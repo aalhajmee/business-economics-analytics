@@ -50,3 +50,5 @@ rsconnect/
 
 #Rproj
 business-economics-analytics.Rproj
+
+*.Rproj*
