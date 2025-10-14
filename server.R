@@ -3,7 +3,7 @@ library(shinydashboard)
 
 
 ui <- dashboardPage(
-  dashboardHeader(),
+  dashboardHeader(title="Consumer Financial Health"),
   dashboardSidebar(),
   dashboardBody()
 )
