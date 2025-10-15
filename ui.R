@@ -83,7 +83,7 @@ dashboardPage(
               
               fluidRow(
               column(5, wellPanel(
-                numericInput("inNumber", "Gross Monthly Income:",
+                numericInput("inNumber", "Income (after tax):",
                            min = 0, max = 1000000000, value = 0, step = 1000),
                 numericInput("inNumber2", "Rent or Mortgage Payments:",
                            min = 0, max = 1000000000, value = 0, step = 100),
@@ -110,7 +110,42 @@ dashboardPage(
                 numericInput("inNumber11", "Travel:",
                              min = 0, max = 1000000000, value = 0, step = 100)
               ))
+            ),
+            
+            br(),
+#Current budget
+            h3("Your Current Spending (Based on Your Inputs)"),
+            fluidRow(
+              column(4, wellPanel(
+                h4("Needs"),
+                textOutput("needs_current")
+              )),
+              column(4, wellPanel(
+                h4("Wants"),
+                textOutput("wants_current")
+              )),
+              column(4, wellPanel(
+                h4("Savings"),
+                textOutput("savings_current")
+              ))
+            ),
+#recommended budget
+            h3("Your Recommended Budget"),
+            fluidRow(
+              column(4, wellPanel(
+                h4("Needs (50%)"),
+                textOutput("needs_out")
+              )),
+              column(4, wellPanel(
+                h4("Wants (30%)"),
+                textOutput("wants_out")
+              )),
+              column(4, wellPanel(
+                h4("Savings (20%)"),
+                textOutput("savings_out")
+              ))
             )
+            
       ),
       
       #FORECASTING TAB
