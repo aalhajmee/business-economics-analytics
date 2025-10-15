@@ -16,13 +16,12 @@ dashboardPage(
   
   dashboardBody(
     tabItems(
-      
-      # --- HOME TAB ---
+      #HOME TAB
       tabItem(tabName = "home",
               h2("Welcome to our Financial Health Dashboard"),
               br(),
               
-              # Gradient bar
+              #Gradient color bar
               div(
                 style = "
           height: 30px;
@@ -35,7 +34,6 @@ dashboardPage(
               ),
               br(),
               
-              # Text boxes below
               fluidRow(
                 column(6,
                        div(
@@ -74,19 +72,19 @@ dashboardPage(
               )
       ),
       
-      # --- SAVINGS GUIDE TAB ---
+      #SAVINGS GUIDE TAB
       tabItem(tabName = "guide",
               h2("Savings Guide"),
               p("Enter your information and learn how to improve your financial health step-by-step.")
       ),
       
-      # --- FORECASTING TAB ---
+      #FORECASTING TAB
       tabItem(tabName = "forecast",
               h2("Forecasting"),
               p("Predict future trends.")
       ),
       
-      # --- EXPLORE TAB ---
+      #EXPLORE TAB
       tabItem(tabName = "explore",
               h2("Explore"),
               p("Dive into the data and uncover insights.")
