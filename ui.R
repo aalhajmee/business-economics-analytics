@@ -75,7 +75,24 @@ dashboardPage(
       #SAVINGS GUIDE TAB
       tabItem(tabName = "guide",
               h2("Savings Guide"),
-              p("Enter your information and learn how to improve your financial health step-by-step.")
+              br(),
+              h3("The 50, 30, 20 Rule"),
+              img(savingchart = "savingchart.png", height = "200px", width = "300px"),
+              p("Enter your information and learn how to improve your financial health step-by-step."),
+              p("Make sure to consistently use monthly or yearly values."),
+              numericInput("inNumber", "Gross Monthly Income:",
+                           min = 0, max = 1000000000, value = 0, step = 1000),
+              numericInput("inNumber2", "Rent or Mortgage Payments:",
+                           min = 0, max = 1000000000, value = 0, step = 100),
+              numericInput("inNumber3", "Utility Bills:",
+                           min = 0, max = 1000000000, value = 0, step = 100),
+              numericInput("inNumber4", "Healthcare:",
+                           min = 0, max = 1000000000, value = 0, step = 100),
+              numericInput("inNumber5", "Insurance Payments:",
+                           min = 0, max = 1000000000, value = 0, step = 100),
+              numericInput("inNumber6", "Other Needs*:",
+                           min = 0, max = 1000000000, value = 0, step = 100),
+              p("*If you can honestly say “I can’t live without it,” you have identified a need. Minimum required payments on a credit card or a loan also belong in this category")
       ),
       
       #FORECASTING TAB
