@@ -77,22 +77,40 @@ dashboardPage(
               h2("Savings Guide"),
               br(),
               h3("The 50, 30, 20 Rule"),
-              img(savingchart = "savingchart.png", height = "200px", width = "300px"),
+              img(src = "savingchart.png", height = "auto", width = "800px"),
               p("Enter your information and learn how to improve your financial health step-by-step."),
               p("Make sure to consistently use monthly or yearly values."),
-              numericInput("inNumber", "Gross Monthly Income:",
+              
+              fluidRow(
+              column(5, wellPanel(
+                numericInput("inNumber", "Gross Monthly Income:",
                            min = 0, max = 1000000000, value = 0, step = 1000),
-              numericInput("inNumber2", "Rent or Mortgage Payments:",
+                numericInput("inNumber2", "Rent or Mortgage Payments:",
                            min = 0, max = 1000000000, value = 0, step = 100),
-              numericInput("inNumber3", "Utility Bills:",
+                numericInput("inNumber3", "Utility Bills:",
                            min = 0, max = 1000000000, value = 0, step = 100),
-              numericInput("inNumber4", "Healthcare:",
+                numericInput("inNumber4", "Healthcare:",
                            min = 0, max = 1000000000, value = 0, step = 100),
-              numericInput("inNumber5", "Insurance Payments:",
+                numericInput("inNumber5", "Insurance Payments:",
                            min = 0, max = 1000000000, value = 0, step = 100),
-              numericInput("inNumber6", "Other Needs*:",
+                numericInput("inNumber6", "Other Needs*:",
                            min = 0, max = 1000000000, value = 0, step = 100),
-              p("*If you can honestly say “I can’t live without it,” you have identified a need. Minimum required payments on a credit card or a loan also belong in this category")
+                p("*If you can honestly say 'I can’t live without it,' you have identified a need. Minimum required payments on a credit card or a loan also belong in this category")
+              )),
+              
+              column(5, wellPanel(
+                numericInput("inNumber7", "Subscriptions:",
+                             min = 0, max = 1000000000, value = 0, step = 10),
+                numericInput("inNumber8", "Dining Out:",
+                             min = 0, max = 1000000000, value = 0, step = 100),
+                numericInput("inNumber9", "Entertainment:",
+                             min = 0, max = 1000000000, value = 0, step = 100),
+                numericInput("inNumber10", "Shopping:",
+                             min = 0, max = 1000000000, value = 0, step = 100),
+                numericInput("inNumber11", "Travel:",
+                             min = 0, max = 1000000000, value = 0, step = 100)
+              ))
+            )
       ),
       
       #FORECASTING TAB
@@ -112,7 +130,7 @@ dashboardPage(
       p("This is a project done by Ammar Alhajmee, Bemnet Ali, and Colin Bridges."),
       br(),
       p("Data Sources:")
+      )
     )
   )
-)
 )
