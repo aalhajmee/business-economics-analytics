@@ -3,6 +3,7 @@ library(leaflet)
 tabItem(tabName = "explore",
         h2("Explore"),
         p("Dive into the data and uncover insights."),
-        leaflet(Data) %>% addProviderTiles(providers$Stamen.TonerLite) %>%
+        leaflet() %>% setView(lng = 39.293357, lat = -97.476204, zoom = 12) %>% 
+          addTiles()
 )
 
