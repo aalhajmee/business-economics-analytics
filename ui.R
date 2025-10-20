@@ -21,10 +21,7 @@ dashboardPage(
       source("homepage.R")$value,
       
       #EXPLORE TAB
-      tabItem(tabName = "explore",
-              h2("Explore"),
-              p("Dive into the data and uncover insights.")
-      ),
+      source("explore.R")$value,
       
       #FORECASTING TAB
       tabItem(tabName = "forecast",
