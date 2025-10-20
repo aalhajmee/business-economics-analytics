@@ -6,9 +6,6 @@ View(loan_approval)
 
 loans <- loan_approval
 
-# Assuming your dataset is already loaded as 'loans'
-# Make sure 'loan_approved' is binary numeric 0/1
-
 # Prepare training data without 'points'
 x <- model.matrix(loan_approved ~ income + credit_score + loan_amount + years_employed, data = loans)[, -1]
 y <- loans$loan_approved
