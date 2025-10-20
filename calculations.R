@@ -121,7 +121,7 @@ output$savingsBox <- renderUI({
       ),
       h4("Savings"),
       h3(paste0("$", format(round(current, 2), big.mark = ","))),
-      p(symbol, if (current >= recommended) "Above recommended ✅" else "Below recommended ⚠️")
+      p(symbol, if (current >= recommended) "Above recommended" else "Below recommended")
     )
   )
 }) 
