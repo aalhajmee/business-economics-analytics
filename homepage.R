@@ -62,11 +62,11 @@ tabItem(
   shinydashboard::box(
     title = "Consumer Financial Health Index (CFHI) — Current Realistic CHFI",
     width = 12, status = "primary", solidHeader = TRUE,
-    # This module renders:
-    # - date-range to control the time window,
+    # The module renders:
+    # - date-range control (change time window),
     # - line with points + month–year labels (toggle in module),
     # - current latest CHFI summary card,
-    # - (internally) smoothing control.
+    # - smoothing control inside the module.
     cfhi_feature_ui("cfhi")
   )
 )
