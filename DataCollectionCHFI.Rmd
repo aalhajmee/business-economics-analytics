@@ -1,0 +1,240 @@
+---
+title: "Consumer Financial Health Index (CFHI) — Complete Build & Export"
+output: html_document
+params:
+  api_key: "x"   # Your FRED API key
+  out_dir: "cfhi_output"
+  norm_start: "2000-01-01"      # normalization window start
+  rebase_month: "2000-01"       # set CFHI(rebase_month)=100 after smoothing
+  smooth_k: 3                   # 3 = three-month moving average; set 1 to disable
+---
+
+```{r setup, message=FALSE, warning=FALSE}
+# ===== Package setup =====
+need <- c("fredr","dplyr","tidyr","readr","lubridate","purrr","stringr","zoo","fs")
+to_install <- setdiff(need, rownames(installed.packages()))
+if (length(to_install)) install.packages(to_install, quiet = TRUE)
+invisible(lapply(need, library, character.only = TRUE))
+
+# ===== Configuration =====
+API_KEY      <- params$api_key
+OUT_DIR      <- params$out_dir
+NORM_START   <- as.Date(params$norm_start)
+REBASE_MONTH <- zoo::as.yearmon(params$rebase_month)
+SMOOTH_K     <- as.integer(params$smooth_k)
+
+if (is.null(API_KEY) || API_KEY %in% c("", "YOUR_FRED_API_KEY_HERE")) {
+  stop("Please set params$api_key in the YAML to your FRED API key.")
+}
+Sys.setenv(FRED_API_KEY = API_KEY)
+fredr_set_key(API_KEY)
+
+# FRED series IDs (4 inputs)
+SERIES <- list(
+  savings_rate = "PSAVERT",         # Personal Saving Rate (↑ good)
+  wage_level   = "CES0500000003",   # Avg Hourly Earnings, Production & Nonsupervisory (↑ good)
+  cpi_level    = "CPIAUCSL",        # CPI level (↑ bad → via YoY then invert)
+  borrow_rate  = "FEDFUNDS"         # Effective Fed Funds Rate (↑ bad)
+)
+
+# ===== Helpers =====
+scale01 <- function(x) {
+  rng <- range(x, na.rm = TRUE)
+  if (!is.finite(rng[1]) || !is.finite(rng[2])) return(rep(NA_real_, length(x)))
+  if (diff(rng) == 0) return(rep(0.5, length(x)))  # constant -> neutral mid
+  (x - rng[1]) / (rng[2] - rng[1])
+}
+
+yoy_pct <- function(x) 100 * (x / dplyr::lag(x, 12) - 1)
+
+pull_series <- function(id, start = as.Date("1998-01-01")) {
+  fredr_series_observations(
+    series_id = id,
+    observation_start = start,
+    observation_end   = Sys.Date(),
+    realtime_start    = as.Date("1900-01-01"),
+    realtime_end      = Sys.Date(),
+    frequency         = "m",
+    aggregation_method = "avg"
+  ) |>
+    transmute(date = as.Date(date), value = suppressWarnings(as.numeric(value)))
+}
+```
+
+## 1) Download monthly data from FRED (1999 start to enable 2000 YoY)
+```{r download, message=FALSE, warning=FALSE}
+obs_start <- as.Date("1999-01-01")
+
+raw_list <- lapply(SERIES, function(id) pull_series(id, start = as.Date("1998-01-01")))
+
+df_raw <- reduce(
+  Map(function(nm, tb) rename(tb, !!nm := value), names(raw_list), raw_list),
+  by = "date",
+  .f = dplyr::full_join
+) |>
+  arrange(date) |>
+  # keep monthly unique dates
+  distinct(date, .keep_all = TRUE)
+
+# Quick diagnostics
+diag_na <- function(nm) {
+  idx <- which(is.na(df_raw[[nm]]))
+  if (length(idx)) {
+    cat(sprintf("[WARN] %s has %d missing values. First few missing dates:\n", nm, length(idx)))
+    print(head(df_raw$date[idx], 6))
+  } else {
+    cat(sprintf("[OK] %s has no missing values.\n", nm))
+  }
+}
+diag_na("savings_rate"); diag_na("wage_level"); diag_na("cpi_level"); diag_na("borrow_rate")
+
+# If wage_level has early NAs due to API hiccups, attempt a second fetch & merge
+if (any(is.na(df_raw$wage_level))) {
+  wl2 <- pull_series(SERIES$wage_level, start = as.Date("1998-01-01")) |>
+    rename(wage_level = value)
+  df_raw <- df_raw |>
+    select(-wage_level) |>
+    left_join(wl2, by = "date")
+  diag_na("wage_level")
+}
+
+head(df_raw, 6)
+```
+
+## 2) Build the CFHI
+- Compute YoY for wage and CPI
+- Keep only months with **all required inputs** present
+- Normalize to 0–100 (invert “bad”)
+- Equal-weight average
+- Optional smoothing
+- Rebase so **2000-01 = 100**
+
+```{r build_index, message=FALSE, warning=FALSE}
+df <- df_raw |>
+  arrange(date) |>
+  mutate(
+    wage_yoy      = yoy_pct(wage_level),
+    inflation_yoy = yoy_pct(cpi_level)
+  )
+
+# Keep only rows where all inputs exist (saves you from trailing incomplete months)
+need_now <- c("savings_rate", "wage_yoy", "inflation_yoy", "borrow_rate")
+df <- df |>
+  filter(if_all(all_of(need_now), ~ !is.na(.x)))
+
+# Restrict to normalization window start (default 2000-01-01)
+df <- df |>
+  filter(date >= NORM_START)
+
+# Components on 0–100
+df <- df |>
+  mutate(
+    S_star = 100 * scale01(savings_rate),            # good ↑
+    W_star = 100 * scale01(wage_yoy),                # good ↑
+    I_star = 100 - 100 * scale01(inflation_yoy),     # bad ↓ (invert)
+    R_star = 100 - 100 * scale01(borrow_rate)        # bad ↓ (invert)
+  )
+
+# Equal-weight average + smoothing
+df <- df |>
+  mutate(
+    CFHI_raw = rowMeans(pick(S_star, W_star, I_star, R_star), na.rm = TRUE),
+    CFHI     = if (SMOOTH_K > 1)
+                 zoo::rollapply(CFHI_raw, SMOOTH_K, mean, align = "right", fill = NA)
+               else CFHI_raw,
+    ym = zoo::as.yearmon(date)
+  )
+
+# Rebase: CFHI(rebase_month) = 100
+base_val <- df |>
+  filter(ym == REBASE_MONTH) |>
+  pull(CFHI) |>
+  tail(1)
+
+if (length(base_val) == 0 || is.na(base_val) || base_val == 0) {
+  warning("Rebase month not found or CFHI base is zero/NA; leaving CFHI un-rebased.")
+} else {
+  df <- df |>
+    mutate(CFHI = 100 * CFHI / base_val)
+}
+
+# Add year/month for exports
+df <- df |>
+  mutate(year = lubridate::year(date), month = lubridate::month(date))
+
+tail(df, 6)
+```
+
+## 3) Save CSVs to disk
+- Master (all months since 2000-01)
+- Per-year CSVs
+- Per-series raw & normalized components
+
+```{r save_csvs, message=FALSE, warning=FALSE}
+fs::dir_create(OUT_DIR)
+fs::dir_create(file.path(OUT_DIR, "by_year"))
+fs::dir_create(file.path(OUT_DIR, "series_raw"))
+fs::dir_create(file.path(OUT_DIR, "series_normalized"))
+
+master_cols <- c(
+  "date","year","month",
+  "savings_rate","wage_level","wage_yoy","cpi_level","inflation_yoy","borrow_rate",
+  "S_star","W_star","I_star","R_star","CFHI_raw","CFHI"
+)
+master <- df |>
+  select(all_of(master_cols))
+
+readr::write_csv(master, file.path(OUT_DIR, "cfhi_master_2000_onward.csv"))
+
+split(master, master$year) |>
+  imap(~ readr::write_csv(.x, file.path(OUT_DIR, "by_year", sprintf("CFHI_%s.csv", .y))))
+
+raw_map <- list(
+  savings_rate  = df |> select(date, savings_rate),
+  wage_level    = df |> select(date, wage_level),
+  wage_yoy      = df |> select(date, wage_yoy),
+  cpi_level     = df |> select(date, cpi_level),
+  inflation_yoy = df |> select(date, inflation_yoy),
+  borrow_rate   = df |> select(date, borrow_rate)
+)
+iwalk(raw_map, ~ readr::write_csv(.x, file.path(OUT_DIR, "series_raw", paste0(.y, ".csv"))))
+
+norm_map <- list(
+  S_star   = df |> select(date, S_star),
+  W_star   = df |> select(date, W_star),
+  I_star   = df |> select(date, I_star),
+  R_star   = df |> select(date, R_star),
+  CFHI_raw = df |> select(date, CFHI_raw),
+  CFHI     = df |> select(date, CFHI)
+)
+iwalk(norm_map, ~ readr::write_csv(.x, file.path(OUT_DIR, "series_normalized", paste0(.y, ".csv"))))
+
+cat("\nSaved CSVs to:", fs::path_abs(OUT_DIR), "\n")
+```
+
+## 4) Quick plot
+```{r plot, message=FALSE, warning=FALSE}
+plot(df$date, df$CFHI, type = "l", lwd = 2,
+     main = "Consumer Financial Health Index (Rebased: 2000-01 = 100)",
+     xlab = "Year", ylab = "Index")
+grid()
+```
+
+## 5) (Optional) Return CFHI for a given year & month
+```{r query_point, eval=TRUE, echo=TRUE}
+# Example: set your target year/month here to echo a single value
+target_year  <- 2019
+target_month <- 7
+
+library(dplyr)
+val <- df |>
+  filter(year == target_year, month == target_month) |>
+  select(date, S_star, W_star, I_star, R_star, CFHI_raw, CFHI)
+
+if (nrow(val) == 0) {
+  message(sprintf("No CFHI available for %04d-%02d (check normalization window or missing inputs).",
+                  target_year, target_month))
+} else {
+  print(val)
+}
+```
