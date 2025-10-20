@@ -10,6 +10,7 @@ dashboardPage(
       menuItem("Explore", tabName = "explore", icon = icon("search")),
       menuItem("Forecasting", tabName = "forecast", icon = icon("line-chart")),
       menuItem("Savings Guide", tabName = "guide", icon = icon("lightbulb")),
+      menuItem("Loan Calculator", tabName = "loan", icon = icon("university")),
       menuItem("About", tabName = "about", icon = icon("info-circle"))
     )
   ),
@@ -113,39 +114,30 @@ dashboardPage(
             ),
             
             br(),
-#Current budget
+        #Current budget
             h3("Your Current Spending (Based on Your Inputs)"),
-            fluidRow(
-              column(4, wellPanel(
-                h4("Needs"),
-                textOutput("needs_current")
-              )),
-              column(4, wellPanel(
-                h4("Wants"),
-                textOutput("wants_current")
-              )),
-              column(4, wellPanel(
-                h4("Savings"),
-                textOutput("savings_current")
-              ))
-            ),
-#recommended budget
+              fluidRow(
+                column(4, uiOutput("needsBox")),    # instead of static wellPanel
+                column(4, uiOutput("wantsBox")),
+                column(4, uiOutput("savingsBox"))
+                ),
+
+        # Recommended Budget Section
             h3("Your Recommended Budget"),
-            fluidRow(
-              column(4, wellPanel(
-                h4("Needs (50%)"),
-                textOutput("needs_out")
+              fluidRow(
+                column(4, wellPanel(
+            h4("Needs (50%)"),
+              textOutput("needs_out")
               )),
-              column(4, wellPanel(
-                h4("Wants (30%)"),
-                textOutput("wants_out")
+                column(4, wellPanel(
+            h4("Wants (30%)"),
+              textOutput("wants_out")
               )),
-              column(4, wellPanel(
-                h4("Savings (20%)"),
-                textOutput("savings_out")
+                column(4, wellPanel(
+            h4("Savings (20%)"),
+              textOutput("savings_out")
               ))
             )
-            
       ),
       
       #FORECASTING TAB
@@ -158,6 +150,11 @@ dashboardPage(
       tabItem(tabName = "explore",
               h2("Explore"),
               p("Dive into the data and uncover insights.")
+      ),
+
+      tabItem(tabName = "loans",
+              h2("Loan Calculator"),
+              p("Need a loan? Try out our calculator!")
       ),
       
       tabItem(tabName = "about",

@@ -69,4 +69,64 @@ function(input, output, session) {
   output$savings_current <- renderText({
     paste0("$", format(round(calc_current()$savings, 2), big.mark = ","))
   })
+  
+  
+#CHANGING COLORS DEPENDING ON THE INPUT MATCHING RECOMMENDED
+  colorBox <- function(current, recommended, title) {
+    color <- if (current <= recommended) "#d9fcd9" else "#ffd6d6"   # green or red background
+    border <- if (current <= recommended) "#28a745" else "#dc3545"  # green or red border
+    symbol <- if (current <= recommended) "✅" else "⚠️"
+    
+    wellPanel(
+      div(
+        style = paste0(
+          "background-color:", color, ";",
+          "border: 2px solid ", border, ";",
+          "border-radius: 8px;",
+          "padding: 15px;",
+          "text-align: center;",
+          "box-shadow: 1px 1px 4px rgba(0,0,0,0.1);"
+        ),
+        h4(title),
+        h3(paste0("$", format(round(current, 2), big.mark = ","))),
+        p(symbol, if (current <= recommended) "Below recommended" else "Above recommended")
+      )
+    )
+  }
+  
+  # Render the dynamic boxes
+  output$needsBox <- renderUI({
+    colorBox(calc_current()$needs, calc_recommended()$needs, "Needs")
+  })
+  
+  output$wantsBox <- renderUI({
+    colorBox(calc_current()$wants, calc_recommended()$wants, "Wants")
+  })
+  
+  output$savingsBox <- renderUI({
+    current <- calc_current()$savings
+    recommended <- calc_recommended()$savings
+    
+    # For savings: green if current >= recommended
+    color <- if (current >= recommended) "#d9fcd9" else "#ffd6d6"
+    border <- if (current >= recommended) "#28a745" else "#dc3545"
+    symbol <- if (current >= recommended) "✅" else "⚠️"
+    
+    wellPanel(
+      div(
+        style = paste0(
+          "background-color:", color, ";",
+          "border: 2px solid ", border, ";",
+          "border-radius: 8px;",
+          "padding: 15px;",
+          "text-align: center;",
+          "box-shadow: 1px 1px 4px rgba(0,0,0,0.1);"
+        ),
+        h4("Savings"),
+        h3(paste0("$", format(round(current, 2), big.mark = ","))),
+        p(symbol, if (current >= recommended) "Above recommended ✅" else "Below recommended ⚠️")
+      )
+    )
+  })
+  
 }
