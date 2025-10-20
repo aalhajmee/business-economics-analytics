@@ -1,4 +1,5 @@
 library(shiny)
+<<<<<<< HEAD
 library(dplyr)
 library(ggplot2)
 library(readr)
@@ -115,3 +116,12 @@ shinyServer(function(input, output, session) {
   })
   
 })
+=======
+library(shinydashboard)
+
+
+function(input, output, session) {
+  #calculations for savings guide
+  source("calculations.R", local = TRUE)
+  }
+>>>>>>> bf67db2ca52c702843138c93df502511ddd1c000
