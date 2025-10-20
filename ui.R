@@ -20,27 +20,28 @@ dashboardPage(
       #HOME TAB
       source("homepage.R")$value,
       
+      #EXPLORE TAB
+      tabItem(tabName = "explore",
+              h2("Explore"),
+              p("Dive into the data and uncover insights.")
+      ),
       
-      #SAVINGS GUIDE TAB
-      source("savingsguide.R")$value,
-       
       #FORECASTING TAB
       tabItem(tabName = "forecast",
               h2("Forecasting"),
               p("Predict future trends.")
       ),
       
-      #EXPLORE TAB
-      tabItem(tabName = "explore",
-              h2("Explore"),
-              p("Dive into the data and uncover insights.")
-      ),
-
+      #SAVINGS GUIDE TAB
+      source("savingsguide.R")$value,
+      
+      #LOAN CALCULATOR
       tabItem(tabName = "loans",
               h2("Loan Calculator"),
               p("Need a loan? Try out our calculator!")
       ),
       
+      #ABOUT
       tabItem(tabName = "about",
       h2("About This Dashboard"),
       p("This is a project done by Ammar Alhajmee, Bemnet Ali, and Colin Bridges."),
