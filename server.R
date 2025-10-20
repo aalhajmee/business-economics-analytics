@@ -127,6 +127,6 @@ function(input, output, session) {
         p(symbol, if (current >= recommended) "Above recommended ✅" else "Below recommended ⚠️")
       )
     )
-  })
+  }) 
   
 }
