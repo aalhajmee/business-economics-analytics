@@ -139,7 +139,7 @@ dashboardPage(
               ))
             )
       ),
-      
+       
       #FORECASTING TAB
       tabItem(tabName = "forecast",
               h2("Forecasting"),
