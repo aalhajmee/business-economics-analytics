@@ -18,15 +18,11 @@ cfhi_feature_ui <- function(id) {
         style = "flex: 3 1 480px; border:1px solid #e5e7eb; border-radius:12px; padding:16px;",
         fluidRow(
           column(
-            width = 6,
+            width = 8,
             uiOutput(ns("date_range_ui"))
           ),
           column(
-            width = 3,
-            numericInput(ns("smooth_k"), "Smoothing (months)", value = 3, min = 1, max = 24, step = 1)
-          ),
-          column(
-            width = 3,
+            width = 4,
             selectInput(ns("show_series"), "Show",
                         choices = c("Composite only" = "cfhi_only",
                                     "Composite + components" = "cfhi_plus"),

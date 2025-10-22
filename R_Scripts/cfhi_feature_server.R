@@ -35,7 +35,8 @@ cfhi_feature_server <- function(id,
         df$I_star <- 100 - 100 * scale01(df$inflation_yoy)
         df$R_star <- 100 - 100 * scale01(df$borrow_rate)
         df$CFHI_raw <- rowMeans(df[, c("S_star","W_star","I_star","R_star")], na.rm = TRUE)
-        df$CFHI <- zoo::rollapply(df$CFHI_raw, 3, mean, align = "right", fill = NA)
+        # No smoothing (k=1)
+        df$CFHI <- df$CFHI_raw
         
         # Rebase to October 2006 = 100
         base_date <- as.Date("2006-10-01")
@@ -74,8 +75,8 @@ cfhi_feature_server <- function(id,
       req(input$date_range)
       rng <- as.Date(input$date_range)
       df <- df[df$date >= rng[1] & df$date <= rng[2], , drop = FALSE]
-      # recompute smoothing based on user input for fairness
-      k <- req(input$smooth_k)
+      # Fixed smoothing: k = 1 (no smoothing)
+      k <- 1
       if ("cfhi_raw" %in% names(df)) {
         cfhi_raw <- df$cfhi_raw
       } else {
