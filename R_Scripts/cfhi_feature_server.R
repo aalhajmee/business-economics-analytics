@@ -307,26 +307,9 @@ cfhi_feature_server <- function(id,
       # Calculate personal CFHI as average
       personal_cfhi_raw <- mean(c(personal_S, personal_W, personal_I, personal_R), na.rm=TRUE)
       
-      # Apply rebasing (Oct 2006 = 100)
-      base_date <- as.Date("2006-10-01")
-      base_idx <- which(df$date == base_date)
-      
-      if (length(base_idx) > 0) {
-        base_S <- 100 * (df$savings_rate[base_idx[1]] - savings_min) / (savings_max - savings_min)
-        base_W <- 100 * (df$wage_yoy[base_idx[1]] - wage_min) / (wage_max - wage_min)
-        base_I <- 100 - 100 * (df$inflation_yoy[base_idx[1]] - inflation_min) / (inflation_max - inflation_min)
-        base_R <- 100 - 100 * (df$borrow_rate[base_idx[1]] - borrow_min) / (borrow_max - borrow_min)
-        base_raw <- mean(c(base_S, base_W, base_I, base_R), na.rm=TRUE)
-        
-        # Rebase: (personal_raw / base_raw) * 100
-        if (!is.na(base_raw) && base_raw > 0) {
-          personal_cfhi <- (personal_cfhi_raw / base_raw) * 100
-        } else {
-          personal_cfhi <- personal_cfhi_raw
-        }
-      } else {
-        personal_cfhi <- personal_cfhi_raw
-      }
+      # Personal index should be on 0-100 scale (no rebasing needed for personal calc)
+      # Cap at 100 since index is defined as 0-100
+      personal_cfhi <- max(0, min(100, personal_cfhi_raw))
       
       # Calculate difference from 2025 U.S. average
       diff <- personal_cfhi - us_cfhi_avg
