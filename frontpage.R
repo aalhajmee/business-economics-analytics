@@ -1,3 +1,11 @@
+tags$script(HTML("
+  function goToTab(tabName) {
+    Shiny.setInputValue('go_to_tab', tabName);
+  }
+"))
+
+
+
 tabItem(
   tabName = "home",
   
@@ -77,7 +85,11 @@ tabItem(
           class = "carousel-caption d-none d-md-block",
           tags$h1("BUILD STRONG FINANCIAL FOUNDATIONS"),
           tags$p("Explore trends, markets, and opportunities that drive long-term success."),
-          tags$a(href = "#", class = "btn btn-primary btn-lg", "Get started now »")
+          tags$button(
+            class = "btn btn-primary btn-lg",
+            onclick = "goToTab('cfhi')",   # tabName must match sidebar
+            "Get started now »"
+          )
         )
       ),
       
@@ -89,7 +101,11 @@ tabItem(
           class = "carousel-caption d-none d-md-block",
           tags$h1("TURN INSIGHTS INTO ACTION"),
           tags$p("Leverage real-time analytics to make confident financial decisions."),
-          tags$a(href = "#", class = "btn btn-primary btn-lg", "Explore now »")
+          tags$button(
+            class = "btn btn-primary btn-lg",
+            onclick = "goToTab('explore')",   # tabName must match sidebar
+            "Explore »"
+          )
         )
       ),
       
@@ -101,7 +117,12 @@ tabItem(
           class = "carousel-caption d-none d-md-block",
           tags$h1("WHERE GROWTH BEGINS"),
           tags$p("Track, plan, and grow your wealth — one smart decision at a time."),
-          tags$a(href = "#", class = "btn btn-primary btn-lg", "Learn more »")
+          
+          tags$button(
+            class = "btn btn-primary btn-lg",
+            onclick = "goToTab('guide')",   # tabName must match sidebar
+            "Learn more »"
+          )
         )
       )
     ),

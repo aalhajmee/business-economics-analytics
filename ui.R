@@ -49,6 +49,7 @@ dashboardPage(
   
   dashboardBody(
     useShinyjs(),
+    
       source("frontpage.R")$value,
     
     tabItems(
