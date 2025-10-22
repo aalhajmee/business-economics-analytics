@@ -18,15 +18,23 @@ cfhi_feature_ui <- function(id) {
         style = "flex: 3 1 480px; border:1px solid #e5e7eb; border-radius:12px; padding:16px;",
         fluidRow(
           column(
-            width = 8,
+            width = 4,
             uiOutput(ns("date_range_ui"))
           ),
           column(
-            width = 4,
-            selectInput(ns("show_series"), "Show",
-                        choices = c("Composite only" = "cfhi_only",
-                                    "Composite + components" = "cfhi_plus"),
-                        selected = "cfhi_only")
+            width = 8,
+            checkboxGroupInput(
+              ns("show_components"),
+              "Select Components to Display:",
+              choices = c(
+                "Savings Rate ↑" = "savings",
+                "Wage Growth ↑" = "wages",
+                "Inflation ↓" = "inflation",
+                "Borrow Rate ↓" = "borrow"
+              ),
+              selected = NULL,
+              inline = TRUE
+            )
           )
         )
       )

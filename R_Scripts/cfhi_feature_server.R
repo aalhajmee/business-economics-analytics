@@ -112,7 +112,7 @@ cfhi_feature_server <- function(id,
       df <- df_filtered()
       req(nrow(df) > 0)
       
-      show_components <- identical(input$show_series, "cfhi_plus")
+      selected_comps <- input$show_components
       
       # Build the plot - main CFHI line
       fig <- plot_ly(df, x = ~date, y = ~CFHI, type = 'scatter', mode = 'lines+markers',
@@ -125,8 +125,9 @@ cfhi_feature_server <- function(id,
                        "<extra></extra>"
                      ))
       
-      # Add component lines if selected with distinct colors
-      if (show_components) {
+      # Add component lines based on user selection
+      if (!is.null(selected_comps) && length(selected_comps) > 0) {
+        # Ensure component columns exist
         if (!all(c("S_star","W_star","I_star","R_star") %in% names(df))) {
           s <- 100 * scale01(df$savings_rate)
           w <- 100 * scale01(df$wage_yoy)
@@ -135,43 +136,61 @@ cfhi_feature_server <- function(id,
           df$S_star <- s; df$W_star <- w; df$I_star <- i; df$R_star <- r
         }
         
-        fig <- fig %>%
-          add_trace(x = ~date, y = ~S_star, data = df, type = 'scatter', mode = 'lines',
-                   name = 'Savings Rate ↑',
-                   line = list(color = '#16a34a', dash = 'dash', width = 2),
-                   hovertemplate = paste0(
-                     "<b>Savings Rate</b><br>",
-                     "%{x|%b %Y}<br>",
-                     "Value: %{y:.2f}<br>",
-                     "<extra></extra>"
-                   )) %>%
-          add_trace(x = ~date, y = ~W_star, data = df, type = 'scatter', mode = 'lines',
-                   name = 'Wage Growth ↑',
-                   line = list(color = '#0891b2', dash = 'dash', width = 2),
-                   hovertemplate = paste0(
-                     "<b>Wage Growth</b><br>",
-                     "%{x|%b %Y}<br>",
-                     "Value: %{y:.2f}<br>",
-                     "<extra></extra>"
-                   )) %>%
-          add_trace(x = ~date, y = ~I_star, data = df, type = 'scatter', mode = 'lines',
-                   name = 'Inflation ↓ (inverted)',
-                   line = list(color = '#ea580c', dash = 'dash', width = 2),
-                   hovertemplate = paste0(
-                     "<b>Inflation (inverted)</b><br>",
-                     "%{x|%b %Y}<br>",
-                     "Value: %{y:.2f}<br>",
-                     "<extra></extra>"
-                   )) %>%
-          add_trace(x = ~date, y = ~R_star, data = df, type = 'scatter', mode = 'lines',
-                   name = 'Borrow Rate ↓ (inverted)',
-                   line = list(color = '#c026d3', dash = 'dash', width = 2),
-                   hovertemplate = paste0(
-                     "<b>Borrow Rate (inverted)</b><br>",
-                     "%{x|%b %Y}<br>",
-                     "Value: %{y:.2f}<br>",
-                     "<extra></extra>"
-                   ))
+        # Add Savings Rate if selected
+        if ("savings" %in% selected_comps) {
+          fig <- fig %>%
+            add_trace(x = ~date, y = ~S_star, data = df, type = 'scatter', mode = 'lines',
+                     name = 'Savings Rate ↑',
+                     line = list(color = '#16a34a', dash = 'dash', width = 2),
+                     hovertemplate = paste0(
+                       "<b>Savings Rate</b><br>",
+                       "%{x|%b %Y}<br>",
+                       "Value: %{y:.2f}<br>",
+                       "<extra></extra>"
+                     ))
+        }
+        
+        # Add Wage Growth if selected
+        if ("wages" %in% selected_comps) {
+          fig <- fig %>%
+            add_trace(x = ~date, y = ~W_star, data = df, type = 'scatter', mode = 'lines',
+                     name = 'Wage Growth ↑',
+                     line = list(color = '#0891b2', dash = 'dash', width = 2),
+                     hovertemplate = paste0(
+                       "<b>Wage Growth</b><br>",
+                       "%{x|%b %Y}<br>",
+                       "Value: %{y:.2f}<br>",
+                       "<extra></extra>"
+                     ))
+        }
+        
+        # Add Inflation if selected
+        if ("inflation" %in% selected_comps) {
+          fig <- fig %>%
+            add_trace(x = ~date, y = ~I_star, data = df, type = 'scatter', mode = 'lines',
+                     name = 'Inflation ↓ (inverted)',
+                     line = list(color = '#ea580c', dash = 'dash', width = 2),
+                     hovertemplate = paste0(
+                       "<b>Inflation (inverted)</b><br>",
+                       "%{x|%b %Y}<br>",
+                       "Value: %{y:.2f}<br>",
+                       "<extra></extra>"
+                     ))
+        }
+        
+        # Add Borrow Rate if selected
+        if ("borrow" %in% selected_comps) {
+          fig <- fig %>%
+            add_trace(x = ~date, y = ~R_star, data = df, type = 'scatter', mode = 'lines',
+                     name = 'Borrow Rate ↓ (inverted)',
+                     line = list(color = '#c026d3', dash = 'dash', width = 2),
+                     hovertemplate = paste0(
+                       "<b>Borrow Rate (inverted)</b><br>",
+                       "%{x|%b %Y}<br>",
+                       "Value: %{y:.2f}<br>",
+                       "<extra></extra>"
+                     ))
+        }
       }
       
       # Layout
