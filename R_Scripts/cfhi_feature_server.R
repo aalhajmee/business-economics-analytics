@@ -7,12 +7,6 @@ cfhi_feature_server <- function(id,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    # Load plotly if not already loaded
-    if (!requireNamespace("plotly", quietly = TRUE)) {
-      install.packages("plotly")
-    }
-    library(plotly)
-    
     # ---- Helpers ----
     scale01 <- function(x) {
       rng <- range(x, na.rm = TRUE)
@@ -42,6 +36,17 @@ cfhi_feature_server <- function(id,
         df$R_star <- 100 - 100 * scale01(df$borrow_rate)
         df$CFHI_raw <- rowMeans(df[, c("S_star","W_star","I_star","R_star")], na.rm = TRUE)
         df$CFHI <- zoo::rollapply(df$CFHI_raw, 3, mean, align = "right", fill = NA)
+        
+        # Rebase to October 2006 = 100
+        base_date <- as.Date("2006-10-01")
+        base_idx <- which(df$date == base_date)
+        if (length(base_idx) > 0) {
+          base_value <- df$CFHI[base_idx[1]]
+          if (!is.na(base_value) && base_value != 0) {
+            df$CFHI <- (df$CFHI / base_value) * 100
+            df$CFHI_raw <- (df$CFHI_raw / base_value) * 100
+          }
+        }
       }
       # Provide year/month
       df$year <- lubridate::year(df$date)
@@ -55,8 +60,8 @@ cfhi_feature_server <- function(id,
       req(nrow(df) > 0)
       min_d <- min(df$date, na.rm = TRUE)
       max_d <- max(df$date, na.rm = TRUE)
-      # default: last 5 years
-      default_start <- max(min_d, max_d %m-% months(60))
+      # default: start from earliest available data
+      default_start <- min_d
       dateRangeInput(ns("date_range"),
                      "Time window",
                      start = default_start, end = max_d,
@@ -88,7 +93,7 @@ cfhi_feature_server <- function(id,
       df
     })
     
-    # Current CHFI card with trend indicator
+    # Current CHFI card
     observe({
       df <- df_master()
       req(nrow(df) > 0)
@@ -96,136 +101,30 @@ cfhi_feature_server <- function(id,
       if (nrow(last_row)) {
         lbl <- sprintf("%.1f", last_row$CFHI)
         sub <- paste0("Latest month: ", format(last_row$date, "%b %Y"))
-        
-        # Calculate trend (compare to 3 months ago)
-        idx <- which(!is.na(df$CFHI))
-        if (length(idx) >= 4) {
-          prev_val <- df$CFHI[idx[length(idx) - 3]]
-          curr_val <- last_row$CFHI
-          trend <- curr_val - prev_val
-          trend_icon <- if (trend > 0) "↑" else if (trend < 0) "↓" else "→"
-          trend_color <- if (trend > 0) "#10b981" else if (trend < 0) "#ef4444" else "#6b7280"
-          sub <- paste0(sub, " ", trend_icon, " ", sprintf("%.1f", abs(trend)))
-        }
-        
         shinyjs::runjs(sprintf("document.getElementById('%s').innerText = '%s';", ns("current_label"), lbl))
         shinyjs::runjs(sprintf("document.getElementById('%s').innerText = '%s';", ns("current_sub"), sub))
       }
     })
     
-    # Summary statistics
-    output$summary_stats <- renderUI({
-      df <- df_filtered()
-      req(nrow(df) > 0)
-      
-      cfhi_vals <- df$CFHI[!is.na(df$CFHI)]
-      if (length(cfhi_vals) == 0) return(NULL)
-      
-      avg_cfhi <- mean(cfhi_vals, na.rm = TRUE)
-      min_cfhi <- min(cfhi_vals, na.rm = TRUE)
-      max_cfhi <- max(cfhi_vals, na.rm = TRUE)
-      
-      tagList(
-        tags$div(
-          style = "display: flex; gap: 12px; justify-content: space-around; margin-top: 12px;",
-          tags$div(
-            style = "text-align: center;",
-            tags$div(style = "font-size: 11px; color: #64748b; text-transform: uppercase;", "Average"),
-            tags$div(style = "font-size: 18px; font-weight: 600; color: #0f172a;", sprintf("%.1f", avg_cfhi))
-          ),
-          tags$div(
-            style = "text-align: center;",
-            tags$div(style = "font-size: 11px; color: #64748b; text-transform: uppercase;", "Min"),
-            tags$div(style = "font-size: 18px; font-weight: 600; color: #ef4444;", sprintf("%.1f", min_cfhi))
-          ),
-          tags$div(
-            style = "text-align: center;",
-            tags$div(style = "font-size: 11px; color: #64748b; text-transform: uppercase;", "Max"),
-            tags$div(style = "font-size: 18px; font-weight: 600; color: #10b981;", sprintf("%.1f", max_cfhi))
-          )
-        )
-      )
-    })
-    
-    # Interactive Plotly visualization
+    # Plot
     output$cfhi_plot <- renderPlotly({
       df <- df_filtered()
       req(nrow(df) > 0)
       
       show_components <- identical(input$show_series, "cfhi_plus")
       
-      # Create main CFHI trace with gradient coloring
-      cfhi_color <- ifelse(df$CFHI >= 90, "#10b981",
-                    ifelse(df$CFHI >= 70, "#84cc16",
-                    ifelse(df$CFHI >= 50, "#eab308",
-                    ifelse(df$CFHI >= 30, "#f97316", "#ef4444"))))
-      
-      # Build hover text
-      hover_text <- paste0(
-        "<b>", format(df$date, "%B %Y"), "</b><br>",
-        "CFHI: <b>", sprintf("%.2f", df$CFHI), "</b><br>",
-        "<extra></extra>"
-      )
-      
-      # Create the main plot
+      # Build the plot - main CFHI line
       fig <- plot_ly(df, x = ~date, y = ~CFHI, type = 'scatter', mode = 'lines+markers',
-                     name = 'CFHI',
-                     line = list(color = '#3b82f6', width = 3, shape = 'spline'),
-                     marker = list(
-                       size = 8,
-                       color = cfhi_color,
-                       line = list(color = '#ffffff', width = 2)
-                     ),
-                     hovertemplate = hover_text,
-                     showlegend = TRUE)
+                     name = 'CFHI (Composite)',
+                     line = list(color = '#1e40af', width = 3),
+                     marker = list(size = 4, color = '#1e40af'),
+                     hovertemplate = paste0(
+                       "<b>%{x|%b %Y}</b><br>",
+                       "CFHI: %{y:.2f}<br>",
+                       "<extra></extra>"
+                     ))
       
-      # Add health zones as background shapes
-      fig <- fig %>% add_trace(
-        x = df$date, y = rep(90, nrow(df)),
-        type = 'scatter', mode = 'none',
-        fill = 'tonexty', fillcolor = 'rgba(16, 185, 129, 0.1)',
-        name = 'Excellent (90-100)',
-        showlegend = TRUE,
-        hoverinfo = 'skip'
-      )
-      
-      fig <- fig %>% add_trace(
-        x = df$date, y = rep(70, nrow(df)),
-        type = 'scatter', mode = 'none',
-        fill = 'tonexty', fillcolor = 'rgba(132, 204, 22, 0.1)',
-        name = 'Good (70-90)',
-        showlegend = TRUE,
-        hoverinfo = 'skip'
-      )
-      
-      fig <- fig %>% add_trace(
-        x = df$date, y = rep(50, nrow(df)),
-        type = 'scatter', mode = 'none',
-        fill = 'tonexty', fillcolor = 'rgba(234, 179, 8, 0.1)',
-        name = 'Fair (50-70)',
-        showlegend = TRUE,
-        hoverinfo = 'skip'
-      )
-      
-      fig <- fig %>% add_trace(
-        x = df$date, y = rep(30, nrow(df)),
-        type = 'scatter', mode = 'none',
-        fill = 'tonexty', fillcolor = 'rgba(249, 115, 22, 0.1)',
-        name = 'Poor (30-50)',
-        showlegend = TRUE,
-        hoverinfo = 'skip'
-      )
-      
-      fig <- fig %>% add_trace(
-        x = df$date, y = rep(0, nrow(df)),
-        type = 'scatter', mode = 'none',
-        fill = 'tonexty', fillcolor = 'rgba(239, 68, 68, 0.1)',
-        name = 'Critical (0-30)',
-        showlegend = TRUE,
-        hoverinfo = 'skip'
-      )
-      
-      # Add component lines if selected
+      # Add component lines if selected with distinct colors
       if (show_components) {
         if (!all(c("S_star","W_star","I_star","R_star") %in% names(df))) {
           s <- 100 * scale01(df$savings_rate)
@@ -235,110 +134,69 @@ cfhi_feature_server <- function(id,
           df$S_star <- s; df$W_star <- w; df$I_star <- i; df$R_star <- r
         }
         
-        fig <- fig %>% add_trace(
-          x = ~date, y = ~S_star, data = df,
-          type = 'scatter', mode = 'lines',
-          name = 'Savings Rate',
-          line = list(color = '#8b5cf6', width = 2, dash = 'dash'),
-          hovertemplate = paste0("<b>Savings Rate</b><br>",
-                                 "%{x|%B %Y}<br>",
-                                 "Value: %{y:.2f}<br>",
-                                 "<extra></extra>")
-        )
-        
-        fig <- fig %>% add_trace(
-          x = ~date, y = ~W_star, data = df,
-          type = 'scatter', mode = 'lines',
-          name = 'Wage Growth',
-          line = list(color = '#06b6d4', width = 2, dash = 'dash'),
-          hovertemplate = paste0("<b>Wage Growth</b><br>",
-                                 "%{x|%B %Y}<br>",
-                                 "Value: %{y:.2f}<br>",
-                                 "<extra></extra>")
-        )
-        
-        fig <- fig %>% add_trace(
-          x = ~date, y = ~I_star, data = df,
-          type = 'scatter', mode = 'lines',
-          name = 'Inflation (inverted)',
-          line = list(color = '#f59e0b', width = 2, dash = 'dash'),
-          hovertemplate = paste0("<b>Inflation (inverted)</b><br>",
-                                 "%{x|%B %Y}<br>",
-                                 "Value: %{y:.2f}<br>",
-                                 "<extra></extra>")
-        )
-        
-        fig <- fig %>% add_trace(
-          x = ~date, y = ~R_star, data = df,
-          type = 'scatter', mode = 'lines',
-          name = 'Borrowing Rate (inverted)',
-          line = list(color = '#ec4899', width = 2, dash = 'dash'),
-          hovertemplate = paste0("<b>Borrowing Rate (inverted)</b><br>",
-                                 "%{x|%B %Y}<br>",
-                                 "Value: %{y:.2f}<br>",
-                                 "<extra></extra>")
-        )
+        fig <- fig %>%
+          add_trace(x = ~date, y = ~S_star, data = df, type = 'scatter', mode = 'lines',
+                   name = 'Savings Rate ↑',
+                   line = list(color = '#16a34a', dash = 'dash', width = 2),
+                   hovertemplate = paste0(
+                     "<b>Savings Rate</b><br>",
+                     "%{x|%b %Y}<br>",
+                     "Value: %{y:.2f}<br>",
+                     "<extra></extra>"
+                   )) %>%
+          add_trace(x = ~date, y = ~W_star, data = df, type = 'scatter', mode = 'lines',
+                   name = 'Wage Growth ↑',
+                   line = list(color = '#0891b2', dash = 'dash', width = 2),
+                   hovertemplate = paste0(
+                     "<b>Wage Growth</b><br>",
+                     "%{x|%b %Y}<br>",
+                     "Value: %{y:.2f}<br>",
+                     "<extra></extra>"
+                   )) %>%
+          add_trace(x = ~date, y = ~I_star, data = df, type = 'scatter', mode = 'lines',
+                   name = 'Inflation ↓ (inverted)',
+                   line = list(color = '#ea580c', dash = 'dash', width = 2),
+                   hovertemplate = paste0(
+                     "<b>Inflation (inverted)</b><br>",
+                     "%{x|%b %Y}<br>",
+                     "Value: %{y:.2f}<br>",
+                     "<extra></extra>"
+                   )) %>%
+          add_trace(x = ~date, y = ~R_star, data = df, type = 'scatter', mode = 'lines',
+                   name = 'Borrow Rate ↓ (inverted)',
+                   line = list(color = '#c026d3', dash = 'dash', width = 2),
+                   hovertemplate = paste0(
+                     "<b>Borrow Rate (inverted)</b><br>",
+                     "%{x|%b %Y}<br>",
+                     "Value: %{y:.2f}<br>",
+                     "<extra></extra>"
+                   ))
       }
       
-      # Layout configuration
+      # Layout
       fig <- fig %>% layout(
-        title = list(
-          text = paste0("<b>", title_prefix, "</b><br>",
-                       "<sub>", format(min(df$date), "%B %Y"), " — ", 
-                       format(max(df$date), "%B %Y"), "</sub>"),
-          font = list(size = 20, family = "Arial, sans-serif")
-        ),
-        xaxis = list(
-          title = "",
-          showgrid = TRUE,
-          gridcolor = '#e5e7eb',
-          zeroline = FALSE
-        ),
-        yaxis = list(
-          title = "Index (Jan 2000 = 100)",
-          showgrid = TRUE,
-          gridcolor = '#e5e7eb',
-          zeroline = TRUE,
-          range = c(0, 105)
-        ),
+        title = list(text = paste0(title_prefix, "<br><sub>", 
+                                   format(min(df$date), "%b %Y"), " — ", 
+                                   format(max(df$date), "%b %Y"), "</sub>")),
+        xaxis = list(title = "", showgrid = TRUE, gridcolor = '#e5e7eb'),
+        yaxis = list(title = "Index (Oct 2006 = 100)", showgrid = TRUE, gridcolor = '#e5e7eb'),
         hovermode = 'x unified',
-        plot_bgcolor = '#ffffff',
-        paper_bgcolor = '#ffffff',
-        font = list(family = "Arial, sans-serif", size = 12, color = '#1f2937'),
         legend = list(
-          orientation = "h",
-          yanchor = "bottom",
-          y = -0.3,
-          xanchor = "center",
+          orientation = "h", 
+          yanchor = "bottom", 
+          y = -0.25, 
+          xanchor = "center", 
           x = 0.5,
-          bgcolor = 'rgba(255, 255, 255, 0.8)',
+          bgcolor = 'rgba(255, 255, 255, 0.9)',
           bordercolor = '#e5e7eb',
           borderwidth = 1
         ),
-        margin = list(t = 80, b = 120, l = 60, r = 40)
-      )
-      
-      # Add range selector and slider
-      fig <- fig %>% layout(
-        xaxis = list(
-          rangeselector = list(
-            buttons = list(
-              list(count = 6, label = "6m", step = "month", stepmode = "backward"),
-              list(count = 1, label = "1y", step = "year", stepmode = "backward"),
-              list(count = 3, label = "3y", step = "year", stepmode = "backward"),
-              list(count = 5, label = "5y", step = "year", stepmode = "backward"),
-              list(step = "all", label = "All")
-            ),
-            bgcolor = '#f3f4f6',
-            activecolor = '#3b82f6',
-            x = 0,
-            y = 1.15
-          ),
-          rangeslider = list(visible = TRUE, thickness = 0.05)
-        )
+        plot_bgcolor = '#ffffff',
+        paper_bgcolor = '#ffffff'
       )
       
       fig
     })
   })
 }
+
