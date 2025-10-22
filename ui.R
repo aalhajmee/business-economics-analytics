@@ -28,6 +28,7 @@ home_tab   <- safe_source_tab("homepage.R",     "home")
 cfhi_tab   <- safe_source_tab("cfhi_tab.R",     "cfhi")
 explore_tab<- safe_source_tab("explore.R",      "explore")
 guide_tab  <- safe_source_tab("savingsguide.R", "guide")
+loan_tab  <- safe_source_tab("loans.R", "loan")
 
 dashboardPage(
   dashboardHeader(title = "Financial Health"),
