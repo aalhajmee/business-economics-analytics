@@ -21,11 +21,11 @@ tabItem(
       # Slide 1
       tags$div(
         class = "carousel-item active",
-        tags$img(src = "https://source.unsplash.com/1600x600/?city,skyline", class="d-block w-100"),
+        tags$img(src = "buildings.jpg", class="d-block w-100"),
         tags$div(
           class = "carousel-caption d-none d-md-block",
-          tags$h1("LOOKING FOR A PARTICULAR AREA?"),
-          tags$p("Use our interactive map to identify pockets of opportunity."),
+          tags$h1("BUILD STRONG FINANCIAL FOUNDATIONS"),
+          tags$p("Explore trends, markets, and opportunities that drive long-term success."),
           tags$a(href = "#", class = "btn btn-primary btn-lg", "Get started now »")
         )
       ),
@@ -33,11 +33,11 @@ tabItem(
       # Slide 2
       tags$div(
         class = "carousel-item",
-        tags$img(src = "https://source.unsplash.com/1600x600/?finance,office", class="d-block w-100"),
+        tags$img(src = "meeting.jpg", class="d-block w-100"),
         tags$div(
           class = "carousel-caption d-none d-md-block",
-          tags$h1("FIND YOUR NEXT INVESTMENT SPOT"),
-          tags$p("Analyze regions with our custom-built financial insights dashboard."),
+          tags$h1("TURN INSIGHTS INTO ACTION"),
+          tags$p("Leverage real-time analytics to make confident financial decisions."),
           tags$a(href = "#", class = "btn btn-primary btn-lg", "Explore now »")
         )
       ),
@@ -45,11 +45,11 @@ tabItem(
       # Slide 3
       tags$div(
         class = "carousel-item",
-        tags$img(src = "https://source.unsplash.com/1600x600/?startup,meeting", class="d-block w-100"),
+        tags$img(src = "plant", class="d-block w-100"),
         tags$div(
           class = "carousel-caption d-none d-md-block",
-          tags$h1("CONNECT DATA TO DECISIONS"),
-          tags$p("Turn analytics into real-world financial growth opportunities."),
+          tags$h1("WHERE GROWTH BEGINS"),
+          tags$p("Track, plan, and grow your wealth — one smart decision at a time."),
           tags$a(href = "#", class = "btn btn-primary btn-lg", "Learn more »")
         )
       )
