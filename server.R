@@ -13,6 +13,7 @@ source("R_Scripts/cfhi_feature_server.R")
 
 shinyServer(function(input, output, session) {
   
+  updateTabItems(session, "tabs", "home")
   # ---- CFHI MODULE ----
   cfhi_feature_server(
     id = "cfhi",
