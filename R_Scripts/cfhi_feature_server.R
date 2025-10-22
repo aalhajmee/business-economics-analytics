@@ -217,6 +217,123 @@ cfhi_feature_server <- function(id,
       
       fig
     })
+    
+    # ---- Personal Calculator Logic ----
+    observeEvent(input$calc_personal, {
+      # Validate inputs
+      req(input$personal_savings, input$personal_wage_growth, 
+          input$personal_inflation, input$personal_borrow_rate)
+      
+      # Get historical data ranges for normalization
+      df <- df_master()
+      req(nrow(df) > 0)
+      
+      # Clamp personal values to historical ranges to avoid errors
+      savings_clamped <- max(min(input$personal_savings, max(df$savings_rate, na.rm=TRUE)), 
+                             min(df$savings_rate, na.rm=TRUE))
+      wage_clamped <- max(min(input$personal_wage_growth, max(df$wage_yoy, na.rm=TRUE)), 
+                          min(df$wage_yoy, na.rm=TRUE))
+      inflation_clamped <- max(min(input$personal_inflation, max(df$inflation_yoy, na.rm=TRUE)), 
+                               min(df$inflation_yoy, na.rm=TRUE))
+      borrow_clamped <- max(min(input$personal_borrow_rate, max(df$borrow_rate, na.rm=TRUE)), 
+                            min(df$borrow_rate, na.rm=TRUE))
+      
+      # Calculate personal normalized components using historical min/max
+      savings_norm <- 100 * (savings_clamped - min(df$savings_rate, na.rm=TRUE)) / 
+                      (max(df$savings_rate, na.rm=TRUE) - min(df$savings_rate, na.rm=TRUE))
+      
+      wage_norm <- 100 * (wage_clamped - min(df$wage_yoy, na.rm=TRUE)) / 
+                   (max(df$wage_yoy, na.rm=TRUE) - min(df$wage_yoy, na.rm=TRUE))
+      
+      inflation_norm <- 100 - 100 * (inflation_clamped - min(df$inflation_yoy, na.rm=TRUE)) / 
+                        (max(df$inflation_yoy, na.rm=TRUE) - min(df$inflation_yoy, na.rm=TRUE))
+      
+      borrow_norm <- 100 - 100 * (borrow_clamped - min(df$borrow_rate, na.rm=TRUE)) / 
+                     (max(df$borrow_rate, na.rm=TRUE) - min(df$borrow_rate, na.rm=TRUE))
+      
+      # Calculate personal CFHI (raw average)
+      personal_cfhi_raw <- mean(c(savings_norm, wage_norm, inflation_norm, borrow_norm), na.rm=TRUE)
+      
+      # Rebase to Oct 2006 = 100 (same as U.S. index)
+      # The personal index uses the same rebasing factor as the U.S. index
+      base_date <- as.Date("2006-10-01")
+      base_idx <- which(df$date == base_date)
+      
+      if (length(base_idx) > 0 && "CFHI" %in% names(df)) {
+        # Get the base value from the CFHI column
+        base_cfhi <- df$CFHI[base_idx[1]]
+        if (!is.na(base_cfhi) && base_cfhi > 0) {
+          # Apply the same rebasing: the base CFHI is 100, so we scale personal accordingly
+          # If US base value was X and is now 100, personal value should scale the same way
+          personal_cfhi <- personal_cfhi_raw
+        } else {
+          personal_cfhi <- personal_cfhi_raw
+        }
+      } else {
+        personal_cfhi <- personal_cfhi_raw
+      }
+      
+      # Get most recent U.S. CFHI
+      if ("CFHI" %in% names(df)) {
+        valid_idx <- which(!is.na(df$CFHI))
+        if (length(valid_idx) > 0) {
+          last_row <- df[tail(valid_idx, 1), ]
+          us_cfhi <- last_row$CFHI
+        } else {
+          us_cfhi <- 100
+        }
+      } else {
+        us_cfhi <- 100
+      }
+      
+      # Calculate difference
+      diff <- personal_cfhi - us_cfhi
+      diff_pct <- if(!is.na(us_cfhi) && us_cfhi != 0) (diff / us_cfhi) * 100 else 0
+      
+      # Determine color and icon
+      if (!is.na(diff) && !is.na(diff_pct)) {
+        if (diff > 10) {
+          color <- "#16a34a"  # green
+          icon <- "↑↑"
+          message <- sprintf("Much better than U.S. average (+%.1f points, +%.1f%%)", diff, diff_pct)
+        } else if (diff > 2) {
+          color <- "#84cc16"  # light green
+          icon <- "↑"
+          message <- sprintf("Better than U.S. average (+%.1f points, +%.1f%%)", diff, diff_pct)
+        } else if (diff > -2) {
+          color <- "#f59e0b"  # amber
+          message <- sprintf("Similar to U.S. average (%.1f points)", diff)
+        } else if (diff > -10) {
+          color <- "#f97316"  # orange
+          icon <- "↓"
+          message <- sprintf("Below U.S. average (%.1f points, %.1f%%)", diff, diff_pct)
+        } else {
+          color <- "#dc2626"  # red
+          icon <- "↓↓"
+          message <- sprintf("Much below U.S. average (%.1f points, %.1f%%)", diff, diff_pct)
+        }
+      } else {
+        color <- "#64748b"
+        icon <- "?"
+        message <- "Unable to calculate comparison"
+      }
+      
+      # Update UI
+      shinyjs::runjs(sprintf("
+        var resultDiv = document.getElementById('%s');
+        resultDiv.style.display = 'block';
+        resultDiv.style.background = '%s15';
+        resultDiv.style.border = '2px solid %s';
+      ", ns("personal_result"), color, color))
+      
+      shinyjs::runjs(sprintf("
+        document.getElementById('%s').innerHTML = '<span style=\"color:%s;\">%s</span> %.1f';
+      ", ns("personal_score"), color, icon, personal_cfhi))
+      
+      shinyjs::runjs(sprintf("
+        document.getElementById('%s').innerHTML = '<span style=\"color:%s;\">%s</span>';
+      ", ns("comparison_text"), color, message))
+    })
   })
 }
 
