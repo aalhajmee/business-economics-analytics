@@ -24,8 +24,6 @@ shinyServer(function(input, output, session) {
   )
   
   
-  
-  
   # ---- OPTIONAL: Savings Guide or other outputs ----
   # If you keep additional server logic in a separate file, source it here
   # so it has access to input/output/session.

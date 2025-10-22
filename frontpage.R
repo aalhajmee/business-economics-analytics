@@ -1,6 +1,6 @@
 tags$script(HTML("
   function goToTab(tabName) {
-    Shiny.setInputValue('go_to_tab', tabName);
+    Shiny.setInputValue('go_to_tab', tabName, {priority: 'event'});
   }
 "))
 
