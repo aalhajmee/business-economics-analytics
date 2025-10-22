@@ -29,13 +29,28 @@ cfhi_feature_server <- function(id,
                     paste("Master CSV missing columns:", paste(missing, collapse=", "))))
       df <- df[order(df$date), ]
       # if CFHI not present, build it minimally:
-      if (!"cfhi" %in% names(df)) {
+      if (!"cfhi" %in% names(df) && !"CFHI" %in% names(df)) {
         df$S_star <- 100 * scale01(df$savings_rate)
         df$W_star <- 100 * scale01(df$wage_yoy)
         df$I_star <- 100 - 100 * scale01(df$inflation_yoy)
         df$R_star <- 100 - 100 * scale01(df$borrow_rate)
         df$CFHI_raw <- rowMeans(df[, c("S_star","W_star","I_star","R_star")], na.rm = TRUE)
-        df$CFHI <- zoo::rollapply(df$CFHI_raw, 3, mean, align = "right", fill = NA)
+        # No smoothing (k=1)
+        df$CFHI <- df$CFHI_raw
+        
+        # Rebase to October 2006 = 100
+        base_date <- as.Date("2006-10-01")
+        base_idx <- which(df$date == base_date)
+        if (length(base_idx) > 0) {
+          base_value <- df$CFHI[base_idx[1]]
+          if (!is.na(base_value) && base_value != 0) {
+            df$CFHI <- (df$CFHI / base_value) * 100
+            df$CFHI_raw <- (df$CFHI_raw / base_value) * 100
+          }
+        }
+      } else if ("cfhi" %in% names(df) && !"CFHI" %in% names(df)) {
+        # Rename lowercase to uppercase for consistency
+        df$CFHI <- df$cfhi
       }
       # Provide year/month
       df$year <- lubridate::year(df$date)
@@ -49,8 +64,8 @@ cfhi_feature_server <- function(id,
       req(nrow(df) > 0)
       min_d <- min(df$date, na.rm = TRUE)
       max_d <- max(df$date, na.rm = TRUE)
-      # default: last 5 years
-      default_start <- max(min_d, max_d %m-% months(60))
+      # default: start from earliest available data
+      default_start <- min_d
       dateRangeInput(ns("date_range"),
                      "Time window",
                      start = default_start, end = max_d,
@@ -63,8 +78,8 @@ cfhi_feature_server <- function(id,
       req(input$date_range)
       rng <- as.Date(input$date_range)
       df <- df[df$date >= rng[1] & df$date <= rng[2], , drop = FALSE]
-      # recompute smoothing based on user input for fairness
-      k <- req(input$smooth_k)
+      # Fixed smoothing: k = 1 (no smoothing)
+      k <- 1
       if ("cfhi_raw" %in% names(df)) {
         cfhi_raw <- df$cfhi_raw
       } else {
@@ -96,26 +111,26 @@ cfhi_feature_server <- function(id,
     })
     
     # Plot
-    output$cfhi_plot <- renderPlot({
+    output$cfhi_plot <- renderPlotly({
       df <- df_filtered()
       req(nrow(df) > 0)
       
-      show_components <- identical(input$show_series, "cfhi_plus")
-      show_labels <- isTRUE(input$show_point_labels)
+      selected_comps <- input$show_components
       
-      gg <- ggplot(df, aes(x = date)) +
-        theme_minimal(base_size = 13) +
-        labs(
-          title = paste0(title_prefix, " — Current Realistic CFHI"),
-          subtitle = paste0("Monthly; window: ",
-                            format(min(df$date), "%b %Y"), " — ",
-                            format(max(df$date), "%b %Y")),
-          x = NULL, y = "Index (Jan 2000 = 100)"
-        ) +
-        geom_line(aes(y = CFHI), linewidth = 1.1)
+      # Build the plot - main CFHI line
+      fig <- plot_ly(df, x = ~date, y = ~CFHI, type = 'scatter', mode = 'lines+markers',
+                     name = 'CFHI (Composite)',
+                     line = list(color = '#1e40af', width = 3),
+                     marker = list(size = 4, color = '#1e40af'),
+                     hovertemplate = paste0(
+                       "<b>%{x|%b %Y}</b><br>",
+                       "CFHI: %{y:.2f}<br>",
+                       "<extra></extra>"
+                     ))
       
-      if (show_components) {
-        # recompute components if not present
+      # Add component lines based on user selection
+      if (!is.null(selected_comps) && length(selected_comps) > 0) {
+        # Ensure component columns exist
         if (!all(c("S_star","W_star","I_star","R_star") %in% names(df))) {
           s <- 100 * scale01(df$savings_rate)
           w <- 100 * scale01(df$wage_yoy)
@@ -123,23 +138,230 @@ cfhi_feature_server <- function(id,
           r <- 100 - 100 * scale01(df$borrow_rate)
           df$S_star <- s; df$W_star <- w; df$I_star <- i; df$R_star <- r
         }
-        gg <- gg +
-          geom_line(aes(y = S_star), linetype = 2, alpha = 0.8) +
-          geom_line(aes(y = W_star), linetype = 2, alpha = 0.8) +
-          geom_line(aes(y = I_star), linetype = 2, alpha = 0.8) +
-          geom_line(aes(y = R_star), linetype = 2, alpha = 0.8)
+        
+        # Add Savings Rate if selected
+        if ("savings" %in% selected_comps) {
+          fig <- fig %>%
+            add_trace(x = ~date, y = ~S_star, data = df, type = 'scatter', mode = 'lines',
+                     name = 'Savings Rate ↑',
+                     line = list(color = '#16a34a', dash = 'dash', width = 2),
+                     hovertemplate = paste0(
+                       "<b>Savings Rate</b><br>",
+                       "%{x|%b %Y}<br>",
+                       "Value: %{y:.2f}<br>",
+                       "<extra></extra>"
+                     ))
+        }
+        
+        # Add Wage Growth if selected
+        if ("wages" %in% selected_comps) {
+          fig <- fig %>%
+            add_trace(x = ~date, y = ~W_star, data = df, type = 'scatter', mode = 'lines',
+                     name = 'Wage Growth ↑',
+                     line = list(color = '#0891b2', dash = 'dash', width = 2),
+                     hovertemplate = paste0(
+                       "<b>Wage Growth</b><br>",
+                       "%{x|%b %Y}<br>",
+                       "Value: %{y:.2f}<br>",
+                       "<extra></extra>"
+                     ))
+        }
+        
+        # Add Inflation if selected
+        if ("inflation" %in% selected_comps) {
+          fig <- fig %>%
+            add_trace(x = ~date, y = ~I_star, data = df, type = 'scatter', mode = 'lines',
+                     name = 'Inflation ↓ (inverted)',
+                     line = list(color = '#ea580c', dash = 'dash', width = 2),
+                     hovertemplate = paste0(
+                       "<b>Inflation (inverted)</b><br>",
+                       "%{x|%b %Y}<br>",
+                       "Value: %{y:.2f}<br>",
+                       "<extra></extra>"
+                     ))
+        }
+        
+        # Add Borrow Rate if selected
+        if ("borrow" %in% selected_comps) {
+          fig <- fig %>%
+            add_trace(x = ~date, y = ~R_star, data = df, type = 'scatter', mode = 'lines',
+                     name = 'Borrow Rate ↓ (inverted)',
+                     line = list(color = '#c026d3', dash = 'dash', width = 2),
+                     hovertemplate = paste0(
+                       "<b>Borrow Rate (inverted)</b><br>",
+                       "%{x|%b %Y}<br>",
+                       "Value: %{y:.2f}<br>",
+                       "<extra></extra>"
+                     ))
+        }
       }
       
-      gg <- gg + geom_point(aes(y = CFHI), size = 1.8)
+      # Layout
+      fig <- fig %>% layout(
+        title = list(text = paste0(title_prefix, "<br><sub>", 
+                                   format(min(df$date), "%b %Y"), " — ", 
+                                   format(max(df$date), "%b %Y"), "</sub>")),
+        xaxis = list(title = "", showgrid = TRUE, gridcolor = '#e5e7eb'),
+        yaxis = list(title = "Index (Oct 2006 = 100)", showgrid = TRUE, gridcolor = '#e5e7eb'),
+        hovermode = 'x unified',
+        legend = list(
+          orientation = "h", 
+          yanchor = "bottom", 
+          y = -0.25, 
+          xanchor = "center", 
+          x = 0.5,
+          bgcolor = 'rgba(255, 255, 255, 0.9)',
+          bordercolor = '#e5e7eb',
+          borderwidth = 1
+        ),
+        plot_bgcolor = '#ffffff',
+        paper_bgcolor = '#ffffff'
+      )
       
-      if (show_labels) {
-        lab <- format(df$date, "%Y-%m")
-        # keep it readable: nudge labels slightly
-        gg <- gg + geom_text(aes(y = CFHI, label = lab),
-                             size = 3, vjust = -0.6, check_overlap = TRUE)
+      fig
+    })
+    
+    # ---- Personal Calculator Logic ----
+    observeEvent(input$calc_personal, {
+      # Validate inputs
+      req(input$monthly_income, input$monthly_savings, input$income_growth)
+      
+      # Get historical data
+      df <- df_master()
+      req(nrow(df) > 0)
+      
+      # Get current year (2025) data for U.S. average comparison
+      current_year <- 2025
+      df_current_year <- df[lubridate::year(df$date) == current_year, ]
+      
+      if (nrow(df_current_year) > 0 && "CFHI" %in% names(df_current_year)) {
+        us_cfhi_avg <- mean(df_current_year$CFHI, na.rm = TRUE)
+      } else {
+        # Fallback to most recent available data
+        if ("CFHI" %in% names(df)) {
+          valid_idx <- which(!is.na(df$CFHI))
+          if (length(valid_idx) > 0) {
+            last_row <- df[tail(valid_idx, 1), ]
+            us_cfhi_avg <- last_row$CFHI
+          } else {
+            us_cfhi_avg <- 100
+          }
+        } else {
+          us_cfhi_avg <- 100
+        }
       }
       
-      gg
+      # Get most recent U.S. economic indicators for comparison
+      if (nrow(df_current_year) > 0) {
+        us_inflation <- mean(df_current_year$inflation_yoy, na.rm = TRUE)
+      } else {
+        last_idx <- tail(which(!is.na(df$inflation_yoy)), 1)
+        us_inflation <- if(length(last_idx) > 0) df$inflation_yoy[last_idx] else 3
+      }
+      
+      # Calculate personal metrics
+      personal_savings_rate <- if(input$monthly_income > 0) {
+        (input$monthly_savings / input$monthly_income) * 100
+      } else { 0 }
+      
+      personal_wage_growth <- input$income_growth
+      
+      # Calculate effective borrowing rate based on debt
+      # Only matters if you have debt
+      personal_borrow_rate <- if(input$total_debt > 0 && !is.null(input$avg_interest_rate)) {
+        input$avg_interest_rate
+      } else {
+        0  # No debt = optimal score
+      }
+      
+      # Get normalization ranges from historical data
+      savings_min <- min(df$savings_rate, na.rm=TRUE)
+      savings_max <- max(df$savings_rate, na.rm=TRUE)
+      wage_min <- min(df$wage_yoy, na.rm=TRUE)
+      wage_max <- max(df$wage_yoy, na.rm=TRUE)
+      inflation_min <- min(df$inflation_yoy, na.rm=TRUE)
+      inflation_max <- max(df$inflation_yoy, na.rm=TRUE)
+      borrow_min <- min(df$borrow_rate, na.rm=TRUE)
+      borrow_max <- max(df$borrow_rate, na.rm=TRUE)
+      
+      # Normalize personal components (same method as U.S. index)
+      personal_S <- if(savings_max != savings_min) {
+        100 * (personal_savings_rate - savings_min) / (savings_max - savings_min)
+      } else { 50 }
+      
+      personal_W <- if(wage_max != wage_min) {
+        100 * (personal_wage_growth - wage_min) / (wage_max - wage_min)
+      } else { 50 }
+      
+      personal_I <- if(inflation_max != inflation_min) {
+        100 - 100 * (us_inflation - inflation_min) / (inflation_max - inflation_min)
+      } else { 50 }
+      
+      personal_R <- if(borrow_max != borrow_min) {
+        100 - 100 * (personal_borrow_rate - borrow_min) / (borrow_max - borrow_min)
+      } else { 100 }  # No debt = maximum score
+      
+      # Clamp to 0-100
+      personal_S <- max(0, min(100, personal_S))
+      personal_W <- max(0, min(100, personal_W))
+      personal_I <- max(0, min(100, personal_I))
+      personal_R <- max(0, min(100, personal_R))
+      
+      # Calculate personal CFHI as average
+      personal_cfhi_raw <- mean(c(personal_S, personal_W, personal_I, personal_R), na.rm=TRUE)
+      
+      # Personal index should be on 0-100 scale (no rebasing needed for personal calc)
+      # Cap at 100 since index is defined as 0-100
+      personal_cfhi <- max(0, min(100, personal_cfhi_raw))
+      
+      # Calculate difference from 2025 U.S. average
+      diff <- personal_cfhi - us_cfhi_avg
+      diff_pct <- if(!is.na(us_cfhi_avg) && us_cfhi_avg != 0) (diff / us_cfhi_avg) * 100 else 0
+      
+      # Determine color and icon
+      if (!is.na(diff) && !is.na(diff_pct)) {
+        if (diff > 10) {
+          color <- "#16a34a"  # green
+          icon <- "↑↑"
+          message <- sprintf("Much better than U.S. average (+%.1f points, +%.1f%%)", diff, diff_pct)
+        } else if (diff > 2) {
+          color <- "#84cc16"  # light green
+          icon <- "↑"
+          message <- sprintf("Better than U.S. average (+%.1f points, +%.1f%%)", diff, diff_pct)
+        } else if (diff > -2) {
+          color <- "#f59e0b"  # amber
+          message <- sprintf("Similar to U.S. average (%.1f points)", diff)
+        } else if (diff > -10) {
+          color <- "#f97316"  # orange
+          icon <- "↓"
+          message <- sprintf("Below U.S. average (%.1f points, %.1f%%)", diff, diff_pct)
+        } else {
+          color <- "#dc2626"  # red
+          icon <- "↓↓"
+          message <- sprintf("Much below U.S. average (%.1f points, %.1f%%)", diff, diff_pct)
+        }
+      } else {
+        color <- "#64748b"
+        icon <- "?"
+        message <- "Unable to calculate comparison"
+      }
+      
+      # Update UI
+      shinyjs::runjs(sprintf("
+        var resultDiv = document.getElementById('%s');
+        resultDiv.style.display = 'block';
+        resultDiv.style.background = '%s15';
+        resultDiv.style.border = '2px solid %s';
+      ", ns("personal_result"), color, color))
+      
+      shinyjs::runjs(sprintf("
+        document.getElementById('%s').innerHTML = '<span style=\"color:%s;\">%s</span> %.1f';
+      ", ns("personal_score"), color, icon, personal_cfhi))
+      
+      shinyjs::runjs(sprintf("
+        document.getElementById('%s').innerHTML = '<span style=\"color:%s;\">%s</span>';
+      ", ns("comparison_text"), color, message))
     })
   })
 }
+

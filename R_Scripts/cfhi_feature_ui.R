@@ -4,47 +4,163 @@
 cfhi_feature_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    tags$div(
-      style = "display:flex; gap:16px; align-items:stretch; flex-wrap: wrap; margin-bottom:16px;",
-      # Current CHFI card
-      tags$div(
-        style = "flex: 1 1 260px; border:1px solid #e5e7eb; border-radius:12px; padding:16px; background:#f8fafc;",
-        tags$div(style="font-size:13px; color:#64748b; text-transform:uppercase; letter-spacing:0.08em;", "Current CHFI"),
-        tags$div(id = ns("current_label"), style="font-size:28px; font-weight:700; color:#0f172a; margin-top:6px;", "—"),
-        tags$div(id = ns("current_sub"), style="font-size:13px; color:#64748b;", "Latest available month")
-      ),
-      # Controls card
-      tags$div(
-        style = "flex: 3 1 480px; border:1px solid #e5e7eb; border-radius:12px; padding:16px;",
-        fluidRow(
-          column(
-            width = 6,
-            uiOutput(ns("date_range_ui"))
-          ),
-          column(
-            width = 3,
-            numericInput(ns("smooth_k"), "Smoothing (months)", value = 3, min = 1, max = 24, step = 1)
-          ),
-          column(
-            width = 3,
-            selectInput(ns("show_series"), "Show",
-                        choices = c("Composite only" = "cfhi_only",
-                                    "Composite + components" = "cfhi_plus"),
-                        selected = "cfhi_only")
+    fluidRow(
+      # LEFT COLUMN - CFHI Visualization
+      column(
+        width = 8,
+        # Current CFHI card
+        tags$div(
+          style = "border:1px solid #e5e7eb; border-radius:12px; padding:16px; background:#f8fafc; margin-bottom:16px;",
+          tags$div(style="font-size:13px; color:#64748b; text-transform:uppercase; letter-spacing:0.08em;", "Current U.S. CFHI"),
+          tags$div(id = ns("current_label"), style="font-size:28px; font-weight:700; color:#0f172a; margin-top:6px;", "—"),
+          tags$div(id = ns("current_sub"), style="font-size:13px; color:#64748b;", "Latest available month")
+        ),
+        
+        # Controls card
+        tags$div(
+          style = "border:1px solid #e5e7eb; border-radius:12px; padding:16px; margin-bottom:16px;",
+          fluidRow(
+            column(
+              width = 4,
+              uiOutput(ns("date_range_ui"))
+            ),
+            column(
+              width = 8,
+              checkboxGroupInput(
+                ns("show_components"),
+                "Select Components to Display:",
+                choices = c(
+                  "Savings Rate ↑" = "savings",
+                  "Wage Growth ↑" = "wages",
+                  "Inflation ↓" = "inflation",
+                  "Borrow Rate ↓" = "borrow"
+                ),
+                selected = NULL,
+                inline = TRUE
+              )
+            )
           )
         ),
-        checkboxInput(ns("show_point_labels"), "Label each point with Year–Month", value = TRUE)
+        
+        # Plot
+        plotlyOutput(ns("cfhi_plot"), height = "480px"),
+        
+        # Methodology Section (collapsible or compact)
+        tags$div(
+          style = "border:1px solid #e5e7eb; border-radius:8px; padding:16px; background:#f9fafb; margin-top:16px;",
+          tags$h4(
+            style = "margin-top:0; margin-bottom:12px; color:#0f172a; font-size:14px; font-weight:600;",
+            "Methodology & Data Sources"
+          ),
+          tags$div(
+            style = "font-size:12px; color:#475569; line-height:1.6;",
+            tags$p(
+              style = "margin:8px 0;",
+              tags$strong("Formula:"), " CFHI = (S* + W* + I* + R*) / 4, where components are normalized to 0-100 scale and rebased to Oct 2006 = 100."
+            ),
+            tags$p(
+              style = "margin:8px 0;",
+              tags$strong("Sources:"), " Personal Saving Rate (BEA), Average Hourly Earnings YoY (BLS), CPI YoY (BLS), Federal Funds Rate (FRED)."
+            )
+          )
+        )
+      ),
+      
+      # RIGHT COLUMN - Personal Calculator
+      column(
+        width = 4,
+        tags$div(
+          style = "border:1px solid #e5e7eb; border-radius:12px; padding:20px; background:#ffffff; position:sticky; top:20px;",
+          
+          # Header
+          tags$h4(
+            style = "margin-top:0; margin-bottom:8px; color:#0f172a; font-size:16px; font-weight:600;",
+            "Your Personal Financial Health"
+          ),
+          tags$p(
+            style = "font-size:12px; color:#64748b; margin-bottom:16px;",
+            "Enter your financial details to calculate your personal index"
+          ),
+          
+          # Input fields
+          numericInput(
+            ns("monthly_income"),
+            "Monthly Income ($)",
+            value = NULL,
+            min = 0,
+            step = 100
+          ),
+          
+          numericInput(
+            ns("monthly_savings"),
+            "Monthly Savings ($)",
+            value = NULL,
+            min = 0,
+            step = 50
+          ),
+          tags$p(style = "font-size:11px; color:#64748b; margin-top:-8px;", "Amount you save each month"),
+          
+          numericInput(
+            ns("income_growth"),
+            "Income Growth vs Last Year (%)",
+            value = NULL,
+            min = -50,
+            max = 100,
+            step = 0.5
+          ),
+          tags$p(style = "font-size:11px; color:#64748b; margin-top:-8px;", "How much your income increased (or decreased)"),
+          
+          numericInput(
+            ns("total_debt"),
+            "Total Debt Balance ($)",
+            value = 0,
+            min = 0,
+            step = 100
+          ),
+          tags$p(style = "font-size:11px; color:#64748b; margin-top:-8px;", "Credit cards, loans, etc. (0 if none)"),
+          
+          numericInput(
+            ns("avg_interest_rate"),
+            "Average Interest Rate on Debt (%)",
+            value = 0,
+            min = 0,
+            max = 50,
+            step = 0.25
+          ),
+          tags$p(style = "font-size:11px; color:#64748b; margin-top:-8px;", "Weighted average of all your debt (0 if no debt)"),
+          
+          # Calculate button
+          actionButton(
+            ns("calc_personal"),
+            "Calculate My Index",
+            style = "width:100%; background:#1e40af; color:white; border:none; padding:10px; border-radius:6px; font-weight:600; margin-top:8px;"
+          ),
+          
+          # Results display
+          tags$div(
+            id = ns("personal_result"),
+            style = "margin-top:20px; padding:16px; border-radius:8px; display:none;",
+            tags$div(
+              style = "font-size:12px; color:#64748b; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;",
+              "Your Personal CFHI"
+            ),
+            tags$div(
+              id = ns("personal_score"),
+              style = "font-size:32px; font-weight:700; margin-bottom:8px;"
+            ),
+            tags$hr(style = "margin:12px 0; border:none; border-top:1px solid #e5e7eb;"),
+            tags$div(
+              style = "font-size:12px; color:#64748b; margin-bottom:4px;",
+              "Compared to 2025 U.S. Average:"
+            ),
+            tags$div(
+              id = ns("comparison_text"),
+              style = "font-size:14px; font-weight:600;"
+            )
+          )
+        )
       )
-    ),
-    # Plot
-    plotOutput(ns("cfhi_plot"), height = "520px"),
-    br(),
-    # Footnote
-    tags$p(
-      style = "font-size:12px; color:#64748b;",
-      "Consumer Financial Health Index (CFHI): equal-weighted average of normalized components ",
-      "(Savings ↑, Wage YoY ↑, Inflation YoY ↓, Borrowing rate ↓). ",
-      "Index rebased relative to Jan 2000 = 100 in your source file."
     )
   )
 }
+
