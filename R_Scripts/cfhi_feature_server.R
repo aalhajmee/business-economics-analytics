@@ -224,48 +224,62 @@ cfhi_feature_server <- function(id,
       req(input$personal_savings, input$personal_wage_growth, 
           input$personal_inflation, input$personal_borrow_rate)
       
-      # Get historical data ranges for normalization
+      # Get historical data for normalization ranges
       df <- df_master()
       req(nrow(df) > 0)
       
-      # Clamp personal values to historical ranges to avoid errors
-      savings_clamped <- max(min(input$personal_savings, max(df$savings_rate, na.rm=TRUE)), 
-                             min(df$savings_rate, na.rm=TRUE))
-      wage_clamped <- max(min(input$personal_wage_growth, max(df$wage_yoy, na.rm=TRUE)), 
-                          min(df$wage_yoy, na.rm=TRUE))
-      inflation_clamped <- max(min(input$personal_inflation, max(df$inflation_yoy, na.rm=TRUE)), 
-                               min(df$inflation_yoy, na.rm=TRUE))
-      borrow_clamped <- max(min(input$personal_borrow_rate, max(df$borrow_rate, na.rm=TRUE)), 
-                            min(df$borrow_rate, na.rm=TRUE))
+      # Get the SAME normalization ranges used for the U.S. index
+      savings_min <- min(df$savings_rate, na.rm=TRUE)
+      savings_max <- max(df$savings_rate, na.rm=TRUE)
+      wage_min <- min(df$wage_yoy, na.rm=TRUE)
+      wage_max <- max(df$wage_yoy, na.rm=TRUE)
+      inflation_min <- min(df$inflation_yoy, na.rm=TRUE)
+      inflation_max <- max(df$inflation_yoy, na.rm=TRUE)
+      borrow_min <- min(df$borrow_rate, na.rm=TRUE)
+      borrow_max <- max(df$borrow_rate, na.rm=TRUE)
       
-      # Calculate personal normalized components using historical min/max
-      savings_norm <- 100 * (savings_clamped - min(df$savings_rate, na.rm=TRUE)) / 
-                      (max(df$savings_rate, na.rm=TRUE) - min(df$savings_rate, na.rm=TRUE))
+      # Normalize personal values using SAME scale as U.S. index
+      # If user's value is outside historical range, extrapolate (don't clamp)
+      personal_S <- if(savings_max != savings_min) {
+        100 * (input$personal_savings - savings_min) / (savings_max - savings_min)
+      } else { 50 }
       
-      wage_norm <- 100 * (wage_clamped - min(df$wage_yoy, na.rm=TRUE)) / 
-                   (max(df$wage_yoy, na.rm=TRUE) - min(df$wage_yoy, na.rm=TRUE))
+      personal_W <- if(wage_max != wage_min) {
+        100 * (input$personal_wage_growth - wage_min) / (wage_max - wage_min)
+      } else { 50 }
       
-      inflation_norm <- 100 - 100 * (inflation_clamped - min(df$inflation_yoy, na.rm=TRUE)) / 
-                        (max(df$inflation_yoy, na.rm=TRUE) - min(df$inflation_yoy, na.rm=TRUE))
+      personal_I <- if(inflation_max != inflation_min) {
+        100 - 100 * (input$personal_inflation - inflation_min) / (inflation_max - inflation_min)
+      } else { 50 }
       
-      borrow_norm <- 100 - 100 * (borrow_clamped - min(df$borrow_rate, na.rm=TRUE)) / 
-                     (max(df$borrow_rate, na.rm=TRUE) - min(df$borrow_rate, na.rm=TRUE))
+      personal_R <- if(borrow_max != borrow_min) {
+        100 - 100 * (input$personal_borrow_rate - borrow_min) / (borrow_max - borrow_min)
+      } else { 50 }
       
-      # Calculate personal CFHI (raw average)
-      personal_cfhi_raw <- mean(c(savings_norm, wage_norm, inflation_norm, borrow_norm), na.rm=TRUE)
+      # Clamp to reasonable bounds (0-100) for display purposes
+      personal_S <- max(0, min(100, personal_S))
+      personal_W <- max(0, min(100, personal_W))
+      personal_I <- max(0, min(100, personal_I))
+      personal_R <- max(0, min(100, personal_R))
       
-      # Rebase to Oct 2006 = 100 (same as U.S. index)
-      # The personal index uses the same rebasing factor as the U.S. index
+      # Calculate personal CFHI as simple average (same as U.S. calculation)
+      personal_cfhi_raw <- mean(c(personal_S, personal_W, personal_I, personal_R), na.rm=TRUE)
+      
+      # Apply the SAME rebasing as U.S. index (Oct 2006 = 100)
       base_date <- as.Date("2006-10-01")
       base_idx <- which(df$date == base_date)
       
-      if (length(base_idx) > 0 && "CFHI" %in% names(df)) {
-        # Get the base value from the CFHI column
-        base_cfhi <- df$CFHI[base_idx[1]]
-        if (!is.na(base_cfhi) && base_cfhi > 0) {
-          # Apply the same rebasing: the base CFHI is 100, so we scale personal accordingly
-          # If US base value was X and is now 100, personal value should scale the same way
-          personal_cfhi <- personal_cfhi_raw
+      if (length(base_idx) > 0) {
+        # Calculate what the base period components were
+        base_S <- 100 * (df$savings_rate[base_idx[1]] - savings_min) / (savings_max - savings_min)
+        base_W <- 100 * (df$wage_yoy[base_idx[1]] - wage_min) / (wage_max - wage_min)
+        base_I <- 100 - 100 * (df$inflation_yoy[base_idx[1]] - inflation_min) / (inflation_max - inflation_min)
+        base_R <- 100 - 100 * (df$borrow_rate[base_idx[1]] - borrow_min) / (borrow_max - borrow_min)
+        base_raw <- mean(c(base_S, base_W, base_I, base_R), na.rm=TRUE)
+        
+        # Rebase: (personal_raw / base_raw) * 100
+        if (!is.na(base_raw) && base_raw > 0) {
+          personal_cfhi <- (personal_cfhi_raw / base_raw) * 100
         } else {
           personal_cfhi <- personal_cfhi_raw
         }
@@ -273,17 +287,20 @@ cfhi_feature_server <- function(id,
         personal_cfhi <- personal_cfhi_raw
       }
       
-      # Get most recent U.S. CFHI
+      # Get most recent U.S. CFHI for comparison
       if ("CFHI" %in% names(df)) {
         valid_idx <- which(!is.na(df$CFHI))
         if (length(valid_idx) > 0) {
           last_row <- df[tail(valid_idx, 1), ]
           us_cfhi <- last_row$CFHI
+          us_date <- format(last_row$date, "%b %Y")
         } else {
           us_cfhi <- 100
+          us_date <- "N/A"
         }
       } else {
         us_cfhi <- 100
+        us_date <- "N/A"
       }
       
       # Calculate difference
