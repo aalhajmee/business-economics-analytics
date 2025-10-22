@@ -33,8 +33,10 @@ loan_tab  <- safe_source_tab("loans.R", "loan")
 dashboardPage(
   dashboardHeader(title = "Financial Health"),
   
+  
   dashboardSidebar(
     sidebarMenu(
+      id = "tabs", 
       menuItem("Home",            tabName = "home",     icon = icon("home")),
       menuItem("CFHI Analysis",   tabName = "cfhi",     icon = icon("chart-line")),
       menuItem("Explore",         tabName = "explore",  icon = icon("search")),
@@ -47,9 +49,11 @@ dashboardPage(
   
   dashboardBody(
     useShinyjs(),
+      source("frontpage.R")$value,
+    
     tabItems(
       # HOME (from homepage.R)
-      home_tab,
+      source("frontpage.R")$value,
       
       # CFHI ANALYSIS (from cfhi_tab.R)
       cfhi_tab,
