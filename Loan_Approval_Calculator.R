@@ -2,7 +2,6 @@ library(glmnet)
 library(tidyverse)
 library(readxl)
 loan_approval <- read_excel("Financial_Calculator_datasets/loan_approval.xlsx")
-View(loan_approval)
 
 loans <- loan_approval
 
@@ -13,12 +12,13 @@ y <- loans$loan_approved
 # Fit regularized logistic regression (ridge regression)
 cv_model <- cv.glmnet(x, y, family = "binomial")
 
+
 # New applicant data (without points)
 new_applicant <- data.frame(
-  income = 60000,
-  credit_score = 700,
-  loan_amount = 10000,
-  years_employed = 25
+  income = input$loan_income,           # Value from "Annual Income" box
+  credit_score = input$loan_credit_score, # Value from "Credit Score" box
+  loan_amount = input$loan_amount,      # Value from "Requested Loan Amount" box
+  years_employed = input$loan_years_employed # Value from "Years Employed" box
 )
 
 # Convert new applicant to model matrix
@@ -29,3 +29,7 @@ prob <- predict(cv_model, new_x, type = "response", s = "lambda.min")
 
 # Print the result
 cat(paste0("Predicted probability of loan approval: ", round(prob * 100, 2), "%\n"))
+
+
+
+
