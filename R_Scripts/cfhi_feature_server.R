@@ -49,8 +49,8 @@ cfhi_feature_server <- function(id,
       req(nrow(df) > 0)
       min_d <- min(df$date, na.rm = TRUE)
       max_d <- max(df$date, na.rm = TRUE)
-      # default: last 5 years
-      default_start <- max(min_d, max_d %m-% months(60))
+      # default: start from earliest available data
+      default_start <- min_d
       dateRangeInput(ns("date_range"),
                      "Time window",
                      start = default_start, end = max_d,
@@ -102,18 +102,18 @@ cfhi_feature_server <- function(id,
       
       show_components <- identical(input$show_series, "cfhi_plus")
       
-      # Build the plot
+      # Build the plot - main CFHI line
       fig <- plot_ly(df, x = ~date, y = ~CFHI, type = 'scatter', mode = 'lines+markers',
-                     name = 'CFHI',
-                     line = list(color = '#3b82f6', width = 2),
-                     marker = list(size = 4, color = '#3b82f6'),
+                     name = 'CFHI (Composite)',
+                     line = list(color = '#1e40af', width = 3),
+                     marker = list(size = 4, color = '#1e40af'),
                      hovertemplate = paste0(
                        "<b>%{x|%b %Y}</b><br>",
                        "CFHI: %{y:.2f}<br>",
                        "<extra></extra>"
                      ))
       
-      # Add component lines if selected
+      # Add component lines if selected with distinct colors
       if (show_components) {
         if (!all(c("S_star","W_star","I_star","R_star") %in% names(df))) {
           s <- 100 * scale01(df$savings_rate)
@@ -125,13 +125,41 @@ cfhi_feature_server <- function(id,
         
         fig <- fig %>%
           add_trace(x = ~date, y = ~S_star, data = df, type = 'scatter', mode = 'lines',
-                   name = 'Savings', line = list(dash = 'dash', width = 1.5)) %>%
+                   name = 'Savings Rate ↑',
+                   line = list(color = '#16a34a', dash = 'dash', width = 2),
+                   hovertemplate = paste0(
+                     "<b>Savings Rate</b><br>",
+                     "%{x|%b %Y}<br>",
+                     "Value: %{y:.2f}<br>",
+                     "<extra></extra>"
+                   )) %>%
           add_trace(x = ~date, y = ~W_star, data = df, type = 'scatter', mode = 'lines',
-                   name = 'Wages', line = list(dash = 'dash', width = 1.5)) %>%
+                   name = 'Wage Growth ↑',
+                   line = list(color = '#0891b2', dash = 'dash', width = 2),
+                   hovertemplate = paste0(
+                     "<b>Wage Growth</b><br>",
+                     "%{x|%b %Y}<br>",
+                     "Value: %{y:.2f}<br>",
+                     "<extra></extra>"
+                   )) %>%
           add_trace(x = ~date, y = ~I_star, data = df, type = 'scatter', mode = 'lines',
-                   name = 'Inflation', line = list(dash = 'dash', width = 1.5)) %>%
+                   name = 'Inflation ↓ (inverted)',
+                   line = list(color = '#ea580c', dash = 'dash', width = 2),
+                   hovertemplate = paste0(
+                     "<b>Inflation (inverted)</b><br>",
+                     "%{x|%b %Y}<br>",
+                     "Value: %{y:.2f}<br>",
+                     "<extra></extra>"
+                   )) %>%
           add_trace(x = ~date, y = ~R_star, data = df, type = 'scatter', mode = 'lines',
-                   name = 'Borrow Rate', line = list(dash = 'dash', width = 1.5))
+                   name = 'Borrow Rate ↓ (inverted)',
+                   line = list(color = '#c026d3', dash = 'dash', width = 2),
+                   hovertemplate = paste0(
+                     "<b>Borrow Rate (inverted)</b><br>",
+                     "%{x|%b %Y}<br>",
+                     "Value: %{y:.2f}<br>",
+                     "<extra></extra>"
+                   ))
       }
       
       # Layout
@@ -139,13 +167,25 @@ cfhi_feature_server <- function(id,
         title = list(text = paste0(title_prefix, "<br><sub>", 
                                    format(min(df$date), "%b %Y"), " — ", 
                                    format(max(df$date), "%b %Y"), "</sub>")),
-        xaxis = list(title = "", showgrid = TRUE),
-        yaxis = list(title = "Index (Jan 2000 = 100)", showgrid = TRUE),
+        xaxis = list(title = "", showgrid = TRUE, gridcolor = '#e5e7eb'),
+        yaxis = list(title = "Index (Jan 2000 = 100)", showgrid = TRUE, gridcolor = '#e5e7eb'),
         hovermode = 'x unified',
-        legend = list(orientation = "h", yanchor = "bottom", y = -0.2, xanchor = "center", x = 0.5)
+        legend = list(
+          orientation = "h", 
+          yanchor = "bottom", 
+          y = -0.25, 
+          xanchor = "center", 
+          x = 0.5,
+          bgcolor = 'rgba(255, 255, 255, 0.9)',
+          bordercolor = '#e5e7eb',
+          borderwidth = 1
+        ),
+        plot_bgcolor = '#ffffff',
+        paper_bgcolor = '#ffffff'
       )
       
       fig
     })
   })
 }
+
