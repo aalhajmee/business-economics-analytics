@@ -27,7 +27,6 @@ safe_source_tab <- function(path, tab_fallback_name) {
 home_tab   <- safe_source_tab("homepage.R",     "home")
 explore_tab<- safe_source_tab("explore.R",      "explore")
 guide_tab  <- safe_source_tab("savingsguide.R", "guide")
-loan_tab  <- safe_source_tab("loans.R", "loan")
 
 dashboardPage(
   dashboardHeader(title = "Financial Health"),

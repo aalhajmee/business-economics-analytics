@@ -24,4 +24,8 @@ shinyServer(function(input, output, session) {
     source("calculations.R", local = TRUE)
   }
   
+  if (file.exists("Loan_Approval_Calculator.R")) {
+    source("Loan_Approval_Calculator.R", local = TRUE)
+  }
+  
 })
