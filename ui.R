@@ -49,11 +49,10 @@ dashboardPage(
   
   dashboardBody(
     useShinyjs(),
-      source("frontpage.R")$value,
     
     tabItems(
       # HOME (from homepage.R)
-      source("frontpage.R")$value,
+      home_tab,
       
       # CFHI ANALYSIS (from cfhi_tab.R)
       cfhi_tab,
