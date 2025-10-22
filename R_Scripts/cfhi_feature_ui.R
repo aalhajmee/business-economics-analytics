@@ -43,7 +43,7 @@ cfhi_feature_ui <- function(id) {
       style = "font-size:12px; color:#64748b;",
       "Consumer Financial Health Index (CFHI): equal-weighted average of normalized components ",
       "(Savings ↑, Wage YoY ↑, Inflation YoY ↓, Borrowing rate ↓). ",
-      "Index rebased relative to Jan 2000 = 100 in your source file."
+      "Index rebased to Oct 2006 = 100."
     )
   )
 }

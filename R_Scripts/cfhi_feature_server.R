@@ -36,6 +36,17 @@ cfhi_feature_server <- function(id,
         df$R_star <- 100 - 100 * scale01(df$borrow_rate)
         df$CFHI_raw <- rowMeans(df[, c("S_star","W_star","I_star","R_star")], na.rm = TRUE)
         df$CFHI <- zoo::rollapply(df$CFHI_raw, 3, mean, align = "right", fill = NA)
+        
+        # Rebase to October 2006 = 100
+        base_date <- as.Date("2006-10-01")
+        base_idx <- which(df$date == base_date)
+        if (length(base_idx) > 0) {
+          base_value <- df$CFHI[base_idx[1]]
+          if (!is.na(base_value) && base_value != 0) {
+            df$CFHI <- (df$CFHI / base_value) * 100
+            df$CFHI_raw <- (df$CFHI_raw / base_value) * 100
+          }
+        }
       }
       # Provide year/month
       df$year <- lubridate::year(df$date)
@@ -168,7 +179,7 @@ cfhi_feature_server <- function(id,
                                    format(min(df$date), "%b %Y"), " — ", 
                                    format(max(df$date), "%b %Y"), "</sub>")),
         xaxis = list(title = "", showgrid = TRUE, gridcolor = '#e5e7eb'),
-        yaxis = list(title = "Index (Jan 2000 = 100)", showgrid = TRUE, gridcolor = '#e5e7eb'),
+        yaxis = list(title = "Index (Oct 2006 = 100)", showgrid = TRUE, gridcolor = '#e5e7eb'),
         hovermode = 'x unified',
         legend = list(
           orientation = "h", 
