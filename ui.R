@@ -25,6 +25,7 @@ safe_source_tab <- function(path, tab_fallback_name) {
 
 # Source your tabs (each file should return a single tabItem(...))
 home_tab   <- safe_source_tab("homepage.R",     "home")
+cfhi_tab   <- safe_source_tab("cfhi_tab.R",     "cfhi")
 explore_tab<- safe_source_tab("explore.R",      "explore")
 guide_tab  <- safe_source_tab("savingsguide.R", "guide")
 loan_tab  <- safe_source_tab("loans.R", "loan")
@@ -35,6 +36,7 @@ dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       menuItem("Home",            tabName = "home",     icon = icon("home")),
+      menuItem("CFHI Analysis",   tabName = "cfhi",     icon = icon("chart-line")),
       menuItem("Explore",         tabName = "explore",  icon = icon("search")),
       menuItem("Forecasting",     tabName = "forecast", icon = icon("line-chart")),
       menuItem("Savings Guide",   tabName = "guide",    icon = icon("lightbulb")),
@@ -48,6 +50,9 @@ dashboardPage(
     tabItems(
       # HOME (from homepage.R)
       home_tab,
+      
+      # CFHI ANALYSIS (from cfhi_tab.R)
+      cfhi_tab,
       
       # EXPLORE (from explore.R)
       explore_tab,
