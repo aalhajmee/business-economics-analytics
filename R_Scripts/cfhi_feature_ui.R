@@ -79,49 +79,55 @@ cfhi_feature_ui <- function(id) {
           ),
           tags$p(
             style = "font-size:12px; color:#64748b; margin-bottom:16px;",
-            "Enter your personal metrics to calculate your individual financial health index"
+            "Enter your financial details to calculate your personal index"
           ),
           
           # Input fields
           numericInput(
-            ns("personal_savings"),
-            "Your Savings Rate (%)",
+            ns("monthly_income"),
+            "Monthly Income ($)",
             value = NULL,
             min = 0,
+            step = 100
+          ),
+          
+          numericInput(
+            ns("monthly_savings"),
+            "Monthly Savings ($)",
+            value = NULL,
+            min = 0,
+            step = 50
+          ),
+          tags$p(style = "font-size:11px; color:#64748b; margin-top:-8px;", "Amount you save each month"),
+          
+          numericInput(
+            ns("income_growth"),
+            "Income Growth vs Last Year (%)",
+            value = NULL,
+            min = -50,
             max = 100,
             step = 0.5
           ),
-          tags$p(style = "font-size:11px; color:#64748b; margin-top:-8px;", "% of your income you save"),
+          tags$p(style = "font-size:11px; color:#64748b; margin-top:-8px;", "How much your income increased (or decreased)"),
           
           numericInput(
-            ns("personal_wage_growth"),
-            "Your Wage Growth (%)",
-            value = NULL,
-            min = -20,
+            ns("total_debt"),
+            "Total Debt Balance ($)",
+            value = 0,
+            min = 0,
+            step = 100
+          ),
+          tags$p(style = "font-size:11px; color:#64748b; margin-top:-8px;", "Credit cards, loans, etc. (0 if none)"),
+          
+          numericInput(
+            ns("avg_interest_rate"),
+            "Average Interest Rate on Debt (%)",
+            value = 0,
+            min = 0,
             max = 50,
-            step = 0.5
-          ),
-          tags$p(style = "font-size:11px; color:#64748b; margin-top:-8px;", "Year-over-year change in your income"),
-          
-          numericInput(
-            ns("personal_inflation"),
-            "Inflation Impact (%)",
-            value = NULL,
-            min = 0,
-            max = 20,
-            step = 0.1
-          ),
-          tags$p(style = "font-size:11px; color:#64748b; margin-top:-8px;", "Current inflation rate (use U.S. rate or local)"),
-          
-          numericInput(
-            ns("personal_borrow_rate"),
-            "Your Borrowing Rate (%)",
-            value = NULL,
-            min = 0,
-            max = 30,
             step = 0.25
           ),
-          tags$p(style = "font-size:11px; color:#64748b; margin-top:-8px;", "Avg interest rate on your debt (credit cards, loans)"),
+          tags$p(style = "font-size:11px; color:#64748b; margin-top:-8px;", "Weighted average of all your debt (0 if no debt)"),
           
           # Calculate button
           actionButton(
@@ -145,7 +151,7 @@ cfhi_feature_ui <- function(id) {
             tags$hr(style = "margin:12px 0; border:none; border-top:1px solid #e5e7eb;"),
             tags$div(
               style = "font-size:12px; color:#64748b; margin-bottom:4px;",
-              "Compared to U.S. Average:"
+              "Compared to 2025 U.S. Average:"
             ),
             tags$div(
               id = ns("comparison_text"),

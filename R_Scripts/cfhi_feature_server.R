@@ -221,14 +221,57 @@ cfhi_feature_server <- function(id,
     # ---- Personal Calculator Logic ----
     observeEvent(input$calc_personal, {
       # Validate inputs
-      req(input$personal_savings, input$personal_wage_growth, 
-          input$personal_inflation, input$personal_borrow_rate)
+      req(input$monthly_income, input$monthly_savings, input$income_growth)
       
-      # Get historical data for normalization ranges
+      # Get historical data
       df <- df_master()
       req(nrow(df) > 0)
       
-      # Get the SAME normalization ranges used for the U.S. index
+      # Get current year (2025) data for U.S. average comparison
+      current_year <- 2025
+      df_current_year <- df[lubridate::year(df$date) == current_year, ]
+      
+      if (nrow(df_current_year) > 0 && "CFHI" %in% names(df_current_year)) {
+        us_cfhi_avg <- mean(df_current_year$CFHI, na.rm = TRUE)
+      } else {
+        # Fallback to most recent available data
+        if ("CFHI" %in% names(df)) {
+          valid_idx <- which(!is.na(df$CFHI))
+          if (length(valid_idx) > 0) {
+            last_row <- df[tail(valid_idx, 1), ]
+            us_cfhi_avg <- last_row$CFHI
+          } else {
+            us_cfhi_avg <- 100
+          }
+        } else {
+          us_cfhi_avg <- 100
+        }
+      }
+      
+      # Get most recent U.S. economic indicators for comparison
+      if (nrow(df_current_year) > 0) {
+        us_inflation <- mean(df_current_year$inflation_yoy, na.rm = TRUE)
+      } else {
+        last_idx <- tail(which(!is.na(df$inflation_yoy)), 1)
+        us_inflation <- if(length(last_idx) > 0) df$inflation_yoy[last_idx] else 3
+      }
+      
+      # Calculate personal metrics
+      personal_savings_rate <- if(input$monthly_income > 0) {
+        (input$monthly_savings / input$monthly_income) * 100
+      } else { 0 }
+      
+      personal_wage_growth <- input$income_growth
+      
+      # Calculate effective borrowing rate based on debt
+      # Only matters if you have debt
+      personal_borrow_rate <- if(input$total_debt > 0 && !is.null(input$avg_interest_rate)) {
+        input$avg_interest_rate
+      } else {
+        0  # No debt = optimal score
+      }
+      
+      # Get normalization ranges from historical data
       savings_min <- min(df$savings_rate, na.rm=TRUE)
       savings_max <- max(df$savings_rate, na.rm=TRUE)
       wage_min <- min(df$wage_yoy, na.rm=TRUE)
@@ -238,39 +281,37 @@ cfhi_feature_server <- function(id,
       borrow_min <- min(df$borrow_rate, na.rm=TRUE)
       borrow_max <- max(df$borrow_rate, na.rm=TRUE)
       
-      # Normalize personal values using SAME scale as U.S. index
-      # If user's value is outside historical range, extrapolate (don't clamp)
+      # Normalize personal components (same method as U.S. index)
       personal_S <- if(savings_max != savings_min) {
-        100 * (input$personal_savings - savings_min) / (savings_max - savings_min)
+        100 * (personal_savings_rate - savings_min) / (savings_max - savings_min)
       } else { 50 }
       
       personal_W <- if(wage_max != wage_min) {
-        100 * (input$personal_wage_growth - wage_min) / (wage_max - wage_min)
+        100 * (personal_wage_growth - wage_min) / (wage_max - wage_min)
       } else { 50 }
       
       personal_I <- if(inflation_max != inflation_min) {
-        100 - 100 * (input$personal_inflation - inflation_min) / (inflation_max - inflation_min)
+        100 - 100 * (us_inflation - inflation_min) / (inflation_max - inflation_min)
       } else { 50 }
       
       personal_R <- if(borrow_max != borrow_min) {
-        100 - 100 * (input$personal_borrow_rate - borrow_min) / (borrow_max - borrow_min)
-      } else { 50 }
+        100 - 100 * (personal_borrow_rate - borrow_min) / (borrow_max - borrow_min)
+      } else { 100 }  # No debt = maximum score
       
-      # Clamp to reasonable bounds (0-100) for display purposes
+      # Clamp to 0-100
       personal_S <- max(0, min(100, personal_S))
       personal_W <- max(0, min(100, personal_W))
       personal_I <- max(0, min(100, personal_I))
       personal_R <- max(0, min(100, personal_R))
       
-      # Calculate personal CFHI as simple average (same as U.S. calculation)
+      # Calculate personal CFHI as average
       personal_cfhi_raw <- mean(c(personal_S, personal_W, personal_I, personal_R), na.rm=TRUE)
       
-      # Apply the SAME rebasing as U.S. index (Oct 2006 = 100)
+      # Apply rebasing (Oct 2006 = 100)
       base_date <- as.Date("2006-10-01")
       base_idx <- which(df$date == base_date)
       
       if (length(base_idx) > 0) {
-        # Calculate what the base period components were
         base_S <- 100 * (df$savings_rate[base_idx[1]] - savings_min) / (savings_max - savings_min)
         base_W <- 100 * (df$wage_yoy[base_idx[1]] - wage_min) / (wage_max - wage_min)
         base_I <- 100 - 100 * (df$inflation_yoy[base_idx[1]] - inflation_min) / (inflation_max - inflation_min)
@@ -287,25 +328,9 @@ cfhi_feature_server <- function(id,
         personal_cfhi <- personal_cfhi_raw
       }
       
-      # Get most recent U.S. CFHI for comparison
-      if ("CFHI" %in% names(df)) {
-        valid_idx <- which(!is.na(df$CFHI))
-        if (length(valid_idx) > 0) {
-          last_row <- df[tail(valid_idx, 1), ]
-          us_cfhi <- last_row$CFHI
-          us_date <- format(last_row$date, "%b %Y")
-        } else {
-          us_cfhi <- 100
-          us_date <- "N/A"
-        }
-      } else {
-        us_cfhi <- 100
-        us_date <- "N/A"
-      }
-      
-      # Calculate difference
-      diff <- personal_cfhi - us_cfhi
-      diff_pct <- if(!is.na(us_cfhi) && us_cfhi != 0) (diff / us_cfhi) * 100 else 0
+      # Calculate difference from 2025 U.S. average
+      diff <- personal_cfhi - us_cfhi_avg
+      diff_pct <- if(!is.na(us_cfhi_avg) && us_cfhi_avg != 0) (diff / us_cfhi_avg) * 100 else 0
       
       # Determine color and icon
       if (!is.na(diff) && !is.na(diff_pct)) {
