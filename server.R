@@ -6,6 +6,7 @@ library(zoo)
 library(lubridate)
 library(shinydashboard)
 library(plotly)
+library(shinyjs)
 
 # CFHI module (reads cfhi_data/cfhi_master_2000_onward.csv)
 source("R_Scripts/cfhi_feature_server.R")

@@ -217,6 +217,93 @@ cfhi_feature_server <- function(id,
       
       fig
     })
+    
+    # ---- Personal Calculator Logic ----
+    observeEvent(input$calc_personal, {
+      # Validate inputs
+      req(input$personal_savings, input$personal_wage_growth, 
+          input$personal_inflation, input$personal_borrow_rate)
+      
+      # Get historical data ranges for normalization
+      df <- df_master()
+      
+      # Calculate personal normalized components using historical min/max
+      savings_norm <- 100 * (input$personal_savings - min(df$savings_rate, na.rm=TRUE)) / 
+                      (max(df$savings_rate, na.rm=TRUE) - min(df$savings_rate, na.rm=TRUE))
+      
+      wage_norm <- 100 * (input$personal_wage_growth - min(df$wage_yoy, na.rm=TRUE)) / 
+                   (max(df$wage_yoy, na.rm=TRUE) - min(df$wage_yoy, na.rm=TRUE))
+      
+      inflation_norm <- 100 - 100 * (input$personal_inflation - min(df$inflation_yoy, na.rm=TRUE)) / 
+                        (max(df$inflation_yoy, na.rm=TRUE) - min(df$inflation_yoy, na.rm=TRUE))
+      
+      borrow_norm <- 100 - 100 * (input$personal_borrow_rate - min(df$borrow_rate, na.rm=TRUE)) / 
+                     (max(df$borrow_rate, na.rm=TRUE) - min(df$borrow_rate, na.rm=TRUE))
+      
+      # Calculate personal CFHI
+      personal_cfhi_raw <- mean(c(savings_norm, wage_norm, inflation_norm, borrow_norm), na.rm=TRUE)
+      
+      # Rebase to Oct 2006 = 100 (same as U.S. index)
+      base_date <- as.Date("2006-10-01")
+      base_idx <- which(df$date == base_date)
+      if (length(base_idx) > 0) {
+        base_value <- df$CFHI[base_idx[1]]
+        if (!is.na(base_value) && base_value != 0) {
+          personal_cfhi <- (personal_cfhi_raw / (base_value / 100)) * 100
+        } else {
+          personal_cfhi <- personal_cfhi_raw
+        }
+      } else {
+        personal_cfhi <- personal_cfhi_raw
+      }
+      
+      # Get most recent U.S. CFHI
+      last_row <- df[tail(which(!is.na(df$CFHI)), 1), ]
+      us_cfhi <- if(nrow(last_row) > 0) last_row$CFHI else 100
+      
+      # Calculate difference
+      diff <- personal_cfhi - us_cfhi
+      diff_pct <- (diff / us_cfhi) * 100
+      
+      # Determine color and icon
+      if (diff > 10) {
+        color <- "#16a34a"  # green
+        icon <- "↑↑"
+        message <- sprintf("Much better than U.S. average (+%.1f points, +%.1f%%)", diff, diff_pct)
+      } else if (diff > 2) {
+        color <- "#84cc16"  # light green
+        icon <- "↑"
+        message <- sprintf("Better than U.S. average (+%.1f points, +%.1f%%)", diff, diff_pct)
+      } else if (diff > -2) {
+        color <- "#f59e0b"  # amber
+        icon <- "≈"
+        message <- sprintf("Similar to U.S. average (%.1f points)", diff)
+      } else if (diff > -10) {
+        color <- "#f97316"  # orange
+        icon <- "↓"
+        message <- sprintf("Below U.S. average (%.1f points, %.1f%%)", diff, diff_pct)
+      } else {
+        color <- "#dc2626"  # red
+        icon <- "↓↓"
+        message <- sprintf("Much below U.S. average (%.1f points, %.1f%%)", diff, diff_pct)
+      }
+      
+      # Update UI
+      shinyjs::runjs(sprintf("
+        var resultDiv = document.getElementById('%s');
+        resultDiv.style.display = 'block';
+        resultDiv.style.background = '%s15';
+        resultDiv.style.border = '2px solid %s';
+      ", ns("personal_result"), color, color))
+      
+      shinyjs::runjs(sprintf("
+        document.getElementById('%s').innerHTML = '<span style=\"color:%s;\">%s</span> %.1f';
+      ", ns("personal_score"), color, icon, personal_cfhi))
+      
+      shinyjs::runjs(sprintf("
+        document.getElementById('%s').innerHTML = '<span style=\"color:%s;\">%s</span>';
+      ", ns("comparison_text"), color, message))
+    })
   })
 }
 
