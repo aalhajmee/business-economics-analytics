@@ -24,7 +24,7 @@ safe_source_tab <- function(path, tab_fallback_name) {
 }
 
 # Source your tabs (each file should return a single tabItem(...))
-home_tab   <- safe_source_tab("homepage.R",     "home")
+home_tab   <- safe_source_tab("frontpage.R",     "home")
 cfhi_tab   <- safe_source_tab("cfhi_tab.R",     "cfhi")
 explore_tab<- safe_source_tab("explore.R",      "explore")
 guide_tab  <- safe_source_tab("savingsguide.R", "guide")

@@ -1,10 +1,36 @@
 tabItem(
-  tabName = "landing",
+  tabName = "home",
+  
+  tags$style(HTML("
+  .carousel-item {
+    height: 500px;              /* adjust this number for size (e.g., 400–600px) */
+    position: relative;
+  }
+
+  .carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;          /* keeps proportions, crops excess */
+  }
+
+  .carousel-item { display: none; }
+  .carousel-item.active { display: block; }
+
+  .carousel-item::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.45), rgba(0,0,0,0.1));
+    z-index: 1;
+  }
+
+  .carousel-caption { z-index: 2; }
+")),
+  
   
   tags$div(
     id = "carouselExampleIndicators",
     class = "carousel slide",
-    `data-bs-ride` = "carousel",
     
     # Carousel indicators
     tags$div(
@@ -21,7 +47,7 @@ tabItem(
       # Slide 1
       tags$div(
         class = "carousel-item active",
-        tags$img(src = "buildings.jpg", class="d-block w-100"),
+        tags$img(src = "buildings.jpg", class="d-block w-100", style = "width: 800px; object-fit: cover;"),
         tags$div(
           class = "carousel-caption d-none d-md-block",
           tags$h1("BUILD STRONG FINANCIAL FOUNDATIONS"),
@@ -33,7 +59,7 @@ tabItem(
       # Slide 2
       tags$div(
         class = "carousel-item",
-        tags$img(src = "meeting.jpg", class="d-block w-100"),
+        tags$img(src = "meeting.jpg", class="d-block w-100", style = "width: 800px; object-fit: cover;"),
         tags$div(
           class = "carousel-caption d-none d-md-block",
           tags$h1("TURN INSIGHTS INTO ACTION"),
@@ -45,7 +71,7 @@ tabItem(
       # Slide 3
       tags$div(
         class = "carousel-item",
-        tags$img(src = "plant", class="d-block w-100"),
+        tags$img(src = "plant.jpg", class="d-block w-100", style = "width: 800px; object-fit: cover;"),
         tags$div(
           class = "carousel-caption d-none d-md-block",
           tags$h1("WHERE GROWTH BEGINS"),
@@ -55,14 +81,20 @@ tabItem(
       )
     ),
     
-    # Navigation arrows
-    tags$button(class="carousel-control-prev", type="button", `data-bs-target`="#carouselExampleIndicators", `data-bs-slide`="prev",
-                tags$span(class="carousel-control-prev-icon", `aria-hidden`="true"),
-                tags$span(class="visually-hidden", "Previous")),
+    # Navigation arrows only (no text)
+    tags$button(
+      class="carousel-control-prev", type="button",
+      `data-bs-target`="#carouselExampleIndicators", `data-bs-slide`="prev",
+      tags$span(class="carousel-control-prev-icon", `aria-hidden`="true"),
+      tags$span(class="visually-hidden", "Previous")
+    ),
+    tags$button(
+      class="carousel-control-next", type="button",
+      `data-bs-target`="#carouselExampleIndicators", `data-bs-slide`="next",
+      tags$span(class="carousel-control-next-icon", `aria-hidden`="true"),
+      tags$span(class="visually-hidden", "Next")
+    )
     
-    tags$button(class="carousel-control-next", type="button", `data-bs-target`="#carouselExampleIndicators", `data-bs-slide`="next",
-                tags$span(class="carousel-control-next-icon", `aria-hidden`="true"),
-                tags$span(class="visually-hidden", "Next"))
   ),
   
   br(),
