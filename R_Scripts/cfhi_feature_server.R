@@ -29,7 +29,7 @@ cfhi_feature_server <- function(id,
                     paste("Master CSV missing columns:", paste(missing, collapse=", "))))
       df <- df[order(df$date), ]
       # if CFHI not present, build it minimally:
-      if (!"cfhi" %in% names(df)) {
+      if (!"cfhi" %in% names(df) && !"CFHI" %in% names(df)) {
         df$S_star <- 100 * scale01(df$savings_rate)
         df$W_star <- 100 * scale01(df$wage_yoy)
         df$I_star <- 100 - 100 * scale01(df$inflation_yoy)
@@ -48,6 +48,9 @@ cfhi_feature_server <- function(id,
             df$CFHI_raw <- (df$CFHI_raw / base_value) * 100
           }
         }
+      } else if ("cfhi" %in% names(df) && !"CFHI" %in% names(df)) {
+        # Rename lowercase to uppercase for consistency
+        df$CFHI <- df$cfhi
       }
       # Provide year/month
       df$year <- lubridate::year(df$date)
