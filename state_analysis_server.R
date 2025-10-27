@@ -36,9 +36,9 @@ output$state_map <- renderPlotly({
   
   metric_title <- switch(
     metric,
-    "median_income" = "Median Household Income ($)",
-    "unemployment" = "Unemployment Rate (%)",
-    "poverty" = "Poverty Rate (%)",
+    "median_income" = "Median Household Income",
+    "unemployment" = "Unemployment Rate",
+    "poverty" = "Poverty Rate",
     "cost_living" = "Cost of Living Index"
   )
   
@@ -49,13 +49,24 @@ output$state_map <- renderPlotly({
   # Create a column for the z values that plotly can access
   df$map_value <- df[[metric_col]]
   
-  df$hover_text <- paste0(
-    "<b>", df$State, "</b><br>",
-    metric_title, ": ", 
-    ifelse(metric == "median_income", 
-           paste0("$", format(round(df[[metric_col]]), big.mark = ",")),
-           round(df[[metric_col]], 2))
-  )
+  # Create properly formatted hover text with units
+  df$hover_text <- sapply(seq_len(nrow(df)), function(i) {
+    value <- df[[metric_col]][i]
+    if (is.na(value)) {
+      formatted_value <- "Data Not Available"
+    } else if (metric == "median_income") {
+      formatted_value <- paste0("$", format(round(value), big.mark = ","))
+    } else if (metric %in% c("unemployment", "poverty")) {
+      formatted_value <- paste0(round(value, 1), "%")
+    } else {  # cost_living
+      formatted_value <- paste0(round(value, 1), " (100 = U.S. avg)")
+    }
+    
+    paste0(
+      "<b>", df$State[i], "</b><br>",
+      metric_title, ": ", formatted_value
+    )
+  })
   
   # Color scale: for unemployment/poverty, lower is better (green), higher is worse (red)
   # For income/cost_living inverted, higher income is better (green)
@@ -78,7 +89,12 @@ output$state_map <- renderPlotly({
       hoverinfo = "text",
       type = "choropleth",
       colorscale = color_scale,
-      colorbar = list(title = metric_title),
+      colorbar = list(
+        title = list(
+          text = metric_title,
+          side = "right"
+        )
+      ),
       zauto = TRUE
     ) %>%
     layout(
@@ -108,15 +124,25 @@ output$top_states <- renderTable({
     return(data.frame(State = "N/A", Value = "N/A"))
   }
   
-  sorted <- if (metric %in% c("unemployment", "poverty")) {
+  sorted <- if (metric %in% c("unemployment", "poverty", "cost_living")) {
     df %>% arrange(!!sym(metric_col)) %>% head(5)
   } else {
     df %>% arrange(desc(!!sym(metric_col))) %>% head(5)
   }
   
-  sorted %>%
-    select(State, Value = !!sym(metric_col)) %>%
-    mutate(Value = round(Value, 2))
+  result <- sorted %>%
+    select(State, Value = !!sym(metric_col))
+  
+  # Format values with proper units
+  if (metric == "median_income") {
+    result <- result %>% mutate(Value = paste0("$", format(round(Value), big.mark = ",")))
+  } else if (metric %in% c("unemployment", "poverty")) {
+    result <- result %>% mutate(Value = paste0(round(Value, 1), "%"))
+  } else {  # cost_living
+    result <- result %>% mutate(Value = paste0(round(Value, 1)))
+  }
+  
+  result
 }, striped = TRUE, hover = TRUE, bordered = TRUE)
 
 output$bottom_states <- renderTable({
@@ -135,15 +161,25 @@ output$bottom_states <- renderTable({
     return(data.frame(State = "N/A", Value = "N/A"))
   }
   
-  sorted <- if (metric %in% c("unemployment", "poverty")) {
+  sorted <- if (metric %in% c("unemployment", "poverty", "cost_living")) {
     df %>% arrange(desc(!!sym(metric_col))) %>% head(5)
   } else {
     df %>% arrange(!!sym(metric_col)) %>% head(5)
   }
   
-  sorted %>%
-    select(State, Value = !!sym(metric_col)) %>%
-    mutate(Value = round(Value, 2))
+  result <- sorted %>%
+    select(State, Value = !!sym(metric_col))
+  
+  # Format values with proper units
+  if (metric == "median_income") {
+    result <- result %>% mutate(Value = paste0("$", format(round(Value), big.mark = ",")))
+  } else if (metric %in% c("unemployment", "poverty")) {
+    result <- result %>% mutate(Value = paste0(round(Value, 1), "%"))
+  } else {  # cost_living
+    result <- result %>% mutate(Value = paste0(round(Value, 1)))
+  }
+  
+  result
 }, striped = TRUE, hover = TRUE, bordered = TRUE)
 
 comparison_data <- eventReactive(input$compare_states, {
