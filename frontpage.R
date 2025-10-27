@@ -1,18 +1,11 @@
-tags$script(HTML("
-  function goToTab(tabName) {
-    Shiny.setInputValue('go_to_tab', tabName, {priority: 'event'});
-  }
-"))
-
-
-
 tabItem(
   tabName = "home",
   
-  # Bootstrap JS for working carousel controls
-  tags$head(
-    tags$script(src = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js")
-  ),
+  tags$script(HTML("
+    function goToTab(tabName) {
+      Shiny.setInputValue('go_to_tab', tabName, {priority: 'event'});
+    }
+  ")),
   
   # Carousel styling
   tags$style(HTML("
@@ -87,7 +80,7 @@ tabItem(
           tags$p("Explore trends, markets, and opportunities that drive long-term success."),
           tags$button(
             class = "btn btn-primary btn-lg",
-            onclick = "goToTab('cfhi')",   # tabName must match sidebar
+            onclick = "goToTab('cfhi')",
             "Get started now »"
           )
         )
@@ -103,7 +96,7 @@ tabItem(
           tags$p("Leverage real-time analytics to make confident financial decisions."),
           tags$button(
             class = "btn btn-primary btn-lg",
-            onclick = "goToTab('explore')",   # tabName must match sidebar
+            onclick = "goToTab('explore')",
             "Explore »"
           )
         )
@@ -117,10 +110,9 @@ tabItem(
           class = "carousel-caption d-none d-md-block",
           tags$h1("WHERE GROWTH BEGINS"),
           tags$p("Track, plan, and grow your wealth — one smart decision at a time."),
-          
           tags$button(
             class = "btn btn-primary btn-lg",
-            onclick = "goToTab('guide')",   # tabName must match sidebar
+            onclick = "goToTab('guide')",
             "Learn more »"
           )
         )
@@ -141,6 +133,8 @@ tabItem(
       tags$span(class="visually-hidden", "Next")
     )
   ),
+  
+  br(),
   
   br(),
   h2(style="text-align:center; font-weight:600;", "WE GOT YOU COVERED!")
