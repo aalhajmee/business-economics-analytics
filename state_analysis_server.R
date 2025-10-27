@@ -5,6 +5,15 @@ state_data <- reactive({
   df
 })
 
+output$metric_explanation <- renderText({
+  switch(input$map_metric,
+    "median_income" = "Annual household income (middle value). Higher is better.",
+    "unemployment" = "% of workforce actively seeking jobs. Lower is better.",
+    "poverty" = "% of population below federal poverty line. Lower is better.",
+    "cost_living" = "Relative cost (100 = U.S. avg). Lower = more affordable."
+  )
+})
+
 observe({
   df <- state_data()
   state_names <- sort(unique(df$State))
