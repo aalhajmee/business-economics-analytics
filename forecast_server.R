@@ -1,5 +1,3 @@
-library(forecast)
-
 forecast_data <- reactive({
   df <- read_csv("cfhi_data/cfhi_master_2000_onward.csv", show_col_types = FALSE)
   df <- df %>%

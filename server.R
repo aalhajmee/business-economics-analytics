@@ -8,17 +8,18 @@ library(shinydashboard)
 library(plotly)
 library(shinyjs)
 library(DT)
+library(forecast)
 
 # CFHI module (reads cfhi_data/cfhi_master_2000_onward.csv)
 source("R_Scripts/cfhi_feature_server.R")
 
-# Forecast server logic
-source("forecast_server.R", local = TRUE)
-
-# State analysis server logic
-source("state_analysis_server.R", local = TRUE)
-
 shinyServer(function(input, output, session) {
+  
+  # ---- FORECAST SERVER LOGIC ----
+  source("forecast_server.R", local = TRUE)
+  
+  # ---- STATE ANALYSIS SERVER LOGIC ----
+  source("state_analysis_server.R", local = TRUE)
   
   # ---- CFHI MODULE ----
   cfhi_feature_server(

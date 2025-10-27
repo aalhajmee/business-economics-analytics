@@ -1,7 +1,5 @@
 library(readxl)
 
-library(readr)
-
 state_data <- reactive({
   df <- read_csv("Financial_Calculator_datasets/State_Data_Demographics.csv", show_col_types = FALSE)
   df
