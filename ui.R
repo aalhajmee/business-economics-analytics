@@ -28,7 +28,8 @@ id = "tabs"
 home_tab   <- safe_source_tab("frontpage.R",     "home")
 cfhi_tab   <- safe_source_tab("cfhi_tab.R",     "cfhi")
 cfhi_data_tab <- safe_source_tab("cfhi_data_tab.R", "cfhi_data")
-explore_tab<- safe_source_tab("explore.R",      "explore")
+explore_tab<- safe_source_tab("state_analysis_tab.R", "explore")
+forecast_tab <- safe_source_tab("forecast_tab.R", "forecast")
 guide_tab  <- safe_source_tab("savingsguide.R", "guide")
 
 dashboardPage(
@@ -66,15 +67,11 @@ dashboardPage(
       # CFHI DATA SOURCES
       cfhi_data_tab,
       
-      # EXPLORE (from explore.R)
+      # EXPLORE (from state_analysis_tab.R)
       explore_tab,
       
-      # FORECASTING
-      tabItem(
-        tabName = "forecast",
-        h2("Forecasting"),
-        p("Predict future trends.")
-      ),
+      # FORECASTING (from forecast_tab.R)
+      forecast_tab,
       
       # SAVINGS GUIDE (from savingsguide.R)
       guide_tab,
