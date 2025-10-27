@@ -7,10 +7,10 @@ state_data <- reactive({
 
 output$metric_explanation <- renderText({
   switch(input$map_metric,
-    "median_income" = "💰 Higher income = Better (Green). Shows the middle household earnings - half earn more, half earn less.",
-    "unemployment" = "📉 Lower unemployment = Better (Green). Shows % of people actively looking for work but can't find jobs.",
-    "poverty" = "📊 Lower poverty = Better (Green). Shows % of people living below federal poverty line ($31,200 for family of 4).",
-    "cost_living" = "💵 Lower cost = Better (Green). 100 = U.S. average. California at 151.7 = 51.7% more expensive than average. Alabama at 88 = 12% cheaper than average."
+    "median_income" = "Unit: U.S. Dollars ($). Definition: The middle value of household income where half earn more and half earn less. Higher values indicate better economic conditions (shown in green).",
+    "unemployment" = "Unit: Percentage (%). Definition: Proportion of the labor force actively seeking work but unable to find employment. Lower values indicate better economic conditions (shown in green).",
+    "poverty" = "Unit: Percentage (%). Definition: Proportion of the population living below the federal poverty line ($31,200 annual income for a family of 4 in 2023). Lower values indicate better economic conditions (shown in green).",
+    "cost_living" = "Unit: Index (100 = U.S. average). Definition: Relative cost of goods and services. Values below 100 are cheaper than average (e.g., 88 = 12% below average), values above 100 are more expensive (e.g., 151.7 = 51.7% above average). Lower values indicate more affordable living (shown in green)."
   )
 })
 
@@ -207,10 +207,30 @@ output$comparison_output <- renderUI({
       h4(s1$State),
       tags$table(
         class = "table table-sm",
-        tags$tr(tags$td("Median Income:"), tags$td(paste0("$", format(s1$Median_Income, big.mark = ",")))),
-        tags$tr(tags$td("Unemployment:"), tags$td(paste0(s1$Unemployment_Rate, "%"))),
-        tags$tr(tags$td("Poverty Rate:"), tags$td(paste0(s1$Poverty_Rate, "%"))),
-        tags$tr(tags$td("Cost of Living:"), tags$td(s1$Cost_of_Living_Index))
+        tags$tr(
+          tags$td(tags$b("Median Household Income:")), 
+          tags$td(paste0("$", format(round(s1$Median_Income), big.mark = ",")), 
+                  tags$br(), 
+                  tags$small(style = "color:#666;", "Unit: U.S. Dollars"))
+        ),
+        tags$tr(
+          tags$td(tags$b("Unemployment Rate:")), 
+          tags$td(paste0(round(s1$Unemployment_Rate, 1), "%"),
+                  tags$br(),
+                  tags$small(style = "color:#666;", "Unit: Percentage of labor force"))
+        ),
+        tags$tr(
+          tags$td(tags$b("Poverty Rate:")), 
+          tags$td(paste0(round(s1$Poverty_Rate, 1), "%"),
+                  tags$br(),
+                  tags$small(style = "color:#666;", "Unit: Percentage of population"))
+        ),
+        tags$tr(
+          tags$td(tags$b("Cost of Living Index:")), 
+          tags$td(round(s1$Cost_of_Living_Index, 1),
+                  tags$br(),
+                  tags$small(style = "color:#666;", "Unit: Index (100 = U.S. average)"))
+        )
       )
     ),
     column(
@@ -218,10 +238,30 @@ output$comparison_output <- renderUI({
       h4(s2$State),
       tags$table(
         class = "table table-sm",
-        tags$tr(tags$td("Median Income:"), tags$td(paste0("$", format(s2$Median_Income, big.mark = ",")))),
-        tags$tr(tags$td("Unemployment:"), tags$td(paste0(s2$Unemployment_Rate, "%"))),
-        tags$tr(tags$td("Poverty Rate:"), tags$td(paste0(s2$Poverty_Rate, "%"))),
-        tags$tr(tags$td("Cost of Living:"), tags$td(s2$Cost_of_Living_Index))
+        tags$tr(
+          tags$td(tags$b("Median Household Income:")), 
+          tags$td(paste0("$", format(round(s2$Median_Income), big.mark = ",")),
+                  tags$br(),
+                  tags$small(style = "color:#666;", "Unit: U.S. Dollars"))
+        ),
+        tags$tr(
+          tags$td(tags$b("Unemployment Rate:")), 
+          tags$td(paste0(round(s2$Unemployment_Rate, 1), "%"),
+                  tags$br(),
+                  tags$small(style = "color:#666;", "Unit: Percentage of labor force"))
+        ),
+        tags$tr(
+          tags$td(tags$b("Poverty Rate:")), 
+          tags$td(paste0(round(s2$Poverty_Rate, 1), "%"),
+                  tags$br(),
+                  tags$small(style = "color:#666;", "Unit: Percentage of population"))
+        ),
+        tags$tr(
+          tags$td(tags$b("Cost of Living Index:")), 
+          tags$td(round(s2$Cost_of_Living_Index, 1),
+                  tags$br(),
+                  tags$small(style = "color:#666;", "Unit: Index (100 = U.S. average)"))
+        )
       )
     )
   )
