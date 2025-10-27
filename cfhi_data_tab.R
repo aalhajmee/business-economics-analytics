@@ -70,31 +70,29 @@ tabItem(
         tags$h3(style = "color:#1e40af; margin-top:0;", "Understanding the Personal Financial Health Index"),
         tags$p(
           style = "font-size:15px;",
-          "Your Personal Consumer Financial Health Index (CFHI) is calculated using the exact same rigorous methodology 
-          as the national U.S. index, but applied to your individual financial situation. This approach ensures your score 
-          is directly comparable to national averages and historical trends. The index produces a score from 0 to 100, where:"
+          "Your Personal Consumer Financial Health Index (CFHI) is calculated using the same methodology 
+          as the national U.S. index, but applied to your individual financial situation. The index produces a score from 0 to 100, where:"
         ),
         tags$ul(
           style = "font-size:14px; line-height:1.8;",
-          tags$li(tags$strong("0-30 (Red Zone):"), " Poor financial health - significant challenges across multiple financial dimensions"),
-          tags$li(tags$strong("30-50 (Orange Zone):"), " Below average financial health - room for improvement in key areas"),
-          tags$li(tags$strong("50-70 (Yellow Zone):"), " Average financial health - on par with typical American household"),
-          tags$li(tags$strong("70-85 (Light Green Zone):"), " Good financial health - performing better than most Americans"),
-          tags$li(tags$strong("85-100 (Dark Green Zone):"), " Excellent financial health - exceptional financial position")
+          tags$li(tags$strong("0-30:"), " Poor financial health"),
+          tags$li(tags$strong("30-50:"), " Below average financial health"),
+          tags$li(tags$strong("50-70:"), " Average financial health"),
+          tags$li(tags$strong("70-85:"), " Good financial health"),
+          tags$li(tags$strong("85-100:"), " Excellent financial health")
         ),
         
         hr(style = "border-top: 2px solid #ffc107;"),
         
-        tags$h3(style = "color:#1e40af;", "Complete Step-by-Step Calculation Process"),
+        tags$h3(style = "color:#1e40af;", "Step-by-Step Calculation Process"),
         
         # STEP 1
         tags$div(
           style = "background:linear-gradient(to right, #fff8e1, #ffffff); border-left:5px solid #ffc107; padding:20px; margin:15px 0; border-radius:5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);",
-          tags$h4(style = "color:#f57c00; margin-top:0;", "📊 STEP 1: Calculate Your Personal Financial Metrics"),
+          tags$h4(style = "color:#f57c00; margin-top:0;", "STEP 1: Calculate Your Personal Financial Metrics"),
           tags$p(
             style = "font-size:14px;",
-            "First, we derive four fundamental metrics from the information you provide in the personal calculator. 
-            These metrics represent the core dimensions of consumer financial health:"
+            "Four fundamental metrics are derived from the information you provide in the personal calculator:"
           ),
           
           tags$div(
@@ -111,8 +109,8 @@ tabItem(
             ),
             tags$p(
               style = "color:#555; font-size:13px;",
-              tags$em("Why it matters: "), "This metric reveals your ability to build wealth, create emergency funds, 
-              and achieve long-term financial goals. Higher savings rates indicate stronger financial discipline and security."
+              tags$strong("Why it matters: "), "Measures your ability to build wealth, create emergency funds, 
+              and achieve long-term financial goals."
             )
           ),
           
@@ -130,9 +128,8 @@ tabItem(
             ),
             tags$p(
               style = "color:#555; font-size:13px;",
-              tags$em("Why it matters: "), "Wage growth indicates whether your earning power is improving over time. 
-              It's crucial for keeping up with inflation and improving your standard of living. Stagnant or negative 
-              wage growth means you're falling behind economically."
+              tags$strong("Why it matters: "), "Indicates whether your earning power is improving over time 
+              and keeping up with inflation."
             )
           ),
           
@@ -150,9 +147,8 @@ tabItem(
             ),
             tags$p(
               style = "color:#555; font-size:13px;",
-              tags$em("Why it matters: "), "Inflation affects everyone equally by eroding purchasing power. 
-              We use the national rate because individual consumers cannot control or avoid inflation - a gallon of milk 
-              costs the same whether you're rich or poor. Higher inflation means your dollars buy less."
+              tags$strong("Why it matters: "), "Inflation affects everyone equally by eroding purchasing power. 
+              We use the national rate because consumers cannot control or avoid inflation."
             )
           ),
           
@@ -172,9 +168,8 @@ tabItem(
             ),
             tags$p(
               style = "color:#555; font-size:13px;",
-              tags$em("Why it matters: "), "High borrowing costs drain your monthly budget through interest payments, 
-              reducing your ability to save and invest. Being debt-free or having low-interest debt significantly 
-              improves your financial flexibility and long-term wealth-building capacity."
+              tags$strong("Why it matters: "), "High borrowing costs reduce your ability to save and invest, 
+              while being debt-free improves financial flexibility."
             )
           )
         ),
@@ -182,20 +177,17 @@ tabItem(
         # STEP 2
         tags$div(
           style = "background:linear-gradient(to right, #e3f2fd, #ffffff); border-left:5px solid #2196f3; padding:20px; margin:15px 0; border-radius:5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);",
-          tags$h4(style = "color:#1976d2; margin-top:0;", "📐 STEP 2: Normalize Each Component to 0-100 Scale"),
+          tags$h4(style = "color:#1976d2; margin-top:0;", "STEP 2: Normalize Each Component to 0-100 Scale"),
           tags$p(
             style = "font-size:14px;",
-            "Each of your four metrics operates on different scales (savings might be 15%, wage growth 3%, etc.), 
-            making them impossible to compare directly. Normalization transforms all metrics to a common 0-100 scale 
-            using historical U.S. data from October 2006 to present. This allows fair comparison and combination 
-            of different financial dimensions."
+            "Each metric operates on different scales, making them impossible to compare directly. Normalization transforms 
+            all metrics to a common 0-100 scale using historical U.S. data from October 2006 to present."
           ),
           
-          tags$h5(style = "color:#0d47a1;", "The Normalization Process:"),
+          tags$h5(style = "color:#0d47a1;", "Normalization Process:"),
           tags$p(
             style = "font-size:14px;",
-            "For each component, we use a min-max normalization formula that maps the historical range to 0-100. 
-            Think of it as grading on a curve based on 20 years of American economic history:"
+            "For each component, we use a min-max normalization formula that maps the historical range to 0-100:"
           ),
           
           tags$div(
@@ -216,9 +208,8 @@ tabItem(
             ),
             tags$p(
               style = "color:#555; font-size:13px; margin-top:10px;",
-              tags$em("Interpretation: "), "A score of 40.7 means your 15% savings rate is better than Americans saved 
-              during boom times (2-5%) but well below pandemic-era peaks. You're in the 40th percentile historically - 
-              decent but with room for improvement."
+              tags$strong("Interpretation: "), "A score of 40.7 means your 15% savings rate is better than Americans saved 
+              during boom times (2-5%) but below pandemic-era peaks."
             )
           ),
           
@@ -240,9 +231,8 @@ tabItem(
             ),
             tags$p(
               style = "color:#555; font-size:13px; margin-top:10px;",
-              tags$em("Interpretation: "), "A score of 61.4 means your 3% income growth is solid - you're earning more 
-              than last year and avoiding the recession-era pay cuts. You're in the 61st percentile historically, 
-              which is above average but not exceptional like the post-COVID wage surge."
+              tags$strong("Interpretation: "), "A score of 61.4 means your 3% income growth is above average, 
+              avoiding recession-era pay cuts."
             )
           ),
           
@@ -255,9 +245,9 @@ tabItem(
             ),
             tags$div(
               style = "background:#fff3e0; padding:10px; margin:10px 0; border:1px solid #ff9800; border-radius:5px;",
-              tags$strong(style = "color:#e65100;", "⚠️ IMPORTANT: "), 
-              "This metric is INVERTED because lower inflation is better for consumers. The formula subtracts from 100 
-              so that 0% inflation = 100 points (best) and 9% inflation = 0 points (worst)."
+              tags$strong(style = "color:#e65100;", "IMPORTANT: "), 
+              "This metric is inverted because lower inflation is better for consumers. The formula subtracts from 100 
+              so that 0% inflation = 100 points and 9% inflation = 0 points."
             ),
             tags$p(tags$strong("Historical Range:"), " U.S. inflation from 2006-2025 ranged from approximately -2% to +9%"),
             tags$p(
@@ -270,9 +260,8 @@ tabItem(
             ),
             tags$p(
               style = "color:#555; font-size:13px; margin-top:10px;",
-              tags$em("Interpretation: "), "A score of 52.7 means current 3.2% inflation is moderate - not the crisis-level 
-              9% of 2022, but higher than the Fed's 2% target. You're losing some purchasing power, but it could be worse. 
-              This affects everyone equally since we all pay the same prices."
+              tags$strong("Interpretation: "), "A score of 52.7 means current 3.2% inflation is moderate - 
+              higher than the Fed's 2% target but lower than the 2022 crisis level of 9%."
             )
           ),
           
@@ -285,9 +274,9 @@ tabItem(
             ),
             tags$div(
               style = "background:#fce4ec; padding:10px; margin:10px 0; border:1px solid #e91e63; border-radius:5px;",
-              tags$strong(style = "color:#880e4f;", "⚠️ IMPORTANT: "), 
-              "This metric is also INVERTED because lower borrowing costs are better for consumers. The formula subtracts from 100 
-              so that 0% rate (no debt) = 100 points (best) and 25% rate (high credit card debt) = 0 points (worst)."
+              tags$strong(style = "color:#880e4f;", "IMPORTANT: "), 
+              "This metric is also inverted because lower borrowing costs are better for consumers. The formula subtracts from 100 
+              so that 0% rate (no debt) = 100 points and 25% rate = 0 points."
             ),
             tags$p(tags$strong("Historical Range:"), " For consumers, borrowing rates typically range from 0% to 25%+ (credit cards)"),
             tags$p(
@@ -306,18 +295,17 @@ tabItem(
             ),
             tags$p(
               style = "color:#555; font-size:13px; margin-top:10px;",
-              tags$em("Interpretation: "), "If you carry credit card debt at 15% APR, you score 40 points - significant room 
-              for improvement through debt payoff or refinancing. If you're debt-free, you achieve the maximum 100 points, 
-              which dramatically boosts your overall CFHI."
+              tags$strong("Interpretation: "), "With credit card debt at 15% APR, you score 40 points. 
+              Paying off debt or being debt-free would achieve the maximum 100 points."
             )
           ),
           
           tags$div(
             style = "background:#fff9c4; padding:15px; margin:15px 0; border-radius:5px; border:2px solid #f57f17;",
-            tags$h5(style = "color:#f57f17; margin-top:0;", "🔑 Key Concept: Clamping to 0-100 Range"),
+            tags$h5(style = "color:#f57f17; margin-top:0;", "Clamping to 0-100 Range"),
             tags$p(
               style = "font-size:14px;",
-              "After normalization, we 'clamp' each component score to ensure it stays within 0-100:"
+              "After normalization, each component score is clamped to ensure it stays within 0-100:"
             ),
             tags$ul(
               style = "font-size:13px;",
@@ -331,11 +319,11 @@ tabItem(
         # STEP 3
         tags$div(
           style = "background:linear-gradient(to right, #e8f5e9, #ffffff); border-left:5px solid #4caf50; padding:20px; margin:15px 0; border-radius:5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);",
-          tags$h4(style = "color:#2e7d32; margin-top:0;", "🧮 STEP 3: Calculate Your Personal CFHI"),
+          tags$h4(style = "color:#2e7d32; margin-top:0;", "STEP 3: Calculate Your Personal CFHI"),
           tags$p(
             style = "font-size:14px;",
-            "Now that all four components are on the same 0-100 scale, we calculate your Personal CFHI using a simple 
-            arithmetic mean (equal-weighted average). This gives each dimension of financial health equal importance:"
+            "With all four components on the same 0-100 scale, we calculate your Personal CFHI using a simple 
+            arithmetic mean (equal-weighted average):"
           ),
           tags$div(
             style = "font-family:'Courier New', monospace; background:#ffffff; padding:20px; border:3px solid #4caf50; margin:15px 0; text-align:center; font-size:18px; border-radius:8px; box-shadow: 0 3px 6px rgba(0,0,0,0.15);",
@@ -349,7 +337,7 @@ tabItem(
             )
           ),
           
-          tags$h5(style = "color:#2e7d32;", "Complete Worked Example:"),
+          tags$h5(style = "color:#2e7d32;", "Worked Example:"),
           tags$div(
             style = "background:#ffffff; padding:20px; margin:10px 0; border-radius:8px; border:2px solid #81c784;",
             tags$p(
@@ -377,26 +365,25 @@ tabItem(
             
             tags$div(
               style = "background:#fff3e0; padding:15px; margin:10px 0; border-radius:5px; border-left:4px solid #ff6f00;",
-              tags$h5(style = "color:#e65100; margin-top:0;", "📊 Interpreting Your Score of 48.7:"),
+              tags$h5(style = "color:#e65100; margin-top:0;", "Interpreting Your Score of 48.7:"),
               tags$ul(
                 style = "font-size:14px;",
                 tags$li(tags$strong("Category:"), " Below Average (30-50 range)"),
-                tags$li(tags$strong("Strengths:"), " Solid wage growth (61.4) keeping you ahead of many Americans"),
-                tags$li(tags$strong("Weaknesses:"), " Low savings rate (40.7) and high borrowing costs (40.0) are dragging down your score"),
-                tags$li(tags$strong("Impact of Debt:"), " If you paid off that 15% APR debt, your R* would jump from 40 to 100, 
-                raising your CFHI from 48.7 to ", tags$strong(style = "color:#2e7d32;", "63.7"), " (near average!)"),
-                tags$li(tags$strong("Action Items:"), " Focus on debt reduction and increasing savings rate to improve overall financial health")
+                tags$li(tags$strong("Strengths:"), " Solid wage growth (61.4)"),
+                tags$li(tags$strong("Weaknesses:"), " Low savings rate (40.7) and high borrowing costs (40.0)"),
+                tags$li(tags$strong("Impact of Debt:"), " Paying off that 15% APR debt would raise R* from 40 to 100, 
+                increasing your CFHI from 48.7 to 63.7"),
+                tags$li(tags$strong("Action Items:"), " Focus on debt reduction and increasing savings rate")
               )
             )
           ),
           
           tags$div(
             style = "background:#e3f2fd; padding:15px; margin:15px 0; border-radius:5px; border:1px solid #2196f3;",
-            tags$h5(style = "color:#1976d2; margin-top:0;", "🔒 Final Step: Capping at 100"),
+            tags$h5(style = "color:#1976d2; margin-top:0;", "Final Step: Capping at 100"),
             tags$p(
               style = "font-size:14px;",
-              "The Personal CFHI is designed to operate on a 0-100 scale (unlike the national index which is rebased to October 2006 = 100 
-              and can theoretically exceed 100). Therefore, if your calculated score exceeds 100, we cap it:"
+              "The Personal CFHI is designed to operate on a 0-100 scale. If your calculated score exceeds 100, it is capped:"
             ),
             tags$div(
               style = "font-family:'Courier New', monospace; background:#ffffff; padding:12px; margin:10px 0; border-left:3px solid #1976d2; font-size:14px;",
@@ -404,8 +391,8 @@ tabItem(
             ),
             tags$p(
               style = "color:#555; font-size:13px;",
-              tags$em("Example: "), "If your components were all perfect 100s, your raw average would be 100. That's the theoretical 
-              maximum, representing the best possible financial health across all four dimensions simultaneously."
+              tags$strong("Example: "), "If your calculated score exceeds 100, it is capped at 100. 
+              If it falls below 0, it is set to 0."
             )
           )
         ),
@@ -413,11 +400,10 @@ tabItem(
         # STEP 4
         tags$div(
           style = "background:linear-gradient(to right, #f3e5f5, #ffffff); border-left:5px solid #9c27b0; padding:20px; margin:15px 0; border-radius:5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);",
-          tags$h4(style = "color:#7b1fa2; margin-top:0;", "📈 STEP 4: Compare to U.S. Average CFHI"),
+          tags$h4(style = "color:#7b1fa2; margin-top:0;", "STEP 4: Compare to U.S. Average CFHI"),
           tags$p(
             style = "font-size:14px;",
-            "Your Personal CFHI score becomes truly meaningful when compared to how the average American is doing financially. 
-            We compare your score to the 2025 U.S. average CFHI to provide context:"
+            "Your Personal CFHI score is compared to the 2025 U.S. average CFHI to provide context:"
           ),
           
           tags$div(
@@ -438,44 +424,38 @@ tabItem(
             )
           ),
           
-          tags$h5(style = "color:#7b1fa2;", "Color-Coded Interpretation Bands:"),
+          tags$h5(style = "color:#7b1fa2;", "Interpretation Bands:"),
           tags$div(
             style = "background:#ffffff; padding:15px; margin:10px 0; border-radius:5px;",
             tags$div(
               style = "background:#c8e6c9; padding:12px; margin:8px 0; border-left:5px solid #2e7d32; border-radius:3px;",
-              tags$strong(style = "color:#1b5e20; font-size:15px;", "↑↑ Much Better (+10 points or more)"), tags$br(),
+              tags$strong(style = "color:#1b5e20; font-size:15px;", "Much Better (+10 points or more)"), tags$br(),
               tags$span(style = "color:#2e7d32;", 
-                "You're significantly outperforming the average American. Your financial health is exceptional compared to national trends. 
-                This typically indicates strong savings, good income growth, low/no debt, and effective financial management.")
+                "You're significantly outperforming the average American. Your financial health is exceptional compared to national trends.")
             ),
             tags$div(
               style = "background:#dcedc8; padding:12px; margin:8px 0; border-left:5px solid #689f38; border-radius:3px;",
-              tags$strong(style = "color:#33691e; font-size:15px;", "↑ Better (+2 to +10 points)"), tags$br(),
+              tags$strong(style = "color:#33691e; font-size:15px;", "Better (+2 to +10 points)"), tags$br(),
               tags$span(style = "color:#558b2f;", 
-                "You're doing better than the typical American household. You have clear financial strengths in one or more areas 
-                (savings, income growth, or debt management). Keep up the good work and look for opportunities to improve further.")
+                "You're doing better than the typical American household, with clear financial strengths in one or more areas.")
             ),
             tags$div(
               style = "background:#fff9c4; padding:12px; margin:8px 0; border-left:5px solid #f9a825; border-radius:3px;",
-              tags$strong(style = "color:#f57f17; font-size:15px;", "≈ Similar (-2 to +2 points)"), tags$br(),
+              tags$strong(style = "color:#f57f17; font-size:15px;", "Similar (-2 to +2 points)"), tags$br(),
               tags$span(style = "color:#f57f17;", 
-                "You're on par with the average American. Your financial situation mirrors national trends - you likely have similar 
-                challenges and successes as most households. This is neither good nor bad, but indicates room for improvement in key areas.")
+                "You're on par with the average American, with similar challenges and successes as most households.")
             ),
             tags$div(
               style = "background:#ffe0b2; padding:12px; margin:8px 0; border-left:5px solid #f57c00; border-radius:3px;",
-              tags$strong(style = "color:#e65100; font-size:15px;", "↓ Below Average (-10 to -2 points)"), tags$br(),
+              tags$strong(style = "color:#e65100; font-size:15px;", "Below Average (-10 to -2 points)"), tags$br(),
               tags$span(style = "color:#e65100;", 
-                "You're facing more financial challenges than the typical American. This often results from high debt, low savings, 
-                or stagnant income. Focus on the lowest-scoring components in your breakdown to identify where to improve first.")
+                "You're facing more financial challenges than the typical American. Focus on the lowest-scoring components to identify where to improve.")
             ),
             tags$div(
               style = "background:#ffcdd2; padding:12px; margin:8px 0; border-left:5px solid #d32f2f; border-radius:3px;",
-              tags$strong(style = "color:#b71c1c; font-size:15px;", "↓↓ Much Below (more than -10 points)"), tags$br(),
+              tags$strong(style = "color:#b71c1c; font-size:15px;", "Much Below (more than -10 points)"), tags$br(),
               tags$span(style = "color:#c62828;", 
-                "You're facing significant financial challenges compared to average Americans. This typically indicates problems across 
-                multiple dimensions - perhaps high debt combined with low savings and income stagnation. Consider seeking guidance from 
-                a financial counselor to develop an improvement plan.")
+                "You're facing significant financial challenges. Consider seeking guidance from a financial counselor to develop an improvement plan.")
             )
           ),
           
@@ -483,10 +463,9 @@ tabItem(
             style = "background:#e1f5fe; padding:15px; margin:15px 0; border-radius:5px; border:1px solid #0277bd;",
             tags$p(
               style = "font-size:13px; margin:0;",
-              tags$strong(style = "color:#01579b;", "📌 Important Note: "), 
-              "The comparison uses the 2025 ", tags$em("average"), " CFHI, not just the most recent month. This provides a more 
-              stable benchmark that isn't affected by monthly volatility. The U.S. average itself fluctuates based on economic conditions, 
-              so your score can change even if your personal finances stay the same."
+              tags$strong(style = "color:#01579b;", "Note: "), 
+              "The comparison uses the 2025 average CFHI, not just the most recent month. This provides a more 
+              stable benchmark that isn't affected by monthly volatility."
             )
           )
         ),
@@ -504,56 +483,42 @@ tabItem(
           style = "background:#fff3cd; padding:20px; margin:15px 0; border-radius:8px; border:2px solid #ffc107;",
           tags$div(
             style = "margin-bottom:15px;",
-            tags$h5(style = "color:#2e7d32; margin-top:0;", "💰 Savings Rate - Financial Resilience"),
+            tags$h5(style = "color:#2e7d32; margin-top:0;", "Savings Rate - Financial Resilience"),
             tags$p(
               style = "font-size:14px; margin:0;",
-              "Measures your ability to build wealth and create safety nets. High savings rates indicate you're living below your means, 
-              building emergency funds, investing for retirement, and can weather unexpected expenses. It's the foundation of long-term 
-              financial security and the primary wealth-building mechanism for most Americans."
+              "Measures your ability to build wealth and create safety nets."
             )
           ),
           tags$div(
             style = "margin-bottom:15px;",
-            tags$h5(style = "color:#0277bd; margin-top:0;", "📊 Wage Growth - Income Trajectory"),
+            tags$h5(style = "color:#0277bd; margin-top:0;", "Wage Growth - Income Trajectory"),
             tags$p(
               style = "font-size:14px; margin:0;",
-              "Indicates whether your earning power is improving over time. Positive wage growth means you can afford more, save more, 
-              and improve your standard of living. It's crucial for keeping up with inflation and achieving financial goals. Stagnant 
-              wages mean you're treading water financially, while declining wages signal serious economic distress."
+              "Indicates whether your earning power is improving over time and keeping up with inflation."
             )
           ),
           tags$div(
             style = "margin-bottom:15px;",
-            tags$h5(style = "color:#d84315; margin-top:0;", "🏷️ Inflation - Purchasing Power"),
+            tags$h5(style = "color:#d84315; margin-top:0;", "Inflation - Purchasing Power"),
             tags$p(
               style = "font-size:14px; margin:0;",
-              "Affects everyone equally by determining how far your dollars stretch. High inflation erodes the value of savings, 
-              reduces real wages, and forces difficult budget choices. Unlike the other components, you can't control inflation individually - 
-              we all face the same prices at the grocery store. That's why we use the national rate rather than asking for your personal experience."
+              "Affects everyone equally by determining how far your dollars stretch. Inverted because high inflation hurts consumers."
             )
           ),
           tags$div(
-            tags$h5(style = "color:#7b1fa2; margin-top:0;", "💳 Borrowing Costs - Debt Burden"),
+            tags$h5(style = "color:#7b1fa2; margin-top:0;", "Borrowing Costs - Debt Burden"),
             tags$p(
               style = "font-size:14px; margin:0;",
-              "Reflects how much of your income goes to interest payments rather than building wealth. High borrowing costs (credit card debt, 
-              high-rate loans) create a financial headwind - you're paying to use money instead of making your money work for you. 
-              Low/no borrowing costs maximize your financial flexibility and enable faster wealth accumulation."
+              "Reflects how much of your income goes to interest payments. Inverted because high rates create financial strain."
             )
           )
         ),
         
-        tags$h5(style = "color:#1e40af;", "The Balance of All Four:"),
+        tags$h5(style = "color:#1e40af;", "Balance of All Four:"),
         tags$p(
           style = "font-size:14px;",
-          "By combining these four metrics equally, the CFHI captures whether you're:", tags$br(),
-          "✓ Building wealth (savings)", tags$br(),
-          "✓ Growing income (wages)", tags$br(),
-          "✓ Maintaining purchasing power (inflation)", tags$br(),
-          "✓ Minimizing financial drag (borrowing costs)", tags$br(), tags$br(),
-          "A person might have high income but also high debt (offsetting effects). Or great savings but stagnant wages (mixed picture). 
-          The CFHI aggregates all dimensions to give you one comprehensive score, while still letting you see which specific areas 
-          need attention."
+          "By combining these four metrics equally, the CFHI captures whether you're building wealth, growing income, 
+          maintaining purchasing power, and minimizing financial drag."
         ),
         
         hr(style = "border-top: 1px solid #ccc; margin: 20px 0;"),
@@ -592,7 +557,7 @@ tabItem(
           style = "font-size:15px;",
           "The U.S. National Consumer Financial Health Index (CFHI) uses the same fundamental methodology as the personal calculator, 
           but with aggregate national economic data from government sources. However, there is one critical difference: the national 
-          index is ", tags$strong("rebased to October 2006 = 100"), ", allowing it to exceed 100 and show improvement relative to the baseline month."
+          index is rebased to October 2006 = 100, allowing it to exceed 100 and show improvement relative to the baseline month."
         ),
         
         hr(style = "border-top: 2px solid #2196f3;"),
@@ -664,12 +629,12 @@ tabItem(
         
         tags$div(
           style = "background:#fff9c4; padding:20px; margin:15px 0; border-radius:5px; border:3px solid #f57f17;",
-          tags$h5(style = "color:#e65100; margin-top:0;", "⭐ Step 3: Rebase to October 2006 = 100 (KEY DIFFERENCE)"),
+          tags$h5(style = "color:#e65100; margin-top:0;", "Step 3: Rebase to October 2006 = 100"),
           tags$p(
             style = "font-size:14px;",
-            "To make the national index more interpretable and track long-term trends, we rebase it so that ", 
-            tags$strong("October 2006 = 100"), ". This was chosen as the baseline because it represents the peak of the 
-            pre-financial crisis economy - a 'normal' period before the Great Recession."
+            "To make the national index more interpretable and track long-term trends, we rebase it so that 
+            October 2006 = 100. This was chosen as the baseline because it represents the peak of the 
+            pre-financial crisis economy."
           ),
           tags$div(
             style = "font-family:'Courier New', monospace; background:#ffffff; padding:15px; margin:15px 0; border-left:4px solid #f57f17; font-size:15px;",
@@ -682,14 +647,12 @@ tabItem(
             tags$li("January 2025 raw CFHI: 52.1"),
             tags$li("Rebased: (52.1 ÷ 58.3) × 100 = ", tags$strong(style = "color:#d84315;", "89.4"))
           ),
-          tags$p(
-            style = "font-size:14px; color:#555;",
-            tags$em("Interpretation: "), 
-            "A rebased score of 89.4 means Americans' financial health in January 2025 is about 89% of what it was in October 2006 - 
-            a ", tags$strong("10.6% decline"), " from the baseline. Values above 100 would indicate financial health better than October 2006."
-          ),
-          
-          tags$div(
+            tags$p(
+              style = "font-size:14px; color:#555;",
+              tags$strong("Interpretation: "), 
+              "A rebased score of 89.4 means Americans' financial health in January 2025 is about 89% of what it was in October 2006 - 
+              a 10.6% decline from the baseline."
+            ),          tags$div(
             style = "background:#e3f2fd; padding:15px; margin:10px 0; border-radius:5px; border:1px solid #0277bd;",
             tags$h5(style = "color:#01579b; margin-top:0;", "Why Rebasing Matters:"),
             tags$ul(
