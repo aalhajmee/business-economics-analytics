@@ -11,7 +11,7 @@ tabItem(
         solidHeader = TRUE,
         
         tags$div(style = "font-size:15px;",
-          tags$p(tags$b("This tool compares all 50 U.S. states (plus DC & Puerto Rico) on key economic measures:")),
+          tags$p(tags$b("This tool compares all 50 U.S. states on key economic measures:")),
           tags$ul(
             tags$li(tags$b("Income:"), " How much do households earn? (median = middle value)"),
             tags$li(tags$b("Jobs:"), " How many people are unemployed and looking for work?"),

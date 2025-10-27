@@ -2,6 +2,8 @@ library(readxl)
 
 state_data <- reactive({
   df <- read_csv("Financial_Calculator_datasets/State_Data_Demographics.csv", show_col_types = FALSE)
+  # Filter out DC and Puerto Rico - only show the 50 U.S. states
+  df <- df %>% filter(!State %in% c("District of Columbia", "Puerto Rico"))
   df
 })
 
