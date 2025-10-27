@@ -330,6 +330,7 @@ cfhi_feature_server <- function(id,
           message <- sprintf("Better than U.S. average (+%.1f points, +%.1f%%)", diff, diff_pct)
         } else if (diff > -2) {
           color <- "#f59e0b"  # amber
+          icon <- "≈"
           message <- sprintf("Similar to U.S. average (%.1f points)", diff)
         } else if (diff > -10) {
           color <- "#f97316"  # orange
