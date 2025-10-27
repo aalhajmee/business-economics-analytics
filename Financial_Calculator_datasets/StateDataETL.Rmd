@@ -32,6 +32,19 @@ library(jsonlite)
 library(dplyr)
 library(tidyr)
 library(readr)
+
+# Load environment variables from .env file
+if(file.exists("../.env")) {
+  env_vars <- readLines("../.env")
+  env_vars <- env_vars[!grepl("^#", env_vars) & nchar(env_vars) > 0]
+  for(line in env_vars) {
+    parts <- strsplit(line, "=")[[1]]
+    if(length(parts) == 2) {
+      Sys.setenv(setNames(parts[2], parts[1]))
+    }
+  }
+  message("Loaded API keys from .env file")
+}
 ```
 
 ## Census Bureau API Setup
