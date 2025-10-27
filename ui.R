@@ -29,6 +29,7 @@ home_tab   <- safe_source_tab("frontpage.R",     "home")
 cfhi_tab   <- safe_source_tab("cfhi_tab.R",     "cfhi")
 cfhi_data_tab <- safe_source_tab("cfhi_data_tab.R", "cfhi_data")
 explore_tab<- safe_source_tab("state_analysis_tab.R", "explore")
+state_data_tab <- safe_source_tab("state_data_tab.R", "state_data")
 forecast_tab <- safe_source_tab("forecast_tab.R", "forecast")
 guide_tab  <- safe_source_tab("savingsguide.R", "guide")
 overview_tab  <- safe_source_tab("overview.R", "overview")
@@ -45,7 +46,10 @@ dashboardPage(
         menuSubItem("Dashboard", tabName = "cfhi"),
         menuSubItem("Data Sources", tabName = "cfhi_data")
       ),
-      menuItem("Explore",         tabName = "explore",  icon = icon("search")),
+      menuItem("State Analysis", icon = icon("map-marked-alt"),
+        menuSubItem("Explore States", tabName = "explore"),
+        menuSubItem("Data Sources", tabName = "state_data")
+      ),
       menuItem("Forecasting",     tabName = "forecast", icon = icon("line-chart")),
       menuItem("Personal Finance", icon = icon("lightbulb"),
         menuSubItem("Overview",   tabName = "overview",    icon = icon("lightbulb")),
@@ -77,6 +81,9 @@ dashboardPage(
       
       # EXPLORE (from state_analysis_tab.R)
       explore_tab,
+      
+      # STATE DATA SOURCES
+      state_data_tab,
       
       # FORECASTING (from forecast_tab.R)
       forecast_tab,

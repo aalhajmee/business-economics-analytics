@@ -54,13 +54,22 @@ output$state_map <- renderPlotly({
   # Remove NA values for color scale calculation
   df_no_na <- df[!is.na(df$map_value), ]
   
-  # Calculate quartiles for better color distribution
+  # Use percentile-based coloring for better distribution
+  # This ensures states are evenly distributed across the color spectrum
   if (nrow(df_no_na) > 0) {
-    q1 <- quantile(df_no_na$map_value, 0.25, na.rm = TRUE)
-    q2 <- quantile(df_no_na$map_value, 0.50, na.rm = TRUE)
-    q3 <- quantile(df_no_na$map_value, 0.75, na.rm = TRUE)
-    min_val <- min(df_no_na$map_value, na.rm = TRUE)
-    max_val <- max(df_no_na$map_value, na.rm = TRUE)
+    # Calculate percentiles
+    percentiles <- quantile(df_no_na$map_value, probs = c(0, 0.2, 0.4, 0.6, 0.8, 1.0), na.rm = TRUE)
+    
+    # Create normalized values (0-1 scale) based on percentile rank
+    df$map_value_normalized <- sapply(df$map_value, function(val) {
+      if (is.na(val)) return(NA)
+      # Find which percentile this value falls into
+      percentile_rank <- sum(df_no_na$map_value <= val) / nrow(df_no_na)
+      return(percentile_rank)
+    })
+    
+    min_val <- 0
+    max_val <- 1
   }
   
   # Create properly formatted hover text with units
@@ -110,7 +119,7 @@ output$state_map <- renderPlotly({
   ) %>%
     add_trace(
       locations = ~State_Code,
-      z = ~map_value,
+      z = ~map_value_normalized,
       text = ~hover_text,
       hoverinfo = "text",
       type = "choropleth",
