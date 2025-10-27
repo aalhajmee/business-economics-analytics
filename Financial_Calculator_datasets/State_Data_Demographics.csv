@@ -1,0 +1,51 @@
+State,State_Code,Median_Income,Unemployment_Rate,Poverty_Rate,Cost_of_Living_Index
+Alabama,AL,59609,2.8,15.7,88.0
+Alaska,AK,86370,4.6,10.6,127.1
+Arizona,AZ,72581,3.5,13.5,102.2
+Arkansas,AR,56335,3.2,16.2,86.9
+California,CA,91905,4.8,12.3,151.7
+Colorado,CO,87598,3.1,9.3,105.6
+Connecticut,CT,90213,3.9,9.4,116.1
+Delaware,DE,79325,3.7,11.3,102.7
+Florida,FL,67106,3.0,12.5,99.6
+Georgia,GA,71355,3.3,13.5,89.2
+Hawaii,HI,88005,3.2,9.3,184.1
+Idaho,ID,70214,3.1,11.2,98.6
+Illinois,IL,79253,4.5,11.9,93.4
+Indiana,IN,67173,3.0,11.9,90.3
+Iowa,IA,70571,2.9,10.2,89.9
+Kansas,KS,69747,2.7,11.4,87.0
+Kentucky,KY,60183,4.0,16.0,92.3
+Louisiana,LA,57852,3.5,18.6,91.9
+Maine,ME,68251,2.6,10.9,115.0
+Maryland,MD,98461,2.3,9.0,119.8
+Massachusetts,MA,96505,3.1,9.4,131.6
+Michigan,MI,68505,3.9,13.0,89.6
+Minnesota,MN,84313,2.8,8.9,94.1
+Mississippi,MS,52985,3.3,19.4,84.8
+Missouri,MO,65920,3.2,12.8,88.6
+Montana,MT,66341,2.9,12.5,100.7
+Nebraska,NE,71722,2.4,9.9,91.3
+Nevada,NV,71646,5.1,12.5,104.9
+New Hampshire,NH,90845,2.5,7.2,109.7
+New Jersey,NJ,97126,3.8,9.1,114.4
+New Mexico,NM,58722,4.2,17.4,92.1
+New York,NY,81386,4.1,13.6,125.1
+North Carolina,NC,66186,3.3,13.4,94.2
+North Dakota,ND,73959,2.1,10.7,98.9
+Ohio,OH,66990,3.8,13.1,91.7
+Oklahoma,OK,61364,3.0,15.2,87.9
+Oregon,OR,76632,3.8,11.8,113.1
+Pennsylvania,PA,73170,3.7,11.8,97.0
+Rhode Island,RI,81370,3.4,10.8,110.6
+South Carolina,SC,63623,3.1,14.6,95.9
+South Dakota,SD,69457,2.2,11.0,96.9
+Tennessee,TN,64035,3.2,13.9,88.7
+Texas,TX,73035,4.0,13.9,92.1
+Utah,UT,86833,2.6,8.9,101.9
+Vermont,VT,72431,2.0,10.4,117.9
+Virginia,VA,87249,2.8,9.2,103.0
+Washington,WA,90955,4.2,9.5,118.7
+West Virginia,WV,55217,4.4,16.8,87.5
+Wisconsin,WI,72458,2.9,10.3,95.4
+Wyoming,WY,72495,3.1,11.1,93.3

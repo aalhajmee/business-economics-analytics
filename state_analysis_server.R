@@ -1,32 +1,10 @@
 library(readxl)
 
 library(readr)
-library(tidyr)
 
 state_data <- reactive({
-  df <- read_csv("Financial_Calculator_datasets/State_Data.csv", show_col_types = FALSE)
-  
-  df_wide <- df %>%
-    filter(GeoFips != 0) %>%
-    select(GeoName, Description, `2024`) %>%
-    tidyr::pivot_wider(names_from = Description, values_from = `2024`)
-  
-  df_clean <- df_wide %>%
-    rename(
-      State = GeoName,
-      GDP = `  Gross domestic product (GDP)`,
-      Personal_Income = `  Personal income`,
-      Disposable_Income = `  Disposable personal income`
-    ) %>%
-    mutate(
-      State_Code = state.abb[match(State, state.name)],
-      GDP_per_Capita = GDP / 1000,
-      Income_per_Capita = Personal_Income / 1000,
-      Disposable_per_Capita = Disposable_Income / 1000
-    ) %>%
-    filter(!is.na(State_Code))
-  
-  df_clean
+  df <- read_csv("Financial_Calculator_datasets/State_Data_Demographics.csv", show_col_types = FALSE)
+  df
 })
 
 observe({
@@ -43,18 +21,18 @@ output$state_map <- renderPlotly({
   
   metric_col <- switch(
     metric,
-    "median_income" = "Personal_Income",
-    "unemployment" = "GDP_per_Capita",
-    "poverty" = "Disposable_per_Capita",
-    "cost_living" = "Income_per_Capita"
+    "median_income" = "Median_Income",
+    "unemployment" = "Unemployment_Rate",
+    "poverty" = "Poverty_Rate",
+    "cost_living" = "Cost_of_Living_Index"
   )
   
   metric_title <- switch(
     metric,
-    "median_income" = "Personal Income (Millions $)",
-    "unemployment" = "GDP per Capita",
-    "poverty" = "Disposable Income per Capita",
-    "cost_living" = "Income per Capita"
+    "median_income" = "Median Household Income ($)",
+    "unemployment" = "Unemployment Rate (%)",
+    "poverty" = "Poverty Rate (%)",
+    "cost_living" = "Cost of Living Index"
   )
   
   if (!metric_col %in% names(df)) {
@@ -63,10 +41,17 @@ output$state_map <- renderPlotly({
   
   df$hover_text <- paste0(
     df$State, "<br>",
-    metric_title, ": ", round(df[[metric_col]], 2)
+    metric_title, ": ", 
+    ifelse(metric == "median_income", 
+           paste0("$", format(round(df[[metric_col]]), big.mark = ",")),
+           round(df[[metric_col]], 2))
   )
   
-  color_scale <- list(c(0, "#dc2626"), c(0.5, "#eab308"), c(1, "#16a34a"))
+  color_scale <- if (metric %in% c("unemployment", "poverty")) {
+    list(c(0, "#16a34a"), c(0.5, "#eab308"), c(1, "#dc2626"))
+  } else {
+    list(c(0, "#dc2626"), c(0.5, "#eab308"), c(1, "#16a34a"))
+  }
   
   plot_geo(
     data = df,
@@ -98,17 +83,21 @@ output$top_states <- renderTable({
   
   metric_col <- switch(
     metric,
-    "median_income" = "Personal_Income",
-    "unemployment" = "GDP_per_Capita",
-    "poverty" = "Disposable_per_Capita",
-    "cost_living" = "Income_per_Capita"
+    "median_income" = "Median_Income",
+    "unemployment" = "Unemployment_Rate",
+    "poverty" = "Poverty_Rate",
+    "cost_living" = "Cost_of_Living_Index"
   )
   
   if (!metric_col %in% names(df)) {
     return(data.frame(State = "N/A", Value = "N/A"))
   }
   
-  sorted <- df %>% arrange(desc(!!sym(metric_col))) %>% head(5)
+  sorted <- if (metric %in% c("unemployment", "poverty")) {
+    df %>% arrange(!!sym(metric_col)) %>% head(5)
+  } else {
+    df %>% arrange(desc(!!sym(metric_col))) %>% head(5)
+  }
   
   sorted %>%
     select(State, Value = !!sym(metric_col)) %>%
@@ -121,17 +110,21 @@ output$bottom_states <- renderTable({
   
   metric_col <- switch(
     metric,
-    "median_income" = "Personal_Income",
-    "unemployment" = "GDP_per_Capita",
-    "poverty" = "Disposable_per_Capita",
-    "cost_living" = "Income_per_Capita"
+    "median_income" = "Median_Income",
+    "unemployment" = "Unemployment_Rate",
+    "poverty" = "Poverty_Rate",
+    "cost_living" = "Cost_of_Living_Index"
   )
   
   if (!metric_col %in% names(df)) {
     return(data.frame(State = "N/A", Value = "N/A"))
   }
   
-  sorted <- df %>% arrange(!!sym(metric_col)) %>% head(5)
+  sorted <- if (metric %in% c("unemployment", "poverty")) {
+    df %>% arrange(desc(!!sym(metric_col))) %>% head(5)
+  } else {
+    df %>% arrange(!!sym(metric_col)) %>% head(5)
+  }
   
   sorted %>%
     select(State, Value = !!sym(metric_col)) %>%
@@ -163,9 +156,10 @@ output$comparison_output <- renderUI({
       h4(s1$State),
       tags$table(
         class = "table table-sm",
-        tags$tr(tags$td("GDP:"), tags$td(paste0("$", format(round(s1$GDP, 2), big.mark = ","), "M"))),
-        tags$tr(tags$td("Personal Income:"), tags$td(paste0("$", format(round(s1$Personal_Income, 2), big.mark = ","), "M"))),
-        tags$tr(tags$td("Disposable Income:"), tags$td(paste0("$", format(round(s1$Disposable_Income, 2), big.mark = ","), "M")))
+        tags$tr(tags$td("Median Income:"), tags$td(paste0("$", format(s1$Median_Income, big.mark = ",")))),
+        tags$tr(tags$td("Unemployment:"), tags$td(paste0(s1$Unemployment_Rate, "%"))),
+        tags$tr(tags$td("Poverty Rate:"), tags$td(paste0(s1$Poverty_Rate, "%"))),
+        tags$tr(tags$td("Cost of Living:"), tags$td(s1$Cost_of_Living_Index))
       )
     ),
     column(
@@ -173,9 +167,10 @@ output$comparison_output <- renderUI({
       h4(s2$State),
       tags$table(
         class = "table table-sm",
-        tags$tr(tags$td("GDP:"), tags$td(paste0("$", format(round(s2$GDP, 2), big.mark = ","), "M"))),
-        tags$tr(tags$td("Personal Income:"), tags$td(paste0("$", format(round(s2$Personal_Income, 2), big.mark = ","), "M"))),
-        tags$tr(tags$td("Disposable Income:"), tags$td(paste0("$", format(round(s2$Disposable_Income, 2), big.mark = ","), "M")))
+        tags$tr(tags$td("Median Income:"), tags$td(paste0("$", format(s2$Median_Income, big.mark = ",")))),
+        tags$tr(tags$td("Unemployment:"), tags$td(paste0(s2$Unemployment_Rate, "%"))),
+        tags$tr(tags$td("Poverty Rate:"), tags$td(paste0(s2$Poverty_Rate, "%"))),
+        tags$tr(tags$td("Cost of Living:"), tags$td(s2$Cost_of_Living_Index))
       )
     )
   )

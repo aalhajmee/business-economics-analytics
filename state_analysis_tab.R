@@ -17,10 +17,10 @@ tabItem(
           "map_metric",
           "Display Metric:",
           choices = c(
-            "Personal Income" = "median_income",
-            "GDP per Capita" = "unemployment",
-            "Disposable Income per Capita" = "poverty",
-            "Income per Capita" = "cost_living"
+            "Median Household Income" = "median_income",
+            "Unemployment Rate" = "unemployment",
+            "Poverty Rate" = "poverty",
+            "Cost of Living Index" = "cost_living"
           ),
           selected = "median_income"
         ),
