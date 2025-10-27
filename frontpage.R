@@ -1,140 +1,110 @@
+tags$script(HTML("
+  function goToTab(tabName) {
+    Shiny.setInputValue('go_to_tab', tabName, {priority: 'event'});
+  }
+"))
+
 tabItem(
   tabName = "home",
   
-  tags$script(HTML("
-    function goToTab(tabName) {
-      Shiny.setInputValue('go_to_tab', tabName, {priority: 'event'});
-    }
-  ")),
-  
-  # Carousel styling
+  # Section styling
   tags$style(HTML("
-    /* overall carousel size */
-    .carousel-item {
-      height: 500px;
+    .hero-section {
       position: relative;
+      height: 500px;
+      margin-bottom: 2rem;
+      overflow: hidden;
     }
 
-    /* make images auto-fit screen width */
-    .carousel-item img {
+    .hero-section img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      filter: brightness(80%);
     }
 
-    /* ensure only one active slide shows */
-    .carousel-item { display: none; }
-    .carousel-item.active { display: block; }
-
-    /* gradient overlay for readability */
-    .carousel-item::before {
-      content: '';
+    .hero-caption {
       position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.45), rgba(0,0,0,0.1));
-      z-index: 1;
-    }
-
-    .carousel-caption { 
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: white;
       z-index: 2;
+      width: 80%;
     }
 
-    /* center and style the arrows */
-    .carousel-control-prev-icon,
-    .carousel-control-next-icon {
-      filter: invert(1) brightness(80%);
-      width: 3rem;
-      height: 3rem;
+    .hero-caption h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .hero-caption p {
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn-primary {
+      background-color: #007bff;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 0.4rem;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3;
     }
   ")),
   
-  # Carousel itself
+  # --- Slide 1 ---
   tags$div(
-    id = "carouselExampleIndicators",
-    class = "carousel slide carousel-fade",
-    `data-bs-ride` = "carousel",
-    `data-bs-interval` = "4000",  # auto-slide every 4 seconds
-    
-    # Indicators (dots)
+    class = "hero-section",
+    tags$img(src = "buildings.jpg"),
     tags$div(
-      class = "carousel-indicators",
-      tags$button(type="button", `data-bs-target`="#carouselExampleIndicators", 
-                  `data-bs-slide-to`="0", class="active", `aria-current`="true", `aria-label`="Slide 1"),
-      tags$button(type="button", `data-bs-target`="#carouselExampleIndicators", 
-                  `data-bs-slide-to`="1", `aria-label`="Slide 2"),
-      tags$button(type="button", `data-bs-target`="#carouselExampleIndicators", 
-                  `data-bs-slide-to`="2", `aria-label`="Slide 3")
-    ),
-    
-    # Slides
-    tags$div(
-      class = "carousel-inner",
-      
-      # Slide 1
-      tags$div(
-        class = "carousel-item active",
-        tags$img(src = "buildings.jpg", class="d-block w-100"),
-        tags$div(
-          class = "carousel-caption d-none d-md-block",
-          tags$h1("BUILD STRONG FINANCIAL FOUNDATIONS"),
-          tags$p("Explore trends, markets, and opportunities that drive long-term success."),
-          tags$button(
-            class = "btn btn-primary btn-lg",
-            onclick = "goToTab('cfhi')",
-            "Get started now »"
-          )
-        )
-      ),
-      
-      # Slide 2
-      tags$div(
-        class = "carousel-item",
-        tags$img(src = "meeting.jpg", class="d-block w-100"),
-        tags$div(
-          class = "carousel-caption d-none d-md-block",
-          tags$h1("TURN INSIGHTS INTO ACTION"),
-          tags$p("Leverage real-time analytics to make confident financial decisions."),
-          tags$button(
-            class = "btn btn-primary btn-lg",
-            onclick = "goToTab('explore')",
-            "Explore »"
-          )
-        )
-      ),
-      
-      # Slide 3
-      tags$div(
-        class = "carousel-item",
-        tags$img(src = "plant.jpg", class="d-block w-100"),
-        tags$div(
-          class = "carousel-caption d-none d-md-block",
-          tags$h1("WHERE GROWTH BEGINS"),
-          tags$p("Track, plan, and grow your wealth — one smart decision at a time."),
-          tags$button(
-            class = "btn btn-primary btn-lg",
-            onclick = "goToTab('guide')",
-            "Learn more »"
-          )
-        )
+      class = "hero-caption",
+      tags$h1("BUILD STRONG FINANCIAL FOUNDATIONS"),
+      tags$p("Explore trends, markets, and opportunities that drive long-term success."),
+      tags$button(
+        class = "btn btn-primary btn-lg",
+        onclick = "goToTab('cfhi')",
+        "Get started now »"
       )
-    ),
-    
-    # Navigation arrows
-    tags$button(
-      class="carousel-control-prev", type="button",
-      `data-bs-target`="#carouselExampleIndicators", `data-bs-slide`="prev",
-      tags$span(class="carousel-control-prev-icon", `aria-hidden`="true"),
-      tags$span(class="visually-hidden", "Previous")
-    ),
-    tags$button(
-      class="carousel-control-next", type="button",
-      `data-bs-target`="#carouselExampleIndicators", `data-bs-slide`="next",
-      tags$span(class="carousel-control-next-icon", `aria-hidden`="true"),
-      tags$span(class="visually-hidden", "Next")
     )
   ),
   
-  br(),
+  # --- Slide 2 ---
+  tags$div(
+    class = "hero-section",
+    tags$img(src = "meeting.jpg"),
+    tags$div(
+      class = "hero-caption",
+      tags$h1("TURN INSIGHTS INTO ACTION"),
+      tags$p("Leverage real-time analytics to make confident financial decisions."),
+      tags$button(
+        class = "btn btn-primary btn-lg",
+        onclick = "goToTab('explore')",
+        "Explore »"
+      )
+    )
+  ),
+  
+  # --- Slide 3 ---
+  tags$div(
+    class = "hero-section",
+    tags$img(src = "plant.jpg"),
+    tags$div(
+      class = "hero-caption",
+      tags$h1("WHERE GROWTH BEGINS"),
+      tags$p("Track, plan, and grow your wealth — one smart decision at a time."),
+      tags$button(
+        class = "btn btn-primary btn-lg",
+        onclick = "goToTab('guide')",
+        "Learn more »"
+      )
+    )
+  ),
   
   br(),
   h2(style="text-align:center; font-weight:600;", "WE GOT YOU COVERED!")

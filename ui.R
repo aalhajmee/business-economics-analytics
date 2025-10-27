@@ -45,8 +45,10 @@ dashboardPage(
       ),
       menuItem("Explore",         tabName = "explore",  icon = icon("search")),
       menuItem("Forecasting",     tabName = "forecast", icon = icon("line-chart")),
-      menuItem("Savings Guide",   tabName = "guide",    icon = icon("lightbulb")),
-      menuItem("Loan Calculator", tabName = "loan",     icon = icon("university")),
+      menuItem("Personal Finance", tabName = "guide", icon = icon("lightbulb"),
+        menuSubItem("Savings Guide",   tabName = "guide",    icon = icon("lightbulb")),
+        menuSubItem("Loan Calculator", tabName = "loan",     icon = icon("university"))
+      ),
       menuItem("About",           tabName = "about",    icon = icon("info-circle"))
     )
   ),
