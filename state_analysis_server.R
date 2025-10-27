@@ -7,10 +7,10 @@ state_data <- reactive({
 
 output$metric_explanation <- renderText({
   switch(input$map_metric,
-    "median_income" = "Annual household income (middle value). Higher is better.",
-    "unemployment" = "% of workforce actively seeking jobs. Lower is better.",
-    "poverty" = "% of population below federal poverty line. Lower is better.",
-    "cost_living" = "Relative cost (100 = U.S. avg). Lower = more affordable."
+    "median_income" = "💰 Higher income = Better (Green). Shows the middle household earnings - half earn more, half earn less.",
+    "unemployment" = "📉 Lower unemployment = Better (Green). Shows % of people actively looking for work but can't find jobs.",
+    "poverty" = "📊 Lower poverty = Better (Green). Shows % of people living below federal poverty line ($31,200 for family of 4).",
+    "cost_living" = "💵 Lower cost = Better (Green). 100 = U.S. average. California at 151.7 = 51.7% more expensive than average. Alabama at 88 = 12% cheaper than average."
   )
 })
 
@@ -46,18 +46,25 @@ output$state_map <- renderPlotly({
     return(plot_ly() %>% layout(title = "Data not available for selected metric"))
   }
   
+  # Create a column for the z values that plotly can access
+  df$map_value <- df[[metric_col]]
+  
   df$hover_text <- paste0(
-    df$State, "<br>",
+    "<b>", df$State, "</b><br>",
     metric_title, ": ", 
     ifelse(metric == "median_income", 
            paste0("$", format(round(df[[metric_col]]), big.mark = ",")),
            round(df[[metric_col]], 2))
   )
   
+  # Color scale: for unemployment/poverty, lower is better (green), higher is worse (red)
+  # For income/cost_living inverted, higher income is better (green)
   color_scale <- if (metric %in% c("unemployment", "poverty")) {
     list(c(0, "#16a34a"), c(0.5, "#eab308"), c(1, "#dc2626"))
-  } else {
+  } else if (metric == "median_income") {
     list(c(0, "#dc2626"), c(0.5, "#eab308"), c(1, "#16a34a"))
+  } else {  # cost_living: lower is better
+    list(c(0, "#16a34a"), c(0.5, "#eab308"), c(1, "#dc2626"))
   }
   
   plot_geo(
@@ -66,12 +73,13 @@ output$state_map <- renderPlotly({
   ) %>%
     add_trace(
       locations = ~State_Code,
-      z = ~get(metric_col),
+      z = ~map_value,
       text = ~hover_text,
       hoverinfo = "text",
       type = "choropleth",
       colorscale = color_scale,
-      colorbar = list(title = metric_title)
+      colorbar = list(title = metric_title),
+      zauto = TRUE
     ) %>%
     layout(
       title = paste("U.S. State-Level", metric_title),
