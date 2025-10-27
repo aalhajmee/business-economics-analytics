@@ -132,10 +132,11 @@ output$forecast_plot <- renderPlotly({
 
 output$forecast_stat_current <- renderUI({
   data <- forecast_data()
-  div(
-    h4(style = "color:#1e40af;", round(data$latest_value, 2)),
-    p(style = "font-size:12px; color:#666;", "Current CFHI"),
-    p(style = "font-size:11px; color:#999;", format(data$latest_date, "%b %Y"))
+  
+  div(style = "text-align:center;",
+    h3(style = "color:#2563eb; margin:0;", round(data$latest_value, 2)),
+    p(style = "font-size:14px; color:#666; margin:5px 0;", strong("Current CFHI")),
+    p(style = "font-size:11px; color:#999;", paste("As of", format(data$latest_date, "%b %Y")))
   )
 })
 
@@ -144,9 +145,11 @@ output$forecast_stat_predicted <- renderUI({
   fcast <- model$forecast
   final_value <- as.numeric(tail(fcast$mean, 1))
   
-  div(
-    h4(style = "color:#ea580c;", round(final_value, 2)),
-    p(style = "font-size:12px; color:#666;", paste(input$forecast_months, "Month Forecast"))
+  div(style = "text-align:center;",
+    h3(style = "color:#f97316; margin:0;", round(final_value, 2)),
+    p(style = "font-size:14px; color:#666; margin:5px 0;", strong("Predicted CFHI")),
+    p(style = "font-size:11px; color:#999;", 
+       paste("In", input$forecast_months, "months"))
   )
 })
 
@@ -162,30 +165,42 @@ output$forecast_stat_change <- renderUI({
   
   color <- if (change > 0) "#16a34a" else "#dc2626"
   arrow <- if (change > 0) "↑" else "↓"
+  direction <- if (change > 0) "Improvement" else "Decline"
   
-  div(
-    h4(style = paste0("color:", color, ";"), paste0(arrow, " ", round(abs(change), 2))),
-    p(style = "font-size:12px; color:#666;", "Expected Change"),
-    p(style = paste0("font-size:11px; color:", color, ";"), paste0(round(change_pct, 1), "%"))
+  div(style = "text-align:center;",
+    h3(style = paste0("color:", color, "; margin:0;"), 
+       paste0(arrow, " ", round(abs(change), 2))),
+    p(style = "font-size:14px; color:#666; margin:5px 0;", strong(paste("Expected", direction))),
+    p(style = paste0("font-size:11px; color:", color, ";"), 
+       paste0(ifelse(change > 0, "+", ""), round(change_pct, 1), "%"))
   )
 })
 
 output$forecast_metrics <- renderPrint({
   model <- forecast_model()
+  data <- forecast_data()
   
-  cat("Model:", input$forecast_method, "\n")
-  cat("Forecast Horizon:", input$forecast_months, "months\n\n")
+  cat("===== FORECAST CONFIGURATION =====\n\n")
+  cat("Historical Data Range:", format(min(data$ts_data_dates), "%b %Y"), "to", 
+      format(max(data$ts_data_dates), "%b %Y"), "\n")
+  cat("Number of Historical Points:", length(data$ts_data), "\n")
+  cat("Prediction Method:", toupper(input$forecast_method), "\n")
+  cat("Forecast Horizon:", input$forecast_months, "months ahead\n\n")
   
   if (input$scenario_savings != 0 || input$scenario_wage != 0 || 
       input$scenario_inflation != 0 || input$scenario_borrow != 0) {
-    cat("Scenario Adjustments Applied:\n")
-    if (input$scenario_savings != 0) cat("  Savings Rate:", input$scenario_savings, "%\n")
-    if (input$scenario_wage != 0) cat("  Wage Growth:", input$scenario_wage, "%\n")
-    if (input$scenario_inflation != 0) cat("  Inflation:", input$scenario_inflation, "%\n")
-    if (input$scenario_borrow != 0) cat("  Borrow Rate:", input$scenario_borrow, "%\n")
+    cat("===== SCENARIO ADJUSTMENTS =====\n\n")
+    if (input$scenario_savings != 0) 
+      cat("  Savings Rate Change:", sprintf("%+.1f%%", input$scenario_savings), "\n")
+    if (input$scenario_wage != 0) 
+      cat("  Wage Growth Change:", sprintf("%+.1f%%", input$scenario_wage), "\n")
+    if (input$scenario_inflation != 0) 
+      cat("  Inflation Change:", sprintf("%+.1f%%", input$scenario_inflation), "\n")
+    if (input$scenario_borrow != 0) 
+      cat("  Interest Rate Change:", sprintf("%+.2f%%", input$scenario_borrow), "\n")
     cat("\n")
   }
   
-  cat("Model Summary:\n")
+  cat("===== STATISTICAL MODEL DETAILS =====\n\n")
   print(model$fit)
 })

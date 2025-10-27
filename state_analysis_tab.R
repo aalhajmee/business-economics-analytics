@@ -1,21 +1,41 @@
 tabItem(
   tabName = "explore",
   h2("State-by-State Economic Analysis"),
-  p("Explore geographic variation in economic health indicators across U.S. states."),
+  p("Compare economic health indicators across U.S. states using official government data."),
+  
+  fluidRow(
+    column(12,
+      box(
+        title = "Data Sources",
+        width = 12,
+        status = "info",
+        solidHeader = FALSE,
+        collapsible = TRUE,
+        collapsed = TRUE,
+        
+        tags$ul(
+          tags$li(tags$b("Median Income & Poverty:"), " U.S. Census Bureau, American Community Survey 2023 5-Year Estimates"),
+          tags$li(tags$b("Unemployment Rate:"), " Bureau of Labor Statistics, Local Area Unemployment Statistics (August 2025)"),
+          tags$li(tags$b("Cost of Living Index:"), " Missouri Economic Research and Information Center (100 = U.S. average, higher values = more expensive)")
+        )
+      )
+    )
+  ),
+  
   br(),
   
   fluidRow(
     column(
       width = 3,
       box(
-        title = "Analysis Settings",
+        title = "Map Controls",
         width = 12,
         status = "primary",
         solidHeader = TRUE,
         
         selectInput(
           "map_metric",
-          "Display Metric:",
+          "Select Metric to Display:",
           choices = c(
             "Median Household Income" = "median_income",
             "Unemployment Rate" = "unemployment",
@@ -25,9 +45,15 @@ tabItem(
           selected = "median_income"
         ),
         
-        hr(),
-        
-        h4("State Comparison"),
+        p(style = "font-size: 12px; color: #666; margin-top: 10px;",
+          textOutput("metric_explanation"))
+        ),
+      
+      box(
+        title = "State Comparison",
+        width = 12,
+        status = "warning",
+        solidHeader = TRUE,
         
         selectInput(
           "compare_state_1",
