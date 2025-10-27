@@ -1,8 +1,7 @@
 tabItem(tabName = "guide",
         h2("Savings Guide"),
         br(),
-        h3("The 50, 30, 20 Rule"),
-        img(src = "savingchart.png", height = "auto", width = "800px"),
+        img(src = "savingchart.png", height = "auto", width = "700px"),
         p("Enter your information and learn how to improve your financial health step-by-step."),
         p("Make sure to consistently use monthly or yearly values."),
         
