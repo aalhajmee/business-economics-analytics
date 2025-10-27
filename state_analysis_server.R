@@ -7,10 +7,10 @@ state_data <- reactive({
 
 output$metric_explanation <- renderText({
   switch(input$map_metric,
-    "median_income" = "Annual household income (middle value). Higher is better.",
-    "unemployment" = "% of workforce actively seeking jobs. Lower is better.",
-    "poverty" = "% of population below federal poverty line. Lower is better.",
-    "cost_living" = "Relative cost (100 = U.S. avg). Lower = more affordable."
+    "median_income" = "Unit: U.S. Dollars ($). Definition: The middle value of household income where half earn more and half earn less. Higher values indicate better economic conditions (shown in green).",
+    "unemployment" = "Unit: Percentage (%). Definition: Proportion of the labor force actively seeking work but unable to find employment. Lower values indicate better economic conditions (shown in green).",
+    "poverty" = "Unit: Percentage (%). Definition: Proportion of the population living below the federal poverty line ($31,200 annual income for a family of 4 in 2023). Lower values indicate better economic conditions (shown in green).",
+    "cost_living" = "Unit: Index (100 = U.S. average). Definition: Relative cost of goods and services. Values below 100 are cheaper than average (e.g., 88 = 12% below average), values above 100 are more expensive (e.g., 151.7 = 51.7% above average). Lower values indicate more affordable living (shown in green)."
   )
 })
 
@@ -36,9 +36,9 @@ output$state_map <- renderPlotly({
   
   metric_title <- switch(
     metric,
-    "median_income" = "Median Household Income ($)",
-    "unemployment" = "Unemployment Rate (%)",
-    "poverty" = "Poverty Rate (%)",
+    "median_income" = "Median Household Income",
+    "unemployment" = "Unemployment Rate",
+    "poverty" = "Poverty Rate",
     "cost_living" = "Cost of Living Index"
   )
   
@@ -46,18 +46,36 @@ output$state_map <- renderPlotly({
     return(plot_ly() %>% layout(title = "Data not available for selected metric"))
   }
   
-  df$hover_text <- paste0(
-    df$State, "<br>",
-    metric_title, ": ", 
-    ifelse(metric == "median_income", 
-           paste0("$", format(round(df[[metric_col]]), big.mark = ",")),
-           round(df[[metric_col]], 2))
-  )
+  # Create a column for the z values that plotly can access
+  df$map_value <- df[[metric_col]]
   
+  # Create properly formatted hover text with units
+  df$hover_text <- sapply(seq_len(nrow(df)), function(i) {
+    value <- df[[metric_col]][i]
+    if (is.na(value)) {
+      formatted_value <- "Data Not Available"
+    } else if (metric == "median_income") {
+      formatted_value <- paste0("$", format(round(value), big.mark = ","))
+    } else if (metric %in% c("unemployment", "poverty")) {
+      formatted_value <- paste0(round(value, 1), "%")
+    } else {  # cost_living
+      formatted_value <- paste0(round(value, 1), " (100 = U.S. avg)")
+    }
+    
+    paste0(
+      "<b>", df$State[i], "</b><br>",
+      metric_title, ": ", formatted_value
+    )
+  })
+  
+  # Color scale: for unemployment/poverty, lower is better (green), higher is worse (red)
+  # For income/cost_living inverted, higher income is better (green)
   color_scale <- if (metric %in% c("unemployment", "poverty")) {
     list(c(0, "#16a34a"), c(0.5, "#eab308"), c(1, "#dc2626"))
-  } else {
+  } else if (metric == "median_income") {
     list(c(0, "#dc2626"), c(0.5, "#eab308"), c(1, "#16a34a"))
+  } else {  # cost_living: lower is better
+    list(c(0, "#16a34a"), c(0.5, "#eab308"), c(1, "#dc2626"))
   }
   
   plot_geo(
@@ -66,12 +84,18 @@ output$state_map <- renderPlotly({
   ) %>%
     add_trace(
       locations = ~State_Code,
-      z = ~get(metric_col),
+      z = ~map_value,
       text = ~hover_text,
       hoverinfo = "text",
       type = "choropleth",
       colorscale = color_scale,
-      colorbar = list(title = metric_title)
+      colorbar = list(
+        title = list(
+          text = metric_title,
+          side = "right"
+        )
+      ),
+      zauto = TRUE
     ) %>%
     layout(
       title = paste("U.S. State-Level", metric_title),
@@ -100,15 +124,25 @@ output$top_states <- renderTable({
     return(data.frame(State = "N/A", Value = "N/A"))
   }
   
-  sorted <- if (metric %in% c("unemployment", "poverty")) {
+  sorted <- if (metric %in% c("unemployment", "poverty", "cost_living")) {
     df %>% arrange(!!sym(metric_col)) %>% head(5)
   } else {
     df %>% arrange(desc(!!sym(metric_col))) %>% head(5)
   }
   
-  sorted %>%
-    select(State, Value = !!sym(metric_col)) %>%
-    mutate(Value = round(Value, 2))
+  result <- sorted %>%
+    select(State, Value = !!sym(metric_col))
+  
+  # Format values with proper units
+  if (metric == "median_income") {
+    result <- result %>% mutate(Value = paste0("$", format(round(Value), big.mark = ",")))
+  } else if (metric %in% c("unemployment", "poverty")) {
+    result <- result %>% mutate(Value = paste0(round(Value, 1), "%"))
+  } else {  # cost_living
+    result <- result %>% mutate(Value = paste0(round(Value, 1)))
+  }
+  
+  result
 }, striped = TRUE, hover = TRUE, bordered = TRUE)
 
 output$bottom_states <- renderTable({
@@ -127,15 +161,25 @@ output$bottom_states <- renderTable({
     return(data.frame(State = "N/A", Value = "N/A"))
   }
   
-  sorted <- if (metric %in% c("unemployment", "poverty")) {
+  sorted <- if (metric %in% c("unemployment", "poverty", "cost_living")) {
     df %>% arrange(desc(!!sym(metric_col))) %>% head(5)
   } else {
     df %>% arrange(!!sym(metric_col)) %>% head(5)
   }
   
-  sorted %>%
-    select(State, Value = !!sym(metric_col)) %>%
-    mutate(Value = round(Value, 2))
+  result <- sorted %>%
+    select(State, Value = !!sym(metric_col))
+  
+  # Format values with proper units
+  if (metric == "median_income") {
+    result <- result %>% mutate(Value = paste0("$", format(round(Value), big.mark = ",")))
+  } else if (metric %in% c("unemployment", "poverty")) {
+    result <- result %>% mutate(Value = paste0(round(Value, 1), "%"))
+  } else {  # cost_living
+    result <- result %>% mutate(Value = paste0(round(Value, 1)))
+  }
+  
+  result
 }, striped = TRUE, hover = TRUE, bordered = TRUE)
 
 comparison_data <- eventReactive(input$compare_states, {
@@ -163,10 +207,30 @@ output$comparison_output <- renderUI({
       h4(s1$State),
       tags$table(
         class = "table table-sm",
-        tags$tr(tags$td("Median Income:"), tags$td(paste0("$", format(s1$Median_Income, big.mark = ",")))),
-        tags$tr(tags$td("Unemployment:"), tags$td(paste0(s1$Unemployment_Rate, "%"))),
-        tags$tr(tags$td("Poverty Rate:"), tags$td(paste0(s1$Poverty_Rate, "%"))),
-        tags$tr(tags$td("Cost of Living:"), tags$td(s1$Cost_of_Living_Index))
+        tags$tr(
+          tags$td(tags$b("Median Household Income:")), 
+          tags$td(paste0("$", format(round(s1$Median_Income), big.mark = ",")), 
+                  tags$br(), 
+                  tags$small(style = "color:#666;", "Unit: U.S. Dollars"))
+        ),
+        tags$tr(
+          tags$td(tags$b("Unemployment Rate:")), 
+          tags$td(paste0(round(s1$Unemployment_Rate, 1), "%"),
+                  tags$br(),
+                  tags$small(style = "color:#666;", "Unit: Percentage of labor force"))
+        ),
+        tags$tr(
+          tags$td(tags$b("Poverty Rate:")), 
+          tags$td(paste0(round(s1$Poverty_Rate, 1), "%"),
+                  tags$br(),
+                  tags$small(style = "color:#666;", "Unit: Percentage of population"))
+        ),
+        tags$tr(
+          tags$td(tags$b("Cost of Living Index:")), 
+          tags$td(round(s1$Cost_of_Living_Index, 1),
+                  tags$br(),
+                  tags$small(style = "color:#666;", "Unit: Index (100 = U.S. average)"))
+        )
       )
     ),
     column(
@@ -174,10 +238,30 @@ output$comparison_output <- renderUI({
       h4(s2$State),
       tags$table(
         class = "table table-sm",
-        tags$tr(tags$td("Median Income:"), tags$td(paste0("$", format(s2$Median_Income, big.mark = ",")))),
-        tags$tr(tags$td("Unemployment:"), tags$td(paste0(s2$Unemployment_Rate, "%"))),
-        tags$tr(tags$td("Poverty Rate:"), tags$td(paste0(s2$Poverty_Rate, "%"))),
-        tags$tr(tags$td("Cost of Living:"), tags$td(s2$Cost_of_Living_Index))
+        tags$tr(
+          tags$td(tags$b("Median Household Income:")), 
+          tags$td(paste0("$", format(round(s2$Median_Income), big.mark = ",")),
+                  tags$br(),
+                  tags$small(style = "color:#666;", "Unit: U.S. Dollars"))
+        ),
+        tags$tr(
+          tags$td(tags$b("Unemployment Rate:")), 
+          tags$td(paste0(round(s2$Unemployment_Rate, 1), "%"),
+                  tags$br(),
+                  tags$small(style = "color:#666;", "Unit: Percentage of labor force"))
+        ),
+        tags$tr(
+          tags$td(tags$b("Poverty Rate:")), 
+          tags$td(paste0(round(s2$Poverty_Rate, 1), "%"),
+                  tags$br(),
+                  tags$small(style = "color:#666;", "Unit: Percentage of population"))
+        ),
+        tags$tr(
+          tags$td(tags$b("Cost of Living Index:")), 
+          tags$td(round(s2$Cost_of_Living_Index, 1),
+                  tags$br(),
+                  tags$small(style = "color:#666;", "Unit: Index (100 = U.S. average)"))
+        )
       )
     )
   )
