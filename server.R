@@ -5,25 +5,26 @@ library(readr)
 library(zoo)
 library(lubridate)
 library(shinydashboard)
+<<<<<<< HEAD
+=======
 library(plotly)
 library(shinyjs)
 library(DT)
+>>>>>>> dbc27333f192925b05116fc454b0c7a89c9171be
 
 # CFHI module (reads cfhi_data/cfhi_master_2000_onward.csv)
 source("R_Scripts/cfhi_feature_server.R")
 
 shinyServer(function(input, output, session) {
-  observeEvent(input$go_to_tab, {
-    updateTabItems(session, "tabs", input$go_to_tab)
-  })
   
-  updateTabItems(session, "tabs", "home")
   # ---- CFHI MODULE ----
   cfhi_feature_server(
     id = "cfhi",
     master_path = "cfhi_data/cfhi_master_2000_onward.csv"
   )
   
+<<<<<<< HEAD
+=======
   # ---- CFHI DATA SOURCES TAB ----
   # Load data based on selection
   selected_data <- reactive({
@@ -290,6 +291,7 @@ shinyServer(function(input, output, session) {
     }
   )
   
+>>>>>>> dbc27333f192925b05116fc454b0c7a89c9171be
   # ---- OPTIONAL: Savings Guide or other outputs ----
   # If you keep additional server logic in a separate file, source it here
   # so it has access to input/output/session.
