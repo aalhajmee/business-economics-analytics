@@ -49,6 +49,18 @@ output$state_map <- renderPlotly({
   # Create a column for the z values that plotly can access
   df$map_value <- df[[metric_col]]
   
+  # Remove NA values for color scale calculation
+  df_no_na <- df[!is.na(df$map_value), ]
+  
+  # Calculate quartiles for better color distribution
+  if (nrow(df_no_na) > 0) {
+    q1 <- quantile(df_no_na$map_value, 0.25, na.rm = TRUE)
+    q2 <- quantile(df_no_na$map_value, 0.50, na.rm = TRUE)
+    q3 <- quantile(df_no_na$map_value, 0.75, na.rm = TRUE)
+    min_val <- min(df_no_na$map_value, na.rm = TRUE)
+    max_val <- max(df_no_na$map_value, na.rm = TRUE)
+  }
+  
   # Create properly formatted hover text with units
   df$hover_text <- sapply(seq_len(nrow(df)), function(i) {
     value <- df[[metric_col]][i]
@@ -68,14 +80,26 @@ output$state_map <- renderPlotly({
     )
   })
   
-  # Color scale: for unemployment/poverty, lower is better (green), higher is worse (red)
-  # For income/cost_living inverted, higher income is better (green)
-  color_scale <- if (metric %in% c("unemployment", "poverty")) {
-    list(c(0, "#16a34a"), c(0.5, "#eab308"), c(1, "#dc2626"))
-  } else if (metric == "median_income") {
-    list(c(0, "#dc2626"), c(0.5, "#eab308"), c(1, "#16a34a"))
-  } else {  # cost_living: lower is better
-    list(c(0, "#16a34a"), c(0.5, "#eab308"), c(1, "#dc2626"))
+  # Color scale with more granular steps for better differentiation
+  # For unemployment/poverty, lower is better (green), higher is worse (red)
+  # For income, higher is better (green), lower is worse (red)
+  # For cost_living, lower is better (green), higher is worse (red)
+  color_scale <- if (metric %in% c("unemployment", "poverty", "cost_living")) {
+    list(
+      c(0, "#16a34a"),      # Best (dark green)
+      c(0.25, "#65a30d"),   # Good (light green)
+      c(0.5, "#eab308"),    # Medium (yellow)
+      c(0.75, "#f97316"),   # Poor (orange)
+      c(1, "#dc2626")       # Worst (red)
+    )
+  } else {  # median_income
+    list(
+      c(0, "#dc2626"),      # Worst (red)
+      c(0.25, "#f97316"),   # Poor (orange)
+      c(0.5, "#eab308"),    # Medium (yellow)
+      c(0.75, "#65a30d"),   # Good (light green)
+      c(1, "#16a34a")       # Best (dark green)
+    )
   }
   
   plot_geo(
@@ -95,7 +119,8 @@ output$state_map <- renderPlotly({
           side = "right"
         )
       ),
-      zauto = TRUE
+      zmin = if (nrow(df_no_na) > 0) min_val else NULL,
+      zmax = if (nrow(df_no_na) > 0) max_val else NULL
     ) %>%
     layout(
       title = paste("U.S. State-Level", metric_title),
