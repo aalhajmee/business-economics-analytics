@@ -31,6 +31,7 @@ cfhi_data_tab <- safe_source_tab("cfhi_data_tab.R", "cfhi_data")
 explore_tab<- safe_source_tab("state_analysis_tab.R", "explore")
 forecast_tab <- safe_source_tab("forecast_tab.R", "forecast")
 guide_tab  <- safe_source_tab("savingsguide.R", "guide")
+overview_tab  <- safe_source_tab("overview.R", "overview")
 
 dashboardPage(
   dashboardHeader(title = "Financial Health"),
@@ -46,7 +47,8 @@ dashboardPage(
       ),
       menuItem("Explore",         tabName = "explore",  icon = icon("search")),
       menuItem("Forecasting",     tabName = "forecast", icon = icon("line-chart")),
-      menuItem("Personal Finance", tabName = "guide", icon = icon("lightbulb"),
+      menuItem("Personal Finance", icon = icon("lightbulb"),
+        menuSubItem("Overview",   tabName = "overview",    icon = icon("lightbulb")),
         menuSubItem("Savings Guide",   tabName = "guide",    icon = icon("lightbulb")),
         menuSubItem("Loan Calculator", tabName = "loan",     icon = icon("university"))
       ),
@@ -55,6 +57,12 @@ dashboardPage(
   ),
   
   dashboardBody(
+    tags$script(HTML("
+  function goToTab(tabName) {
+    Shiny.setInputValue('go_to_tab', tabName, {priority: 'event'});
+  }
+")),
+    
     useShinyjs(),
     
     tabItems(
@@ -72,6 +80,9 @@ dashboardPage(
       
       # FORECASTING (from forecast_tab.R)
       forecast_tab,
+      
+      # OVERVIEW TAB (from overview.R)
+      overview_tab,
       
       # SAVINGS GUIDE (from savingsguide.R)
       guide_tab,

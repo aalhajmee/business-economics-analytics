@@ -15,6 +15,10 @@ source("R_Scripts/cfhi_feature_server.R")
 
 shinyServer(function(input, output, session) {
   
+  observeEvent(input$go_to_tab, {
+    updateTabItems(session, "tabs", input$go_to_tab)
+  })
+  
   # ---- FORECAST SERVER LOGIC ----
   source("forecast_server.R", local = TRUE)
   

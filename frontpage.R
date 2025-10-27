@@ -100,12 +100,25 @@ tabItem(
       tags$p("Track, plan, and grow your wealth — one smart decision at a time."),
       tags$button(
         class = "btn btn-primary btn-lg",
-        onclick = "goToTab('guide')",
+        onclick = "goToTab('overview')",
         "Learn more »"
       )
     )
   ),
   
   br(),
-  h2(style="text-align:center; font-weight:600;", "WE GOT YOU COVERED!")
-)
+  h2(style="text-align:center; font-weight:600;", "WE'VE GOT YOU COVERED!"),
+
+  tags$style(HTML("
+  /* Fade animation for tab transitions */
+  .tab-pane {
+    opacity: 0;
+    transition: opacity 0.4s ease-in-out;
+  }
+
+  .tab-pane.active {
+    opacity: 1;
+  }
+"))
+  
+  )
