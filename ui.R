@@ -35,7 +35,13 @@ guide_tab  <- safe_source_tab("savingsguide.R", "guide")
 overview_tab  <- safe_source_tab("overview.R", "overview")
 
 dashboardPage(
-  dashboardHeader(title = "Financial Health"),
+  dashboardHeader(title = span("FINANCIAL HEALTH", style = "
+  font-family: 'Poppins', sans-serif;
+  font-size: 19px;
+  font-weight: 600;
+  color: white;
+  letter-spacing: 0.5px;
+")),
   
   
   dashboardSidebar(
