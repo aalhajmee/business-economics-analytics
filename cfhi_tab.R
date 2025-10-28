@@ -63,6 +63,7 @@ tabItem(
     title = "Consumer Financial Health Index (CFHI) — Current Realistic CHFI",
     width = 12, status = "primary", solidHeader = TRUE,
     cfhi_feature_ui("cfhi")
+  ),
+  p(".")
   )
-)
 
