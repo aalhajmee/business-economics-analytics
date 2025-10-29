@@ -27,7 +27,6 @@ safe_source_tab <- function(path, tab_fallback_name) {
 id = "tabs"
 home_tab   <- safe_source_tab("frontpage.R",     "home")
 cfhi_tab   <- safe_source_tab("cfhi_tab.R",     "cfhi")
-cfhi_data_tab <- safe_source_tab("cfhi_data_tab.R", "cfhi_data")
 explore_tab<- safe_source_tab("explore.R",      "explore")
 guide_tab  <- safe_source_tab("savingsguide.R", "guide")
 
@@ -39,10 +38,7 @@ dashboardPage(
     sidebarMenu(
       id = "tabs", 
       menuItem("Home",            tabName = "home",     icon = icon("home")),
-      menuItem("CFHI Analysis",   icon = icon("chart-line"),
-        menuSubItem("Dashboard", tabName = "cfhi"),
-        menuSubItem("Data Sources", tabName = "cfhi_data")
-      ),
+      menuItem("CFHI Analysis",   tabName = "cfhi",     icon = icon("chart-line")),
       menuItem("Explore",         tabName = "explore",  icon = icon("search")),
       menuItem("Forecasting",     tabName = "forecast", icon = icon("line-chart")),
       menuItem("Savings Guide",   tabName = "guide",    icon = icon("lightbulb")),
@@ -54,15 +50,14 @@ dashboardPage(
   dashboardBody(
     useShinyjs(),
     
+      source("frontpage.R")$value,
+    
     tabItems(
       # HOME (from homepage.R)
       home_tab,
       
       # CFHI ANALYSIS (from cfhi_tab.R)
       cfhi_tab,
-      
-      # CFHI DATA SOURCES
-      cfhi_data_tab,
       
       # EXPLORE (from explore.R)
       explore_tab,
@@ -83,6 +78,7 @@ dashboardPage(
         h2("Loan Calculator"),
         p("Need a loan? Try out our calculator!")
       ),
+      
       
       # ABOUT
       tabItem(

@@ -1,232 +1,155 @@
 # Loans.R
 # This script defines the UI and server logic for the loan approval calculator tab
-library(glmnet)
-library(tidyverse)
-library(readxl)
 library(shinydashboard)
+library(readxl)
+library(glmnet)
 
-# UI Component
+# ---- UI SECTION ----
 loan_ui <- tabItem(
   tabName = "loan",
   h2("Loan Approval Calculator"),
   br(),
-  h3(""),
-  img(src = "savingchart.png", height = "auto", width = "800px"),
   p("Enter your information and calculate your likelihood of getting approved for a loan."),
+  p("Our model uses machine learning trained on real loan approval data to predict your chances."),
   
   fluidRow(
     column(5, wellPanel(
-      numericInput("inNumber", "Income (after tax):",
-                   min = 0, max = 1000000000, value = 50000, step = 1000),
-      numericInput("inNumber2", "Credit Score:",
-                   min = 300, max = 850, value = 650, step = 10),
-      numericInput("inNumber3", "Loan Amount:",
-                   min = 1000, max = 1000000000, value = 20000, step = 1000),
-      numericInput("inNumber4", "Years Employed:",
-                   min = 0, max = 100, value = 5, step = 1),
-      actionButton("calculateBtn", "Calculate Approval Odds", 
-                   class = "btn-primary", width = "100%"),
-      p("*Enter your information to learn more about how to improve your chances of approval!")
-    )),
-    
-    column(7, wellPanel(
-      h4("Loan Approval Prediction"),
-      uiOutput("approvalResult"),
-      hr(),
-      h4("Debt-to-Income Ratio"),
-      uiOutput("dtiRatio"),
-      hr(),
-      h4("Recommendations"),
+      h4("Applicant Information"),
+      numericInput("loan_income", "Annual Income (after tax) ($):",
+                   min = 0, max = 10000000, value = 50000, step = 5000),
+      numericInput("loan_credit_score", "Credit Score:",
+                   min = 300, max = 800, value = 700, step = 10),
+      numericInput("loan_amount", "Requested Loan Amount ($):",
+                   min = 0, max = 1000000, value = 20000, step = 1000),
+      numericInput("loan_years_employed", "Years Employed:",
+                   min = 0, max = 50, value = 5, step = 1),
+      p(style = "color: #666; font-size: 12px;", 
+        "*All fields are required for accurate prediction")
+    ))
+  ),
+  
+  br(),
+  
+  # Main Results Section
+  h3("Loan Approval Prediction"),
+  fluidRow(
+    column(12, uiOutput("loan_result_box"))
+  ),
+  
+  br(),
+  
+  # Additional Metrics
+  h3("Financial Health Metrics"),
+  fluidRow(
+    column(4, uiOutput("dti_box")),
+    column(4, uiOutput("income_ratio_box")),
+    column(4, uiOutput("credit_status_box"))
+  ),
+  
+  br(),
+  
+  # Recommendations Section
+  fluidRow(
+    column(12, wellPanel(
+      h4(icon("lightbulb"), " Personalized Recommendations"),
       uiOutput("recommendations")
     ))
+  ),
+  
+  br(),
+  
+  # Budget Planning Section (50/30/20 Rule)
+  h3("Suggested Budget Based on Your Income"),
+  p("Following the 50/30/20 rule can help you manage loan payments alongside your other financial goals."),
+  fluidRow(
+    column(4, uiOutput("needsBox")),
+    column(4, uiOutput("wantsBox")),
+    column(4, uiOutput("savingsBox"))
   )
 )
 
-# Server Logic
-loan_server <- function(input, output, session) {
+# ---- SERVER LOGIC SECTION ----
+loan_server <- function(input, output, session, loan_approval) {
+  
+  # Fit the model (reactive, updates if data changes)
+  loan_model <- reactive({
+    req(loan_approval)
+    
+    # Prepare training data without 'points'
+    x <- model.matrix(loan_approved ~ income + credit_score + loan_amount + years_employed, 
+                      data = loan_approval)[, -1]
+    y <- loan_approval$loan_approved
+    
+    # Fit regularized logistic regression (ridge regression)
+    cv_model <- cv.glmnet(x, y, family = "binomial")
+    
+    return(cv_model)
+  })
   
   # Calculate loan approval probability
-  loan_approval <- reactive({
-    req(input$calculateBtn)
+  loan_probability <- reactive({
+    req(input$loan_income, input$loan_credit_score, 
+        input$loan_amount, input$loan_years_employed)
     
-    income <- input$inNumber
-    credit_score <- input$inNumber2
-    loan_amount <- input$inNumber3
-    years_employed <- input$inNumber4
-    
-    # Simple scoring model (replace with your glmnet model if you have trained data)
-    # This uses a basic heuristic approach
-    
-    # Credit score component (0-40 points)
-    credit_points <- case_when(
-      credit_score >= 750 ~ 40,
-      credit_score >= 700 ~ 30,
-      credit_score >= 650 ~ 20,
-      credit_score >= 600 ~ 10,
-      TRUE ~ 0
+    # New applicant data (without points)
+    new_applicant <- data.frame(
+      income = input$loan_income,
+      credit_score = input$loan_credit_score,
+      loan_amount = input$loan_amount,
+      years_employed = input$loan_years_employed
     )
     
-    # Debt-to-income ratio component (0-30 points)
-    # Assuming monthly payments of ~1% of loan amount
-    monthly_payment <- loan_amount * 0.01
-    monthly_income <- income / 12
-    dti <- if(monthly_income > 0) monthly_payment / monthly_income else 1
+    # Convert new applicant to model matrix
+    new_x <- model.matrix(~ income + credit_score + loan_amount + years_employed, 
+                          data = new_applicant)[, -1]
     
-    dti_points <- case_when(
-      dti <= 0.20 ~ 30,
-      dti <= 0.30 ~ 20,
-      dti <= 0.40 ~ 10,
-      TRUE ~ 0
-    )
+    # Predict probability of approval
+    prob <- predict(loan_model(), new_x, type = "response", s = "lambda.min")
     
-    # Employment stability (0-20 points)
-    employment_points <- case_when(
-      years_employed >= 5 ~ 20,
-      years_employed >= 3 ~ 15,
-      years_employed >= 1 ~ 10,
-      TRUE ~ 5
-    )
-    
-    # Income sufficiency (0-10 points)
-    income_points <- if(income >= loan_amount * 0.3) 10 else 5
-    
-    total_score <- credit_points + dti_points + employment_points + income_points
-    probability <- min(total_score / 100, 0.95) # Cap at 95%
-    
-    list(
-      probability = probability,
-      dti = dti,
-      credit_points = credit_points,
-      dti_points = dti_points,
-      employment_points = employment_points
-    )
+    return(as.numeric(prob))
   })
   
-  # Approval result display
-  output$approvalResult <- renderUI({
-    result <- loan_approval()
-    prob_pct <- round(result$probability * 100, 1)
-    
-    color <- if(prob_pct >= 70) "green" else if(prob_pct >= 40) "orange" else "red"
-    icon_name <- if(prob_pct >= 70) "check-circle" else if(prob_pct >= 40) "exclamation-circle" else "times-circle"
-    
-    div(
-      tags$h3(
-        icon(icon_name),
-        paste0(prob_pct, "% Approval Probability"),
-        style = paste0("color: ", color, ";")
-      ),
-      tags$p(
-        if(prob_pct >= 70) {
-          "Strong likelihood of approval! Your financial profile looks good."
-        } else if(prob_pct >= 40) {
-          "Moderate approval chances. Consider the recommendations below to improve your odds."
-        } else {
-          "Lower approval probability. Focus on improving key factors before applying."
-        }
-      )
-    )
+  # Render the approval probability output
+  output$loan_approval_probability <- renderText({
+    prob <- loan_probability()
+    paste0("Predicted probability of loan approval: ", round(prob * 100, 2), "%")
   })
   
-  # DTI display
-  output$dtiRatio <- renderUI({
-    result <- loan_approval()
-    dti_pct <- round(result$dti * 100, 1)
+  # Render color-coded result box
+  output$loan_result_box <- renderUI({
+    prob <- loan_probability()
     
-    dti_status <- if(dti_pct <= 30) {
-      list(text = "Excellent", color = "green")
-    } else if(dti_pct <= 40) {
-      list(text = "Good", color = "orange")
+    # Determine status based on probability
+    status <- if (prob >= 0.7) {
+      "success"  # Green for high approval chance
+    } else if (prob >= 0.4) {
+      "warning"  # Yellow for moderate chance
     } else {
-      list(text = "High", color = "red")
+      "danger"   # Red for low chance
     }
     
-    div(
-      tags$p(
-        strong("Current DTI: "),
-        span(paste0(dti_pct, "%"), style = paste0("color: ", dti_status$color, "; font-size: 1.2em;")),
-        " - ", dti_status$text
-      ),
-      tags$p("Lenders typically prefer a DTI below 40%. Lower is better!")
+    # Determine message
+    message <- if (prob >= 0.7) {
+      "Strong likelihood of approval!"
+    } else if (prob >= 0.4) {
+      "Moderate chance - consider improving your profile"
+    } else {
+      "Low approval probability - work on your credit/income"
+    }
+    
+    box(
+      title = "Loan Approval Prediction",
+      status = status,
+      solidHeader = TRUE,
+      width = NULL,
+      h3(paste0(round(prob * 100, 1), "%")),
+      p(message),
+      hr(),
+      p(style = "font-size: 13px; color: #666;",
+        "Based on income, credit score, loan amount, and employment history")
     )
   })
   
-  # Recommendations
-  output$recommendations <- renderUI({
-    result <- loan_approval()
-    income <- input$inNumber
-    credit_score <- input$inNumber2
-    loan_amount <- input$inNumber3
-    
-    recommendations <- list()
-    
-    if(credit_score < 700) {
-      recommendations <- c(recommendations, 
-                           "📊 Improve your credit score by paying bills on time and reducing credit card balances")
-    }
-    
-    if(result$dti > 0.40) {
-      recommendations <- c(recommendations,
-                           "💰 Consider requesting a smaller loan amount to reduce your debt-to-income ratio")
-    }
-    
-    if(input$inNumber4 < 2) {
-      recommendations <- c(recommendations,
-                           "💼 Build more employment history before applying for larger loans")
-    }
-    
-    if(loan_amount > income * 0.5) {
-      recommendations <- c(recommendations,
-                           "🎯 Your loan amount is high relative to your income. Consider saving for a larger down payment")
-    }
-    
-    if(length(recommendations) == 0) {
-      recommendations <- c("✅ Your financial profile is strong! You're in good shape to apply.")
-    }
-    
-    tags$ul(
-      lapply(recommendations, function(rec) tags$li(rec))
-    )
-  })
-  
-  # 50/30/20 Budget boxes
-  output$needsBox <- renderUI({
-    income <- input$inNumber
-    needs <- income * 0.50
-    
-    valueBox(
-      value = paste0("$", formatC(needs, format = "f", digits = 0, big.mark = ",")),
-      subtitle = "Needs (50%)",
-      icon = icon("home"),
-      color = "blue"
-    )
-  })
-  
-  output$wantsBox <- renderUI({
-    income <- input$inNumber
-    wants <- income * 0.30
-    
-    valueBox(
-      value = paste0("$", formatC(wants, format = "f", digits = 0, big.mark = ",")),
-      subtitle = "Wants (30%)",
-      icon = icon("shopping-cart"),
-      color = "yellow"
-    )
-  })
-  
-  output$savingsBox <- renderUI({
-    income <- input$inNumber
-    savings <- income * 0.20
-    
-    valueBox(
-      value = paste0("$", formatC(savings, format = "f", digits = 0, big.mark = ",")),
-      subtitle = "Savings (20%)",
-      icon = icon("piggy-bank"),
-      color = "green"
-    )
-  })
+  # Additional outputs can be added here for dti_box, income_ratio_box, 
+  # credit_status_box, recommendations, needsBox, wantsBox, savingsBox
 }
-
-# Export for use in main app
-# In your main server.R, call: loan_server(input, output, session)
-# In your main ui.R, include: loan_ui
