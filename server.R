@@ -31,6 +31,15 @@ shinyServer(function(input, output, session) {
   if (file.exists("Loan_Approval_Calculator.R")) {
     source("Loan_Approval_Calculator.R", local = TRUE)
   }
+  
+  # ---- LOAN CALCULATOR TAB ----
+  # Source the loans.R file to get the loan_server function
+  if (file.exists("loans.R")) {
+    source("loans.R", local = TRUE)
+    # Call the loan server function
+    loan_server(input, output, session)
+  }
+  
   # ---- STATE DATA SOURCES TAB ----
   # Render state economic data table
   output$state_data_table <- DT::renderDT({

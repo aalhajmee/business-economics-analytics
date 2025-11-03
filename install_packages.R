@@ -25,13 +25,10 @@ required_packages <- c(
   "shinyjs",
   
   # Data manipulation
-  "dplyr",
-  "tidyr",
-  "readr",
+  "tidyverse",  # Includes dplyr, tidyr, ggplot2, readr, and more
   "readxl",
   
   # Data visualization
-  "ggplot2",
   "plotly",
   
   # Data tables

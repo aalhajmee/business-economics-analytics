@@ -7,7 +7,7 @@ library(shinydashboard)
 
 # UI Component
 loan_ui <- tabItem(
-  tabName = "loan",
+  tabName = "loans",
   h2("Loan Approval Calculator",
      style = "text-align:center;
               font-family:'Trebuchet MS',sans-serif;
@@ -234,3 +234,6 @@ loan_server <- function(input, output, session) {
 # Export for use in main app
 # In your main server.R, call: loan_server(input, output, session)
 # In your main ui.R, include: loan_ui
+
+# Return the UI component for safe_source_tab
+loan_ui
