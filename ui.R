@@ -25,14 +25,15 @@ safe_source_tab <- function(path, tab_fallback_name) {
 
 # Source your tabs (each file should return a single tabItem(...))
 id = "tabs"
-home_tab   <- safe_source_tab("frontpage.R",     "home")
-cfhi_tab   <- safe_source_tab("cfhi_tab.R",     "cfhi")
-cfhi_data_tab <- safe_source_tab("cfhi_data_tab.R", "cfhi_data")
-explore_tab<- safe_source_tab("state_analysis_tab.R", "explore")
+home_tab       <- safe_source_tab("frontpage.R",     "home")
+cfhi_tab       <- safe_source_tab("cfhi_tab.R",     "cfhi")
+cfhi_data_tab  <- safe_source_tab("cfhi_data_tab.R", "cfhi_data")
+explore_tab    <- safe_source_tab("state_analysis_tab.R", "explore")
 state_data_tab <- safe_source_tab("state_data_tab.R", "state_data")
-forecast_tab <- safe_source_tab("forecast_tab.R", "forecast")
-guide_tab  <- safe_source_tab("savingsguide.R", "guide")
-overview_tab  <- safe_source_tab("overview.R", "overview")
+forecast_tab   <- safe_source_tab("forecast_tab.R", "forecast")
+guide_tab      <- safe_source_tab("savingsguide.R", "guide")
+overview_tab   <- safe_source_tab("overview.R", "overview")
+loan_tab       <- safe_source_tab("loans.R", "loans")
 
 dashboardPage(
   dashboardHeader(title = span("FINANCIAL HEALTH", style = "
@@ -60,7 +61,7 @@ dashboardPage(
       menuItem("Personal Finance", icon = icon("lightbulb"),
         menuSubItem("Overview",   tabName = "overview",    icon = icon("lightbulb")),
         menuSubItem("Savings Guide",   tabName = "guide",    icon = icon("lightbulb")),
-        menuSubItem("Loan Calculator", tabName = "loan",     icon = icon("university"))
+        menuSubItem("Loan Calculator", tabName = "loans",     icon = icon("university"))
       ),
       menuItem("About",           tabName = "about",    icon = icon("info-circle"))
     )
@@ -100,12 +101,8 @@ dashboardPage(
       # SAVINGS GUIDE (from savingsguide.R)
       guide_tab,
       
-      # LOAN CALCULATOR
-      tabItem(
-        tabName = "loan",
-        h2("Loan Calculator"),
-        p("Need a loan? Try out our calculator!")
-      ),
+      # LOAN CALCULATOR (from loans.R)
+      loan_tab,
       
       # ABOUT
       tabItem(

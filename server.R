@@ -25,6 +25,18 @@ shinyServer(function(input, output, session) {
   # ---- STATE ANALYSIS SERVER LOGIC ----
   source("state_analysis_server.R", local = TRUE)
   
+  # ---- CALCULATOR LOGIC ----
+  # Source the calculation and loan approval logic
+  # These define outputs that need to be in the server scope,
+  # so they have access to input/output/session.
+  if (file.exists("calculations.R")) {
+    source("calculations.R", local = TRUE)
+  }
+  
+  if (file.exists("Loan_Approval_Calculator.R")) {
+    source("Loan_Approval_Calculator.R", local = TRUE)
+  }
+  
   # ---- STATE DATA SOURCES TAB ----
   # Render state economic data table
   output$state_data_table <- DT::renderDT({
