@@ -1,5 +1,6 @@
 # Loans.R
 # This script defines the UI and server logic for the loan approval calculator tab
+library(shiny)
 library(glmnet)
 library(tidyverse)
 library(readxl)
