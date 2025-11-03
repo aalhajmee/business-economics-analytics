@@ -6,17 +6,29 @@ An interactive R Shiny dashboard for analyzing consumer financial health through
 
 ## 🚀 Quick Start
 
-### First Time Setup (All Machines)
+### Easiest Way (Automatic Package Installation)
+
+```bash
+# Just run the app - packages install automatically!
+Rscript -e "shiny::runApp()"
+```
+
+The app will:
+1. ✅ Check for missing packages
+2. ✅ Automatically install any missing packages
+3. ✅ Start the dashboard at http://127.0.0.1:3838
+
+### Alternative: Manual Package Installation
+
+If you prefer to install packages first:
 
 ```bash
 # 1. Install all required R packages
 Rscript install_packages.R
 
 # 2. Run the dashboard
-Rscript run_app.R
+Rscript -e "shiny::runApp()"
 ```
-
-The app will automatically open in your browser at http://127.0.0.1:3838
 
 ### For Collaborators
 
@@ -24,8 +36,7 @@ When working across multiple machines or after pulling new changes:
 
 ```bash
 git pull origin main
-Rscript install_packages.R  # Installs any new packages
-Rscript run_app.R
+Rscript -e "shiny::runApp()"  # Packages auto-install if needed
 ```
 
 ## 📊 Features
