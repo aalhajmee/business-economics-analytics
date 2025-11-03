@@ -114,16 +114,51 @@ git push origin main        # Try again
 3. Test: `Rscript -e "shiny::runApp()"`
 4. Commit & push
 
-### **Add New Package**
+### **Add New Package/Library**
 
-1. Add library to your file
-2. Update `ui.R` line 8:
+**Example:** You want to use `leaflet` for interactive maps
+
+1. **Add library to your code:**
    ```r
-   required_packages <- c("shiny", ..., "new_package")
+   # In your tabs/my_feature.R or server/my_server.R
+   library(leaflet)
+   
+   # Use the package
+   output$map <- renderLeaflet({
+     leaflet() %>% addTiles()
+   })
    ```
-3. Test (auto-installs)
-4. Commit & push
-5. Tell team: "Added [package], restart your app"
+
+2. **Update `ui.R` line 8** - add to required_packages:
+   ```r
+   required_packages <- c("shiny", "shinydashboard", "shinythemes", "shinyjs", 
+                          "tidyverse", "readxl", "plotly", "DT", "zoo", 
+                          "lubridate", "forecast", "glmnet", "leaflet")
+   #                                                    ^^^^^^^^ ADD HERE
+   ```
+
+3. **Update `install_packages.R` line 19-30** - add there too:
+   ```r
+   required_packages <- c(
+     "shiny", "shinydashboard", "shinythemes", "shinyjs",
+     "tidyverse", "readxl", "plotly", "DT", "zoo",
+     "lubridate", "forecast", "glmnet", "leaflet"  # ADD HERE TOO
+   )
+   ```
+
+4. **Test** (app auto-installs the new package):
+   ```bash
+   Rscript -e "shiny::runApp()"
+   ```
+
+5. **Commit & push:**
+   ```bash
+   git add ui.R install_packages.R tabs/my_feature.R
+   git commit -m "Add leaflet package for interactive maps"
+   git push origin main
+   ```
+
+6. **Tell team:** "📦 Added leaflet package - restart your app to install it!"
 
 ---
 
