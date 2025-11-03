@@ -31,15 +31,9 @@ cfhi_data_tab <- safe_source_tab("cfhi_data_tab.R", "cfhi_data")
 explore_tab <- safe_source_tab("state_analysis_tab.R", "explore")
 state_data_tab <- safe_source_tab("state_data_tab.R", "state_data")
 forecast_tab <- safe_source_tab("forecast_tab.R", "forecast")
-<<<<<<< HEAD
-guide_tab  <- safe_source_tab("savingsguide.R", "guide")
-overview_tab  <- safe_source_tab("overview.R", "overview")
-loans_tab  <- safe_source_tab("loans.R", "loan")
-=======
 guide_tab <- safe_source_tab("savingsguide.R", "guide")
 overview_tab <- safe_source_tab("overview.R", "overview")
 loan_tab <- safe_source_tab("loans.R", "loans")
->>>>>>> daaffb4427fe1a81e252a7e0623fb61e8f2614ce
 
 dashboardPage(
   dashboardHeader(title = span("FINANCIAL HEALTH", style = "
@@ -94,24 +88,8 @@ Shiny.setInputValue('go_to_tab', tabName, {priority: 'event'});
       overview_tab,
       # SAVINGS GUIDE (from savingsguide.R)
       guide_tab,
-<<<<<<< HEAD
-      
-      # LOAN CALCULATOR
-      tabItem(
-        tabName = "loan",
-        h2("Loan Calculator",
-           style = "text-align:center;
-              font-family:'Trebuchet MS',sans-serif;
-              font-weight:600;
-              font-size:32px;"),
-        p("Need a loan? Try out our calculator!")
-      ),
-      
-      
-=======
       # LOAN CALCULATOR (from loans.R)
       loan_tab,
->>>>>>> daaffb4427fe1a81e252a7e0623fb61e8f2614ce
       # ABOUT
       tabItem(
         tabName = "about",
