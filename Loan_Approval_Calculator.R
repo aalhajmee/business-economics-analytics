@@ -4,10 +4,10 @@
 #loan_approval$city <- NULL
 library(readxl)
 loan_approval <- read_excel("Financial_Calculator_datasets/loan_approval.xlsx")
-View(loan_approval)
+# View(loan_approval)  # Commented out - causes X11 error on macOS
 loan_clean <- loan_approval[, -c(1, 2, 7)]
 loan_clean$loan_approved <- as.numeric(loan_clean$loan_approved)
-View(loan_clean)
+# View(loan_clean)  # Commented out - causes X11 error on macOS
 
 calc_loan <- reactive({
   income <- input$inNumber
