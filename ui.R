@@ -1,3 +1,24 @@
+# ===============================================================================
+# AUTO-INSTALL MISSING PACKAGES
+# ===============================================================================
+# This checks and installs any missing packages before loading them
+required_packages <- c("shiny", "shinydashboard", "shinythemes", "shinyjs", 
+                       "tidyverse", "readxl", "plotly", "DT", "zoo", 
+                       "lubridate", "forecast", "glmnet")
+
+missing_packages <- required_packages[!required_packages %in% installed.packages()[,"Package"]]
+
+if(length(missing_packages) > 0) {
+  cat("\n=================================================================\n")
+  cat("Installing missing packages:", paste(missing_packages, collapse=", "), "\n")
+  cat("=================================================================\n\n")
+  install.packages(missing_packages, repos = "https://cloud.r-project.org")
+  cat("\n✓ Package installation complete!\n\n")
+}
+
+# ===============================================================================
+# LOAD LIBRARIES
+# ===============================================================================
 library(shiny)
 library(shinydashboard)
 library(shinythemes)
