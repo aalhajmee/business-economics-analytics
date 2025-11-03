@@ -2,6 +2,7 @@ library(shiny)
 library(shinydashboard)
 library(shinythemes)
 library(shinyjs)
+library(plotly)
 
 # CFHI UI module
 source("R_Scripts/cfhi_feature_ui.R")

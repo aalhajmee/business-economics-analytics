@@ -5,7 +5,7 @@ tabItem(
               font-family:'Trebuchet MS',sans-serif;
               font-weight:600;
               font-size:32px;"),
-  br(),,
+  br(),
   
   fluidRow(
     column(12,
