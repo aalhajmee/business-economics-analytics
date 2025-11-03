@@ -26,7 +26,7 @@ library(shinyjs)
 library(plotly)
 
 # CFHI UI module
-source("R_Scripts/cfhi_feature_ui.R")
+source("modules/cfhi_feature_ui.R")
 
 # ---- Safe sourcing helper: returns a tabItem or a friendly error tab ----
 safe_source_tab <- function(path, tab_fallback_name) {
@@ -47,15 +47,15 @@ safe_source_tab <- function(path, tab_fallback_name) {
 
 # Source your tabs (each file should return a single tabItem(...))
 id = "tabs"
-home_tab       <- safe_source_tab("frontpage.R",     "home")
-cfhi_tab       <- safe_source_tab("cfhi_tab.R",     "cfhi")
-cfhi_data_tab  <- safe_source_tab("cfhi_data_tab.R", "cfhi_data")
-explore_tab    <- safe_source_tab("state_analysis_tab.R", "explore")
-state_data_tab <- safe_source_tab("state_data_tab.R", "state_data")
-forecast_tab   <- safe_source_tab("forecast_tab.R", "forecast")
-guide_tab      <- safe_source_tab("savingsguide.R", "guide")
-overview_tab   <- safe_source_tab("overview.R", "overview")
-loan_tab       <- safe_source_tab("loans.R", "loans")
+home_tab       <- safe_source_tab("tabs/frontpage.R",     "home")
+cfhi_tab       <- safe_source_tab("tabs/cfhi_tab.R",     "cfhi")
+cfhi_data_tab  <- safe_source_tab("tabs/cfhi_data_tab.R", "cfhi_data")
+explore_tab    <- safe_source_tab("tabs/state_analysis_tab.R", "explore")
+state_data_tab <- safe_source_tab("tabs/state_data_tab.R", "state_data")
+forecast_tab   <- safe_source_tab("tabs/forecast_tab.R", "forecast")
+guide_tab      <- safe_source_tab("tabs/savingsguide.R", "guide")
+overview_tab   <- safe_source_tab("tabs/overview.R", "overview")
+loan_tab       <- safe_source_tab("tabs/loans.R", "loans")
 
 dashboardPage(
   dashboardHeader(title = span("FINANCIAL HEALTH", style = "

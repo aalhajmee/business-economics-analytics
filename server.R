@@ -11,31 +11,31 @@ library(DT)
 library(forecast)
 
 # CFHI module (reads cfhi_data/cfhi_master_2000_onward.csv)
-source("R_Scripts/cfhi_feature_server.R")
+source("modules/cfhi_feature_server.R")
 
 shinyServer(function(input, output, session) {
   observeEvent(input$go_to_tab, {
     updateTabItems(session, "tabs", input$go_to_tab)
   })
   # ---- FORECAST SERVER LOGIC ----
-  source("forecast_server.R", local = TRUE)
+  source("server/forecast_server.R", local = TRUE)
   # ---- STATE ANALYSIS SERVER LOGIC ----
-  source("state_analysis_server.R", local = TRUE)
+  source("server/state_analysis_server.R", local = TRUE)
   # ---- CALCULATOR LOGIC ----
   # Source the calculation and loan approval logic
   # These define outputs that need to be in the server scope,
   # so they have access to input/output/session.
-  if (file.exists("calculations.R")) {
-    source("calculations.R", local = TRUE)
+  if (file.exists("server/calculations.R")) {
+    source("server/calculations.R", local = TRUE)
   }
-  if (file.exists("Loan_Approval_Calculator.R")) {
-    source("Loan_Approval_Calculator.R", local = TRUE)
+  if (file.exists("server/Loan_Approval_Calculator.R")) {
+    source("server/Loan_Approval_Calculator.R", local = TRUE)
   }
   
   # ---- LOAN CALCULATOR TAB ----
   # Source the loans.R file to get the loan_server function
-  if (file.exists("loans.R")) {
-    source("loans.R", local = TRUE)
+  if (file.exists("tabs/loans.R")) {
+    source("tabs/loans.R", local = TRUE)
     # Call the loan server function
     loan_server(input, output, session)
   }

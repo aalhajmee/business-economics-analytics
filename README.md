@@ -45,13 +45,12 @@ Rscript -e "shiny::runApp()"  # Packages auto-install if needed
 - **State Economic Comparison**: Interactive maps and data tables
 - **Personal Finance Tools**: Loan calculators and savings guides
 
-## 👥 For Collaborators
+## 👥 Team Workflow
 
-**Working with multiple people?** See [COLLABORATION_GUIDE.md](COLLABORATION_GUIDE.md) for:
-- Branch strategy and workflow
-- How to avoid merge conflicts
-- File ownership guidelines
-- Communication protocols
+**See [WORKFLOW.md](WORKFLOW.md)** for:
+- How to add new features
+- File ownership
+- Daily git workflow
 
 ## 🚀 Quick Start
 
