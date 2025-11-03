@@ -5,6 +5,7 @@ library(readr)
 library(zoo)
 library(lubridate)
 library(shinydashboard)
+library(plotly)
 
 # CFHI module (reads cfhi_data/cfhi_master_2000_onward.csv)
 source("R_Scripts/cfhi_feature_server.R")
@@ -22,6 +23,10 @@ shinyServer(function(input, output, session) {
   # so it has access to input/output/session.
   if (file.exists("calculations.R")) {
     source("calculations.R", local = TRUE)
+  }
+  
+  if (file.exists("Loan_Approval_Calculator.R")) {
+    source("Loan_Approval_Calculator.R", local = TRUE)
   }
   
   

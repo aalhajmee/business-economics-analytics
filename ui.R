@@ -29,6 +29,7 @@ home_tab   <- safe_source_tab("frontpage.R",     "home")
 cfhi_tab   <- safe_source_tab("cfhi_tab.R",     "cfhi")
 explore_tab<- safe_source_tab("explore.R",      "explore")
 guide_tab  <- safe_source_tab("savingsguide.R", "guide")
+loan_tab  <- safe_source_tab("loans.R", "loans")
 
 dashboardPage(
   dashboardHeader(title = "Financial Health"),
@@ -42,7 +43,7 @@ dashboardPage(
       menuItem("Explore",         tabName = "explore",  icon = icon("search")),
       menuItem("Forecasting",     tabName = "forecast", icon = icon("line-chart")),
       menuItem("Savings Guide",   tabName = "guide",    icon = icon("lightbulb")),
-      menuItem("Loan Calculator", tabName = "loan",     icon = icon("university")),
+      menuItem("Loan Calculator", tabName = "loans",     icon = icon("university")),
       menuItem("About",           tabName = "about",    icon = icon("info-circle"))
     )
   ),
@@ -73,11 +74,8 @@ dashboardPage(
       guide_tab,
       
       # LOAN CALCULATOR
-      tabItem(
-        tabName = "loan",
-        h2("Loan Calculator"),
-        p("Need a loan? Try out our calculator!")
-      ),
+      loan_tab,
+        
       
       
       # ABOUT

@@ -36,6 +36,7 @@ tabItem(
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
+    color: white;
     z-index: 2;
     width: 80%;
   }
