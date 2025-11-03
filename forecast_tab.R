@@ -1,6 +1,11 @@
 tabItem(
   tabName = "forecast",
-  h2("CFHI Future Predictions"),
+  h2("CFHI Future Predictions",
+     style = "text-align:center;
+              font-family:'Trebuchet MS',sans-serif;
+              font-weight:600;
+              font-size:32px;"),
+  br(),
   p("Use historical data to predict future trends in Consumer Financial Health. Adjust economic scenarios to see potential impacts."),
   
   fluidRow(

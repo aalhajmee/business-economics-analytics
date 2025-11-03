@@ -1,6 +1,11 @@
 tabItem(
   tabName = "state_data",
-  h2("State Economic Data Sources"),
+  h2("State Economic Data Sources",
+     style = "text-align:center;
+              font-family:'Trebuchet MS',sans-serif;
+              font-weight:600;
+              font-size:32px;"),
+  br(),
   
   fluidRow(
     column(12,

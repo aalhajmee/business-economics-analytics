@@ -1,7 +1,11 @@
 tabItem(tabName = "guide",
-        h2("Savings Guide"),
+        h2("Savings Guide",
+        style = "text-align:center;
+              font-family:'Trebuchet MS',sans-serif;
+              font-weight:600;
+              font-size:32px;"),
         br(),
-        img(src = "savingchart.png", height = "auto", width = "700px"),
+        img(src = "savingchart.png", height = "auto", width = "900px"),
         p("Enter your information and learn how to improve your financial health step-by-step."),
         p("Make sure to consistently use monthly or yearly values."),
         

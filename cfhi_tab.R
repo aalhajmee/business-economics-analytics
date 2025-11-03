@@ -1,6 +1,10 @@
 tabItem(
   tabName = "cfhi",
-  h2("Consumer Financial Health Index (CFHI)"),
+  h2("Consumer Financial Health Index (CFHI)",
+     style = "text-align:center;
+              font-family:'Trebuchet MS',sans-serif;
+              font-weight:600;
+              font-size:32px;"),
   br(),
   
   # Gradient color bar

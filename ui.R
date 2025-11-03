@@ -33,6 +33,7 @@ state_data_tab <- safe_source_tab("state_data_tab.R", "state_data")
 forecast_tab <- safe_source_tab("forecast_tab.R", "forecast")
 guide_tab  <- safe_source_tab("savingsguide.R", "guide")
 overview_tab  <- safe_source_tab("overview.R", "overview")
+loans_tab  <- safe_source_tab("loans.R", "loan")
 
 dashboardPage(
   dashboardHeader(title = span("FINANCIAL HEALTH", style = "
@@ -103,9 +104,14 @@ dashboardPage(
       # LOAN CALCULATOR
       tabItem(
         tabName = "loan",
-        h2("Loan Calculator"),
+        h2("Loan Calculator",
+           style = "text-align:center;
+              font-family:'Trebuchet MS',sans-serif;
+              font-weight:600;
+              font-size:32px;"),
         p("Need a loan? Try out our calculator!")
       ),
+      
       
       # ABOUT
       tabItem(

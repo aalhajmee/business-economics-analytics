@@ -8,7 +8,11 @@ library(shinydashboard)
 # UI Component
 loan_ui <- tabItem(
   tabName = "loan",
-  h2("Loan Approval Calculator"),
+  h2("Loan Approval Calculator",
+     style = "text-align:center;
+              font-family:'Trebuchet MS',sans-serif;
+              font-weight:600;
+              font-size:32px;"),
   br(),
   h3(""),
   img(src = "savingchart.png", height = "auto", width = "800px"),

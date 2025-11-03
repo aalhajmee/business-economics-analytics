@@ -1,6 +1,11 @@
 tabItem(
   tabName = "explore",
-  h2("Compare States: Which States Have Better Economic Health?"),
+  h2("Which States Have Better Economic Health?",
+     style = "text-align:center;
+              font-family:'Trebuchet MS',sans-serif;
+              font-weight:600;
+              font-size:32px;"),
+  br(),,
   
   fluidRow(
     column(12,

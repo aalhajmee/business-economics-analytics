@@ -1,6 +1,11 @@
 tabItem(
   tabName = "cfhi_data",
-  h2("CFHI Data Sources"),
+  h2("CFHI Data Sources",
+     style = "text-align:center;
+              font-family:'Trebuchet MS',sans-serif;
+              font-weight:600;
+              font-size:32px;"),
+  br(),
   p("View the raw data used to calculate the Consumer Financial Health Index."),
   br(),
   
