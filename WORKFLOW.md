@@ -1,15 +1,14 @@
-# Team Workflow
+# Development Workflow
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 business-economics-analytics/
-├── ui.R                    # Main UI - defines layout
-├── server.R                # Main server - coordinates everything
+├── ui.R                    # Main UI definition
+├── server.R                # Main server logic
 ├── install_packages.R      # Manual package installer
-├── run_app.R               # App launcher with checks
 │
-├── tabs/                   # All UI tabs
+├── tabs/                   # UI tab definitions
 │   ├── frontpage.R
 │   ├── cfhi_tab.R
 │   ├── cfhi_data_tab.R
@@ -18,8 +17,7 @@ business-economics-analytics/
 │   ├── state_data_tab.R
 │   ├── loans.R
 │   ├── savingsguide.R
-│   ├── overview.R
-│   └── explore.R
+│   └── overview.R
 │
 ├── server/                 # Server logic files
 │   ├── forecast_server.R
@@ -31,199 +29,148 @@ business-economics-analytics/
 │   ├── cfhi_feature_ui.R
 │   └── cfhi_feature_server.R
 │
-├── cfhi_data/             # CFHI datasets
-├── Financial_Calculator_datasets/  # Loan/state data
-└── www/                   # Images/static files
+├── cfhi_data/
+├── Financial_Calculator_datasets/
+└── www/
 ```
 
----
+## Standard Workflow
 
-## 🚀 Daily Workflow
-
-### **Start Working**
+### Before Starting Work
 ```bash
-cd /Users/[YOUR_NAME]/Desktop/DevOps/business-economics-analytics
-git pull origin main                    # Get latest changes
-Rscript -e "shiny::runApp()"           # Start app (auto-installs packages)
+cd /path/to/business-economics-analytics
+git pull origin main
 ```
 
-### **Make Changes**
-1. Edit YOUR file (see ownership below)
-2. Test in browser: http://127.0.0.1:3838
-3. Commit:
+### Making Changes
+1. Open files in Posit Workbench
+2. Edit and save changes
+3. Test application: `Rscript -e "shiny::runApp()"`
+4. Commit changes:
    ```bash
-   git add [your-file]
-   git commit -m "What you changed"
+   git add [modified-files]
+   git commit -m "Description of changes"
    git push origin main
    ```
-4. **Tell team in group chat**: "Pushed [file] - pull before working!"
 
-### **If Push Fails** (someone else pushed first)
+### Handling Push Conflicts
+If push is rejected due to remote changes:
 ```bash
-git pull origin main        # Get their changes
-# If conflicts, fix them together on Zoom
-git push origin main        # Try again
+git pull origin main
+```
+Resolve any merge conflicts if they occur, then:
+```bash
+git push origin main
 ```
 
----
+## Adding New Features
 
-## 🎯 Adding New Features
+### Creating a New Tab
 
-### **Add a New Tab**
+1. Create new file in `tabs/` directory (e.g., `tabs/new_feature.R`)
 
-1. Create file in `tabs/`:
-   ```bash
-   # Create tabs/my_new_tab.R
-   ```
-
-2. Write tab code:
+2. Define tab UI:
    ```r
    tabItem(
-     tabName = "my_tab",
-     h2("My Feature"),
-     # Your UI here
+     tabName = "feature_name",
+     h2("Feature Title"),
+     # UI components
    )
    ```
 
-3. Add to `ui.R` (line ~50):
-   ```r
-   my_tab <- safe_source_tab("tabs/my_new_tab.R", "my_tab")
-   ```
-
-4. Add to menu in `ui.R` (line ~70):
-   ```r
-   menuSubItem("My Feature", tabName = "my_tab")
-   ```
-
-5. Add to body in `ui.R` (line ~120):
-   ```r
-   my_tab,
-   ```
-
-6. If needs server logic, create `server/my_tab_server.R` and add to `server.R`:
-   ```r
-   source("server/my_tab_server.R", local = TRUE)
-   ```
-
-7. Test, commit, push
-
-### **Edit Existing Feature**
-
-1. Find file in `tabs/` or `server/`
-2. Make changes
-3. Test: `Rscript -e "shiny::runApp()"`
-4. Commit & push
-
-### **Add New Package/Library**
-
-**Example:** You want to use `leaflet` for interactive maps
-
-1. **Add library to your code:**
-   ```r
-   # In your tabs/my_feature.R or server/my_server.R
-   library(leaflet)
+3. Register tab in `ui.R`:
    
-   # Use the package
-   output$map <- renderLeaflet({
-     leaflet() %>% addTiles()
-   })
+   Add source call (around line 50):
+   ```r
+   feature_tab <- safe_source_tab("tabs/new_feature.R", "feature_name")
+   ```
+   
+   Add menu item (around line 70):
+   ```r
+   menuSubItem("Feature Title", tabName = "feature_name")
+   ```
+   
+   Add to body (around line 120):
+   ```r
+   feature_tab,
    ```
 
-2. **Update `ui.R` line 8** - add to required_packages:
+4. Add server logic if required:
+   
+   Create `server/new_feature_server.R`
+   
+   Source in `server.R` (around line 23):
+   ```r
+   source("server/new_feature_server.R", local = TRUE)
+   ```
+
+5. Test and commit:
+   ```bash
+   Rscript -e "shiny::runApp()"
+   git add tabs/new_feature.R ui.R server.R server/new_feature_server.R
+   git commit -m "Add new feature tab"
+   git push origin main
+   ```
+
+### Modifying Existing Features
+
+1. Locate relevant file in `tabs/` or `server/`
+2. Make modifications and save
+3. Test: `Rscript -e "shiny::runApp()"`
+4. Commit and push changes
+
+### Adding New Package Dependencies
+
+1. Add library call to your code:
+   ```r
+   library(package_name)
+   ```
+
+2. Update `ui.R` (line 8):
    ```r
    required_packages <- c("shiny", "shinydashboard", "shinythemes", "shinyjs", 
                           "tidyverse", "readxl", "plotly", "DT", "zoo", 
-                          "lubridate", "forecast", "glmnet", "leaflet")
-   #                                                    ^^^^^^^^ ADD HERE
+                          "lubridate", "forecast", "glmnet", "package_name")
    ```
 
-3. **Update `install_packages.R` line 19-30** - add there too:
+3. Update `install_packages.R` (lines 19-30):
    ```r
    required_packages <- c(
      "shiny", "shinydashboard", "shinythemes", "shinyjs",
      "tidyverse", "readxl", "plotly", "DT", "zoo",
-     "lubridate", "forecast", "glmnet", "leaflet"  # ADD HERE TOO
+     "lubridate", "forecast", "glmnet", "package_name"
    )
    ```
 
-4. **Test** (app auto-installs the new package):
+4. Test and commit:
    ```bash
    Rscript -e "shiny::runApp()"
-   ```
-
-5. **Commit & push:**
-   ```bash
-   git add ui.R install_packages.R tabs/my_feature.R
-   git commit -m "Add leaflet package for interactive maps"
+   git add ui.R install_packages.R [your-modified-files]
+   git commit -m "Add package_name dependency"
    git push origin main
    ```
 
-6. **Tell team:** "📦 Added leaflet package - restart your app to install it!"
+Note: The application automatically installs missing packages on startup.
 
----
+## Common Commands
 
-## 👥 File Ownership (Avoid Conflicts!)
-
-| Your Name | Your Files | Can Edit Freely? |
-|-----------|------------|------------------|
-| **Ammar** | `tabs/state_analysis_tab.R`, `server/calculations.R` | ✅ Yes |
-| **Bemnet** | `tabs/frontpage.R`, `tabs/savingsguide.R` | ✅ Yes |
-| **Colin** | `tabs/loans.R`, `tabs/cfhi_tab.R`, `modules/cfhi_*` | ✅ Yes |
-| **Anyone** | `ui.R`, `server.R` | ⚠️ Ask in chat first! |
-
-**Golden Rule:** If you need to edit someone else's file, ask them in group chat first!
-
----
-
-## 🚫 DO / DON'T
-
-### ✅ DO:
-- Pull before you start working
-- Work on your assigned files
-- Test before pushing
-- Push small changes often (every 30-60 min)
-- Tell team when you push
-
-### 🚫 DON'T:
-- Edit same file as someone else simultaneously
-- Push without testing
-- Wait days to push (conflicts pile up)
-- Edit ui.R/server.R without asking team
-
----
-
-## 🛠️ Common Tasks
-
-### Kill stuck app:
+### Terminate running app:
 ```bash
 pkill -9 Rscript
 ```
 
-### Reinstall all packages:
+### Manual package installation:
 ```bash
 Rscript install_packages.R
 ```
 
-### Check what changed:
+### Check repository status:
 ```bash
 git status
 git diff
 ```
 
-### Undo your changes (careful!):
+### Discard local changes:
 ```bash
-git checkout -- [file]     # Undoes changes to one file
+git checkout -- [filename]
 ```
-
----
-
-## 🆘 When Things Break
-
-1. **DON'T PANIC**
-2. **DON'T PUSH** if app is broken
-3. **Message team in chat**
-4. **Jump on Zoom** and fix together
-
----
-
-**That's it!** Pull → Edit → Test → Push → Tell team 🎉
