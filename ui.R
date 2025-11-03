@@ -25,81 +25,76 @@ safe_source_tab <- function(path, tab_fallback_name) {
 
 # Source your tabs (each file should return a single tabItem(...))
 id = "tabs"
-home_tab   <- safe_source_tab("frontpage.R",     "home")
-cfhi_tab   <- safe_source_tab("cfhi_tab.R",     "cfhi")
+home_tab <- safe_source_tab("frontpage.R", "home")
+cfhi_tab <- safe_source_tab("cfhi_tab.R", "cfhi")
 cfhi_data_tab <- safe_source_tab("cfhi_data_tab.R", "cfhi_data")
-explore_tab<- safe_source_tab("state_analysis_tab.R", "explore")
+explore_tab <- safe_source_tab("state_analysis_tab.R", "explore")
 state_data_tab <- safe_source_tab("state_data_tab.R", "state_data")
 forecast_tab <- safe_source_tab("forecast_tab.R", "forecast")
+<<<<<<< HEAD
 guide_tab  <- safe_source_tab("savingsguide.R", "guide")
 overview_tab  <- safe_source_tab("overview.R", "overview")
 loans_tab  <- safe_source_tab("loans.R", "loan")
+=======
+guide_tab <- safe_source_tab("savingsguide.R", "guide")
+overview_tab <- safe_source_tab("overview.R", "overview")
+loan_tab <- safe_source_tab("loans.R", "loans")
+>>>>>>> daaffb4427fe1a81e252a7e0623fb61e8f2614ce
 
 dashboardPage(
   dashboardHeader(title = span("FINANCIAL HEALTH", style = "
-  font-family: 'Poppins', sans-serif;
-  font-size: 19px;
-  font-weight: 600;
-  color: white;
-  letter-spacing: 0.5px;
+font-family: 'Poppins', sans-serif;
+font-size: 19px;
+font-weight: 600;
+color: white;
+letter-spacing: 0.5px;
 ")),
-  
-  
   dashboardSidebar(
     sidebarMenu(
       id = "tabs", 
-      menuItem("Home",            tabName = "home",     icon = icon("home")),
-      menuItem("CFHI Analysis",   icon = icon("chart-line"),
-        menuSubItem("Dashboard", tabName = "cfhi"),
-        menuSubItem("Data Sources", tabName = "cfhi_data")
+      menuItem("Home", tabName = "home", icon = icon("home")),
+      menuItem("CFHI Analysis", icon = icon("chart-line"),
+               menuSubItem("Dashboard", tabName = "cfhi"),
+               menuSubItem("Data Sources", tabName = "cfhi_data")
       ),
       menuItem("State Analysis", icon = icon("map-marked-alt"),
-        menuSubItem("Explore States", tabName = "explore"),
-        menuSubItem("Data Sources", tabName = "state_data")
+               menuSubItem("Explore States", tabName = "explore"),
+               menuSubItem("Data Sources", tabName = "state_data")
       ),
-      menuItem("Forecasting",     tabName = "forecast", icon = icon("line-chart")),
+      menuItem("Forecasting", tabName = "forecast", icon = icon("line-chart")),
       menuItem("Personal Finance", icon = icon("lightbulb"),
-        menuSubItem("Overview",   tabName = "overview",    icon = icon("lightbulb")),
-        menuSubItem("Savings Guide",   tabName = "guide",    icon = icon("lightbulb")),
-        menuSubItem("Loan Calculator", tabName = "loan",     icon = icon("university"))
+               menuSubItem("Overview", tabName = "overview", icon = icon("lightbulb")),
+               menuSubItem("Savings Guide", tabName = "guide", icon = icon("lightbulb")),
+               menuSubItem("Loan Calculator", tabName = "loans", icon = icon("university"))
       ),
-      menuItem("About",           tabName = "about",    icon = icon("info-circle"))
+      menuItem("About", tabName = "about", icon = icon("info-circle"))
     )
   ),
-  
   dashboardBody(
     tags$script(HTML("
-  function goToTab(tabName) {
-    Shiny.setInputValue('go_to_tab', tabName, {priority: 'event'});
-  }
+function goToTab(tabName) {
+Shiny.setInputValue('go_to_tab', tabName, {priority: 'event'});
+}
 ")),
-    
     useShinyjs(),
-    
     tabItems(
       # HOME (from homepage.R)
       home_tab,
-      
       # CFHI ANALYSIS (from cfhi_tab.R)
       cfhi_tab,
-      
       # CFHI DATA SOURCES
       cfhi_data_tab,
-      
       # EXPLORE (from state_analysis_tab.R)
       explore_tab,
-      
       # STATE DATA SOURCES
       state_data_tab,
-      
       # FORECASTING (from forecast_tab.R)
       forecast_tab,
-      
       # OVERVIEW TAB (from overview.R)
       overview_tab,
-      
       # SAVINGS GUIDE (from savingsguide.R)
       guide_tab,
+<<<<<<< HEAD
       
       # LOAN CALCULATOR
       tabItem(
@@ -113,6 +108,10 @@ dashboardPage(
       ),
       
       
+=======
+      # LOAN CALCULATOR (from loans.R)
+      loan_tab,
+>>>>>>> daaffb4427fe1a81e252a7e0623fb61e8f2614ce
       # ABOUT
       tabItem(
         tabName = "about",
@@ -124,3 +123,5 @@ dashboardPage(
     )
   )
 )
+
+
