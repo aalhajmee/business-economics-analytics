@@ -103,7 +103,7 @@ dashboardPage(
       guide_tab,
       
       # LOAN CALCULATOR (from loans.R)
-  
+      loan_tab,
       
       # ABOUT
       tabItem(
