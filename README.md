@@ -41,10 +41,19 @@ Rscript -e "shiny::runApp()"  # Packages auto-install if needed
 
 ## 📊 Features
 
-- **CFHI Analysis** - Consumer Financial Health Index tracking and visualization
-- **State Economic Analysis** - Compare all 50 U.S. states on income, employment, poverty, and cost of living
-- **Forecasting** - Time series predictions for economic indicators
-- **Personal Finance Calculators** - Budgeting tools, savings guidance, and loan approval predictions
+- **CFHI Analysis**: Comprehensive financial health indicators
+- **State Economic Comparison**: Interactive maps and data tables
+- **Personal Finance Tools**: Loan calculators and savings guides
+
+## 👥 For Collaborators
+
+**Working with multiple people?** See [COLLABORATION_GUIDE.md](COLLABORATION_GUIDE.md) for:
+- Branch strategy and workflow
+- How to avoid merge conflicts
+- File ownership guidelines
+- Communication protocols
+
+## 🚀 Quick Start
 
 ## 📦 Required Packages
 
