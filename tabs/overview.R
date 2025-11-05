@@ -82,7 +82,7 @@ tabItem(tabName = "overview",
 # ===== DEBT SECTION =====
         box(
           title = tagList(icon("balance-scale"), "Managing Debt"),
-          status = "info", solidHeader = TRUE, width = 12,
+          status = "warning", solidHeader = TRUE, width = 12,
           p("Debt can be a useful financial tool if managed wisely, but excessive debt can limit your 
              financial flexibility and increase stress."),
           tags$ul(
@@ -105,7 +105,7 @@ tabItem(tabName = "overview",
 # ===== LOANS SECTION =====
         box(
           title = tagList(icon("university"), "Understanding Loans"),
-          status = "primary", solidHeader = TRUE, width = 12,
+          status = "info", solidHeader = TRUE, width = 12,
           p("Loans allow you to make large purchases or investments that would otherwise be out of reach. 
              Understanding loan types and terms helps you make smarter borrowing decisions."),
           tags$ul(
@@ -129,7 +129,7 @@ tabItem(tabName = "overview",
 # ===== RETIREMENT SECTION =====
         br(),
         box(
-          status = "info", solidHeader = TRUE, width = 12,
+          status = "primary", solidHeader = TRUE, width = 12,
           title = tagList(icon("umbrella-beach"), "Retirement Planning"),
           div(
             p("Planning for retirement early can significantly improve your long-term financial security. 
@@ -154,7 +154,7 @@ tabItem(tabName = "overview",
 # ===== GENERAL FINANCIAL WELLNESS SECTION =====
         box(
           title = tagList(icon("chart-line"), "Financial Wellness Habits"),
-          status = "primary", solidHeader = TRUE, width = 12,
+          status = "success", solidHeader = TRUE, width = 12,
           p("Financial wellness is achieved by making informed, consistent choices that align with your long-term goals."),
           tags$ul(
             tags$li("Create and follow a monthly budget."),

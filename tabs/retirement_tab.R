@@ -193,7 +193,7 @@ tabItem(
   # === Explanatory text box ===
   shinydashboard::box(
     title = "How to Read the Charts",
-    width = 12, status = "info", solidHeader = TRUE,
+    width = 12, status = "warning", solidHeader = TRUE,
     div(style = "color: #6c757d; font-size: 14px; line-height: 1.8;",
         p(strong("Left Plot:"), "Displays 200 possible portfolio value trajectories over time. Each line represents one simulation outcome based on random market returns and inflation."),
         p(strong("Right Plot:"), "Shows the success rate over time - the percentage of simulations where money is still available at each point."),
