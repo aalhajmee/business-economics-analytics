@@ -16,6 +16,10 @@ observeEvent(input$go_to_loan_calculator, {
   updateTabItems(session, "tabs", "loans")     # Loan calculator tab
 })
 
+observeEvent(input$go_to_retirement, {
+  updateTabItems(session, "tabs", "retirement")     # Loan calculator tab
+})
+
 observeEvent(input$go_to_overview, {
   updateTabItems(session, "tabs", "home")     # Back to overview/home
 })

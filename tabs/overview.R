@@ -125,6 +125,35 @@ tabItem(tabName = "overview",
                            icon = icon("arrow-right"), class = "btn-flat"))
         ),
         
+        # ===== RETIREMENT SECTION =====
+        # --- RETIREMENT PLANNING BLOCK ---
+        br(),
+        box(
+          width = 12,
+          status = "primary",
+          solidHeader = TRUE,
+          title = tagList(icon("umbrella-beach"), "Retirement Planning"),
+          div(
+            style = "font-size:16px; line-height:1.6; font-family:'Segoe UI', sans-serif;",
+            p("Planning for retirement early can significantly improve your long-term financial security. 
+       The earlier you begin contributing to retirement accounts like a 401(k), IRA, or Roth IRA, 
+       the more time your money has to grow through compound interest."),
+            tags$ul(
+              tags$li(tags$b("Start early:"), " Even small contributions made consistently can grow substantially over time."),
+              tags$li(tags$b("Employer match:"), " Take full advantage of your company's 401(k) match if offered."),
+              tags$li(tags$b("Diversify investments:"), " Spread your retirement savings across stocks, bonds, and index funds."),
+              tags$li(tags$b("Adjust over time:"), " Revisit your retirement plan regularly as your income, lifestyle, and goals evolve.")
+            ),
+            p("A good rule of thumb is to save at least 15% of your income for retirement, 
+       and to gradually increase your contribution rate as your earnings grow.")
+          ),
+          
+          # Button leading to Retirement tab
+          div(style = "text-align:right;",
+              actionButton("go_to_retirement", "Go to Retirement Planner", 
+                           icon = icon("arrow-right"), class = "btn-flat"))
+        ),
+        
         # ===== GENERAL FINANCIAL WELLNESS SECTION =====
         box(
           title = tagList(icon("chart-line"), "Financial Wellness Habits"),
