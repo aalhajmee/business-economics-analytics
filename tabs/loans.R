@@ -194,8 +194,10 @@ loan_server <- function(input, output, session) {
     )
   })
   
-  # 50/30/20 Budget boxes
-  output$needsBox <- renderUI({
+  return(loan_ui)
+  
+  # 50/30/20 Budget boxes for Loans tab
+  output$loan_needsBox <- renderUI({
     income <- input$inNumber
     needs <- income * 0.50
     
@@ -207,9 +209,9 @@ loan_server <- function(input, output, session) {
     )
   })
   
-  output$wantsBox <- renderUI({
+  output$loan_wantsBox <- renderUI({
     income <- input$inNumber
-    wants <- income * 0.30
+    wants <- input$inNumber * 0.30
     
     valueBox(
       value = paste0("$", formatC(wants, format = "f", digits = 0, big.mark = ",")),
@@ -219,9 +221,9 @@ loan_server <- function(input, output, session) {
     )
   })
   
-  output$savingsBox <- renderUI({
+  output$loan_savingsBox <- renderUI({
     income <- input$inNumber
-    savings <- income * 0.20
+    savings <- input$inNumber * 0.20
     
     valueBox(
       value = paste0("$", formatC(savings, format = "f", digits = 0, big.mark = ",")),
