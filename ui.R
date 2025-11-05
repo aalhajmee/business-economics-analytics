@@ -2,11 +2,13 @@
 # AUTO-INSTALL MISSING PACKAGES
 # ===============================================================================
 # This checks and installs any missing packages before loading them
-required_packages <- c("shiny", "shinydashboard", "shinythemes", "shinyjs", 
-                       "tidyverse", "readxl", "plotly", "DT", "zoo", 
+required_packages <- c("shiny", "shinydashboard", "shinythemes", "shinyjs",
+                       "tidyverse", "readxl", "plotly", "DT", "zoo",
                        "lubridate", "forecast", "glmnet")
 
+
 missing_packages <- required_packages[!required_packages %in% installed.packages()[,"Package"]]
+
 
 if(length(missing_packages) > 0) {
   cat("\n=================================================================\n")
@@ -15,6 +17,7 @@ if(length(missing_packages) > 0) {
   install.packages(missing_packages, repos = "https://cloud.r-project.org")
   cat("\n✓ Package installation complete!\n\n")
 }
+
 
 # ===============================================================================
 # LOAD LIBRARIES
@@ -25,8 +28,10 @@ library(shinythemes)
 library(shinyjs)
 library(plotly)
 
+
 # CFHI UI module
 source("modules/cfhi_feature_ui.R")
+
 
 # ---- Safe sourcing helper: returns a tabItem or a friendly error tab ----
 safe_source_tab <- function(path, tab_fallback_name) {
@@ -45,6 +50,7 @@ safe_source_tab <- function(path, tab_fallback_name) {
   )
 }
 
+
 # Source your tabs (each file should return a single tabItem(...))
 id = "tabs"
 home_tab       <- safe_source_tab("tabs/frontpage.R",     "home")
@@ -58,15 +64,16 @@ market_data_tab <- safe_source_tab("tabs/market_data_sources_tab.R", "market_dat
 guide_tab      <- safe_source_tab("tabs/savingsguide.R", "guide")
 overview_tab   <- safe_source_tab("tabs/overview.R", "overview")
 loan_tab       <- safe_source_tab("tabs/loans.R", "loans")
+retirement_tab <- safe_source_tab("tabs/retirement_tab.R", "retirement_tab")
 about_tab      <- safe_source_tab("tabs/about_tab.R", "about")
+
 
 dashboardPage(
   dashboardHeader(title = "FINANCIAL HEALTH"),
   
-  
   dashboardSidebar(
     sidebarMenu(
-      id = "tabs", 
+      id = "tabs",
       menuItem("Home",            tabName = "home",     icon = icon("home")),
       menuItem("CFHI Analysis",   icon = icon("chart-line"),
                menuSubItem("Analysis", tabName = "cfhi"),
@@ -84,65 +91,65 @@ dashboardPage(
       menuItem("Personal Finance", icon = icon("lightbulb"),
                menuSubItem("Overview",   tabName = "overview",    icon = icon("lightbulb")),
                menuSubItem("Savings Guide",   tabName = "guide",    icon = icon("lightbulb")),
-               menuSubItem("Loan Calculator", tabName = "loans",     icon = icon("university"))
+               menuSubItem("Loan Calculator", tabName = "loans",     icon = icon("university")),
+               menuSubItem("Retirement", tabName = "retirement_tab",     icon = icon("umbrella-beach"))
       ),
       menuItem("About",           tabName = "about",    icon = icon("info-circle"))
     )
   ),
-  
   dashboardBody(
     tags$head(
       tags$style(HTML("
-        .main-header .logo {
-          font-family: 'Poppins', sans-serif !important;
-          font-size: 24px !important;
-          font-weight: 600 !important;
-          letter-spacing: 0.5px !important;
-        }
-        
-        /* Fix button text visibility */
-        .btn-primary,
-        .btn-primary:hover,
-        .btn-primary:focus,
-        .btn-primary:active,
-        .btn-success,
-        .btn-success:hover,
-        .btn-success:focus,
-        .btn-success:active,
-        .btn-info,
-        .btn-info:hover,
-        .btn-info:focus,
-        .btn-info:active,
-        .btn-warning,
-        .btn-warning:hover,
-        .btn-warning:focus,
-        .btn-warning:active,
-        .btn-danger,
-        .btn-danger:hover,
-        .btn-danger:focus,
-        .btn-danger:active,
-        .shiny-download-link.btn-primary,
-        .shiny-download-link.btn-success,
-        .shiny-download-link.btn-info,
-        .action-button {
-          color: #ffffff !important;
-        }
-        
-        /* Ensure icons are also white */
-        .btn-primary i,
-        .btn-success i,
-        .btn-info i,
-        .btn-warning i,
-        .btn-danger i,
-        .shiny-download-link i {
-          color: #ffffff !important;
-        }
-      "))
+       .main-header .logo {
+         font-family: 'Poppins', sans-serif !important;
+         font-size: 24px !important;
+         font-weight: 600 !important;
+         letter-spacing: 0.5px !important;
+       }
+      
+       /* Fix button text visibility */
+       .btn-primary,
+       .btn-primary:hover,
+       .btn-primary:focus,
+       .btn-primary:active,
+       .btn-success,
+       .btn-success:hover,
+       .btn-success:focus,
+       .btn-success:active,
+       .btn-info,
+       .btn-info:hover,
+       .btn-info:focus,
+       .btn-info:active,
+       .btn-warning,
+       .btn-warning:hover,
+       .btn-warning:focus,
+       .btn-warning:active,
+       .btn-danger,
+       .btn-danger:hover,
+       .btn-danger:focus,
+       .btn-danger:active,
+       .shiny-download-link.btn-primary,
+       .shiny-download-link.btn-success,
+       .shiny-download-link.btn-info,
+       .action-button {
+         color: #ffffff !important;
+       }
+      
+       /* Ensure icons are also white */
+       .btn-primary i,
+       .btn-success i,
+       .btn-info i,
+       .btn-warning i,
+       .btn-danger i,
+       .shiny-download-link i {
+         color: #ffffff !important;
+       }
+     "))
     ),
     tags$script(HTML("
-  function goToTab(tabName) {
-    Shiny.setInputValue('go_to_tab', tabName, {priority: 'event'});
-  }
+ function goToTab(tabName) {
+   Shiny.setInputValue('go_to_tab', tabName, {priority: 'event'});
+ }
 ")),
     
     useShinyjs(),
@@ -181,8 +188,14 @@ dashboardPage(
       # LOAN CALCULATOR (from loans.R)
       loan_tab,
       
+      # RETIREMENT (from retirement.R)
+      retirement_tab,
+      
       # ABOUT (from about_tab.R)
       about_tab
     )
   )
 )
+
+
+
