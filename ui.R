@@ -58,7 +58,7 @@ overview_tab   <- safe_source_tab("tabs/overview.R", "overview")
 loan_tab       <- safe_source_tab("tabs/loans.R", "loans")
 
 dashboardPage(
-  dashboardHeader(title = HTML("<span style='font-family: Poppins, sans-serif; font-size: 24px; font-weight: 600; color: white; letter-spacing: 0.5px;'>FINANCIAL HEALTH</span>")),
+  dashboardHeader(title = "FINANCIAL HEALTH"),
   
   
   dashboardSidebar(
@@ -84,6 +84,16 @@ dashboardPage(
   ),
   
   dashboardBody(
+    tags$head(
+      tags$style(HTML("
+        .main-header .logo {
+          font-family: 'Poppins', sans-serif !important;
+          font-size: 24px !important;
+          font-weight: 600 !important;
+          letter-spacing: 0.5px !important;
+        }
+      "))
+    ),
     tags$script(HTML("
   function goToTab(tabName) {
     Shiny.setInputValue('go_to_tab', tabName, {priority: 'event'});
