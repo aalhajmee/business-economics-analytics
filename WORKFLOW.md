@@ -11,6 +11,7 @@ business-economics-analytics/
 ├── tabs/                   # UI tab definitions
 │   ├── frontpage.R
 │   ├── cfhi_tab.R
+│   ├── cfhi_feature_ui.R
 │   ├── cfhi_data_tab.R
 │   ├── forecast_tab.R
 │   ├── state_analysis_tab.R
@@ -20,18 +21,30 @@ business-economics-analytics/
 │   └── overview.R
 │
 ├── server/                 # Server logic files
+│   ├── cfhi_feature_server.R
 │   ├── forecast_server.R
 │   ├── state_analysis_server.R
+│   ├── state_data_server.R
+│   ├── cfhi_data_server.R
+│   ├── market_correlation_server.R
 │   ├── calculations.R
+│   ├── retirement_calculator.R
 │   └── Loan_Approval_Calculator.R
 │
-├── modules/                # Reusable modules
-│   ├── cfhi_feature_ui.R
-│   └── cfhi_feature_server.R
+├── data/                   # Organized data files
+│   ├── cfhi/              # CFHI economic indicators
+│   │   ├── cfhi_master_2000_onward.csv
+│   │   ├── series_raw/
+│   │   ├── series_normalized/
+│   │   └── by_year/
+│   ├── market/            # Market data
+│   │   └── SP500_PriceHistory_Monthly_042006_082025_FactSet.xlsx
+│   ├── state/             # State economic data
+│   │   └── State_Data_Demographics.csv
+│   └── loan/              # Loan calculator data
+│       └── loan_approval.xlsx
 │
-├── cfhi_data/
-├── Financial_Calculator_datasets/
-└── www/
+└── www/                   # Static assets
 ```
 
 ## Standard Workflow

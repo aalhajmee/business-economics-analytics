@@ -8,13 +8,13 @@ market_data <- reactive({
   
   tryCatch({
     # Load CFHI data - normalize to first day of month
-    cfhi <- read_csv("cfhi_data/cfhi_master_2000_onward.csv", show_col_types = FALSE) %>%
+    cfhi <- read_csv("data/cfhi/cfhi_master_2000_onward.csv", show_col_types = FALSE) %>%
       select(date, CFHI) %>%
       filter(!is.na(CFHI)) %>%
       mutate(date = floor_date(as.Date(date), "month"))
     
     # Load S&P 500 data - normalize to first day of month
-    sp500 <- read_excel("cfhi_data/SP500_PriceHistory_Monthly_042006_082025_FactSet.xlsx", sheet = 1) %>%
+    sp500 <- read_excel("data/market/SP500_PriceHistory_Monthly_042006_082025_FactSet.xlsx", sheet = 1) %>%
       select(Date, Price, `% Change`) %>%
       rename(date = Date, sp500_price = Price, sp500_change = `% Change`) %>%
       mutate(date = floor_date(as.Date(date), "month"))

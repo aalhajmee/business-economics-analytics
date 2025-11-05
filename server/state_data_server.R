@@ -3,7 +3,7 @@
 
 # Render state economic data table
 output$state_data_table <- DT::renderDT({
-  df <- read_csv("Financial_Calculator_datasets/State_Data_Demographics.csv", show_col_types = FALSE)
+  df <- read_csv("data/state/State_Data_Demographics.csv", show_col_types = FALSE)
   # Filter out DC and Puerto Rico
   df <- df %>% filter(!State %in% c("District of Columbia", "Puerto Rico"))
   # Format the data for display
@@ -43,7 +43,7 @@ output$download_state_data <- downloadHandler(
     paste0("state_economic_data_", Sys.Date(), ".csv")
   },
   content = function(file) {
-    df <- read_csv("Financial_Calculator_datasets/State_Data_Demographics.csv", show_col_types = FALSE)
+    df <- read_csv("data/state/State_Data_Demographics.csv", show_col_types = FALSE)
     # Filter out DC and Puerto Rico
     df <- df %>% filter(!State %in% c("District of Columbia", "Puerto Rico"))
     write_csv(df, file)

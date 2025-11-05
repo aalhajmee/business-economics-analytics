@@ -127,19 +127,30 @@ business-economics-analytics/
 ├── server.R                    # Server logic coordinator
 ├── tabs/                       # UI components for each feature
 │   ├── cfhi_tab.R
+│   ├── cfhi_feature_ui.R      # CFHI module UI
 │   ├── forecast_tab.R
 │   ├── market_correlation_tab.R
 │   ├── state_analysis_tab.R
 │   └── loans.R
 ├── server/                     # Backend logic for each feature
+│   ├── cfhi_feature_server.R  # CFHI module server
 │   ├── forecast_server.R
 │   ├── market_correlation_server.R
-│   └── state_analysis_server.R
-├── modules/                    # Reusable Shiny modules
-├── cfhi_data/                  # CFHI and S&P 500 datasets
-│   ├── cfhi_master_2000_onward.csv
-│   └── SP500_PriceHistory_Monthly_042006_082025_FactSet.xlsx
-└── Financial_Calculator_datasets/  # State and loan data
+│   ├── state_analysis_server.R
+│   └── retirement_calculator.R
+├── data/                       # All project data organized by feature
+│   ├── cfhi/                  # CFHI economic indicators
+│   │   ├── cfhi_master_2000_onward.csv
+│   │   ├── series_raw/
+│   │   ├── series_normalized/
+│   │   └── by_year/
+│   ├── market/                # S&P 500 market data
+│   │   └── SP500_PriceHistory_Monthly_042006_082025_FactSet.xlsx
+│   ├── state/                 # State economic demographics
+│   │   └── State_Data_Demographics.csv
+│   └── loan/                  # Loan approval dataset
+│       └── loan_approval.xlsx
+└── www/                        # Static assets (images, CSS)
 ```
 
 ## Data Sources

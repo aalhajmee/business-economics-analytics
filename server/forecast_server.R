@@ -1,5 +1,5 @@
 forecast_data <- reactive({
-  df <- read_csv("cfhi_data/cfhi_master_2000_onward.csv", show_col_types = FALSE)
+  df <- read_csv("data/cfhi/cfhi_master_2000_onward.csv", show_col_types = FALSE)
   df <- df %>%
     arrange(date) %>%
     distinct(date, .keep_all = TRUE) %>%

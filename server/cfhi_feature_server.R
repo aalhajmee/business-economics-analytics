@@ -2,7 +2,7 @@
 # Server module for Consumer Financial Health Index (CFHI)
 
 cfhi_feature_server <- function(id,
-                                master_path = "cfhi_data/cfhi_master_2000_onward.csv",
+                                master_path = "data/cfhi/cfhi_master_2000_onward.csv",
                                 title_prefix = "Consumer Financial Health Index (CFHI)") {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns

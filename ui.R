@@ -30,7 +30,7 @@ library(plotly)
 
 
 # CFHI UI module
-source("modules/cfhi_feature_ui.R")
+source("tabs/cfhi_feature_ui.R")
 
 
 # ---- Safe sourcing helper: returns a tabItem or a friendly error tab ----

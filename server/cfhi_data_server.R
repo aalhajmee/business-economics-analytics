@@ -6,11 +6,11 @@
 selected_data <- reactive({
   req(input$data_source_select)
   data_path <- switch(input$data_source_select,
-                      "master" = "cfhi_data/cfhi_master_2000_onward.csv",
-                      "savings" = "cfhi_data/series_raw/savings_rate.csv",
-                      "wage" = "cfhi_data/series_raw/wage_yoy.csv",
-                      "inflation" = "cfhi_data/series_raw/inflation_yoy.csv",
-                      "borrow" = "cfhi_data/series_raw/borrow_rate.csv"
+                      "master" = "data/cfhi/cfhi_master_2000_onward.csv",
+                      "savings" = "data/cfhi/series_raw/savings_rate.csv",
+                      "wage" = "data/cfhi/series_raw/wage_yoy.csv",
+                      "inflation" = "data/cfhi/series_raw/inflation_yoy.csv",
+                      "borrow" = "data/cfhi/series_raw/borrow_rate.csv"
   )
   if (file.exists(data_path)) {
     df <- read_csv(data_path, show_col_types = FALSE)

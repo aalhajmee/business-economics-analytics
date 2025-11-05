@@ -11,8 +11,8 @@ library(shinyjs)
 library(DT)
 library(forecast)
 
-# CFHI module (reads cfhi_data/cfhi_master_2000_onward.csv)
-source("modules/cfhi_feature_server.R")
+# CFHI module (reads data/cfhi/cfhi_master_2000_onward.csv)
+source("server/cfhi_feature_server.R")
 
 shinyServer(function(input, output, session) {
   observeEvent(input$go_to_tab, {
@@ -52,7 +52,7 @@ shinyServer(function(input, output, session) {
   # ---- CFHI MODULE ----
   cfhi_feature_server(
     id = "cfhi",
-    master_path = "cfhi_data/cfhi_master_2000_onward.csv"
+    master_path = "data/cfhi/cfhi_master_2000_onward.csv"
   )
   
   # ---- CFHI DATA SOURCES TAB ----
