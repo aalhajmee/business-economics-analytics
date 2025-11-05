@@ -58,10 +58,7 @@ overview_tab   <- safe_source_tab("tabs/overview.R", "overview")
 loan_tab       <- safe_source_tab("tabs/loans.R", "loans")
 
 dashboardPage(
-  dashboardHeader(title = tags$span(
-    "FINANCIAL HEALTH", 
-    style = "font-family: 'Poppins', sans-serif; font-size: 24px; font-weight: 600; color: white; letter-spacing: 0.5px;"
-  )),
+  dashboardHeader(title = HTML("<span style='font-family: Poppins, sans-serif; font-size: 24px; font-weight: 600; color: white; letter-spacing: 0.5px;'>FINANCIAL HEALTH</span>")),
   
   
   dashboardSidebar(
