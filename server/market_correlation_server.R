@@ -4,36 +4,44 @@
 
 # Load and merge data
 market_data <- reactive({
-  # Load CFHI data
-  cfhi <- read_csv("cfhi_data/cfhi_master_2000_onward.csv", show_col_types = FALSE) %>%
-    select(date, CFHI) %>%
-    filter(!is.na(CFHI))
+  req(input$market_date_range)
   
-  # Load S&P 500 data
-  sp500 <- read_excel("cfhi_data/SP500_PriceHistory_Monthly_042006_082025_FactSet.xlsx", sheet = 1) %>%
-    select(Date, Price, `% Change`) %>%
-    rename(date = Date, sp500_price = Price, sp500_change = `% Change`) %>%
-    mutate(date = as.Date(date))
-  
-  # Merge datasets
-  merged <- inner_join(cfhi, sp500, by = "date") %>%
-    arrange(date) %>%
-    filter(!is.na(CFHI), !is.na(sp500_price))
-  
-  # Apply date range filter
-  date_range <- input$market_date_range
-  
-  if (date_range == "custom") {
-    merged <- merged %>%
-      filter(date >= input$market_start_date, date <= input$market_end_date)
-  } else if (date_range != "full") {
-    years_back <- as.numeric(gsub("yr", "", date_range))
-    cutoff_date <- max(merged$date) - years(years_back)
-    merged <- merged %>%
-      filter(date >= cutoff_date)
-  }
-  
-  merged
+  tryCatch({
+    # Load CFHI data
+    cfhi <- read_csv("cfhi_data/cfhi_master_2000_onward.csv", show_col_types = FALSE) %>%
+      select(date, CFHI) %>%
+      filter(!is.na(CFHI)) %>%
+      mutate(date = as.Date(date))
+    
+    # Load S&P 500 data
+    sp500 <- read_excel("cfhi_data/SP500_PriceHistory_Monthly_042006_082025_FactSet.xlsx", sheet = 1) %>%
+      select(Date, Price, `% Change`) %>%
+      rename(date = Date, sp500_price = Price, sp500_change = `% Change`) %>%
+      mutate(date = as.Date(date))
+    
+    # Merge datasets
+    merged <- inner_join(cfhi, sp500, by = "date") %>%
+      arrange(date) %>%
+      filter(!is.na(CFHI), !is.na(sp500_price))
+    
+    # Apply date range filter
+    date_range <- input$market_date_range
+    
+    if (date_range == "custom") {
+      merged <- merged %>%
+        filter(date >= as.Date(input$market_start_date), date <= as.Date(input$market_end_date))
+    } else if (date_range != "full") {
+      years_back <- as.numeric(gsub("yr", "", date_range))
+      cutoff_date <- max(merged$date) - lubridate::years(years_back)
+      merged <- merged %>%
+        filter(date >= cutoff_date)
+    }
+    
+    merged
+  }, error = function(e) {
+    # Return empty data frame on error
+    data.frame(date = as.Date(character()), CFHI = numeric(), sp500_price = numeric(), sp500_change = numeric())
+  })
 })
 
 # Calculate correlation statistics
