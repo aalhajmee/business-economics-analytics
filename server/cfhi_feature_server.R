@@ -360,35 +360,77 @@ cfhi_feature_server <- function(id,
         document.getElementById('%s').innerHTML = '<span style=\"color:%s;\">%s</span>';
       ", ns("comparison_text"), color, message))
     })
+    
+    # Download handlers (inside moduleServer)
+    output$download_cfhi_data <- downloadHandler(
+      filename = function() {
+        paste0("CFHI_data_", format(Sys.Date(), "%Y%m%d"), ".csv")
+      },
+      content = function(file) {
+        df <- df_filtered()
+        export_df <- df %>%
+          select(date, CFHI, S_star, W_star, I_star, R_star, 
+                 savings_rate, wage_yoy, inflation_yoy, borrow_rate)
+        write.csv(export_df, file, row.names = FALSE)
+      }
+    )
+    
+    output$download_cfhi_plot <- downloadHandler(
+      filename = function() {
+        paste0("CFHI_plot_", format(Sys.Date(), "%Y%m%d"), ".html")
+      },
+      content = function(file) {
+        df <- df_filtered()
+        req(nrow(df) > 0)
+        
+        selected_comps <- input$show_components
+        
+        fig <- plot_ly(df, x = ~date, y = ~CFHI, type = 'scatter', mode = 'lines+markers',
+                       name = 'CFHI (Composite)',
+                       line = list(color = '#1e40af', width = 3),
+                       marker = list(size = 4, color = '#1e40af'))
+        
+        if (!is.null(selected_comps) && length(selected_comps) > 0) {
+          if (!all(c("S_star","W_star","I_star","R_star") %in% names(df))) {
+            s <- 100 * scale01(df$savings_rate)
+            w <- 100 * scale01(df$wage_yoy)
+            i <- 100 - 100 * scale01(df$inflation_yoy)
+            r <- 100 - 100 * scale01(df$borrow_rate)
+            df$S_star <- s; df$W_star <- w; df$I_star <- i; df$R_star <- r
+          }
+          
+          if ("savings" %in% selected_comps) {
+            fig <- fig %>% add_trace(x = ~date, y = ~S_star, data = df, type = 'scatter', 
+                                    mode = 'lines', name = 'Savings Rate ↑',
+                                    line = list(color = '#16a34a', dash = 'dash', width = 2))
+          }
+          if ("wages" %in% selected_comps) {
+            fig <- fig %>% add_trace(x = ~date, y = ~W_star, data = df, type = 'scatter',
+                                    mode = 'lines', name = 'Wage Growth ↑',
+                                    line = list(color = '#0891b2', dash = 'dash', width = 2))
+          }
+          if ("inflation" %in% selected_comps) {
+            fig <- fig %>% add_trace(x = ~date, y = ~I_star, data = df, type = 'scatter',
+                                    mode = 'lines', name = 'Inflation ↓',
+                                    line = list(color = '#ea580c', dash = 'dash', width = 2))
+          }
+          if ("borrow" %in% selected_comps) {
+            fig <- fig %>% add_trace(x = ~date, y = ~R_star, data = df, type = 'scatter',
+                                    mode = 'lines', name = 'Borrow Rate ↓',
+                                    line = list(color = '#c026d3', dash = 'dash', width = 2))
+          }
+        }
+        
+        fig <- fig %>% layout(
+          title = paste0("CFHI: ", format(min(df$date), "%b %Y"), " — ", format(max(df$date), "%b %Y")),
+          xaxis = list(title = ""), yaxis = list(title = "Index (Oct 2006 = 100)"),
+          hovermode = 'x unified', legend = list(orientation = "h", yanchor = "bottom", y = -0.25)
+        )
+        
+        htmlwidgets::saveWidget(plotly::as_widget(fig), file, selfcontained = TRUE)
+      }
+    )
   })
-  
-  # Download handlers
-  output$download_cfhi_data <- downloadHandler(
-    filename = function() {
-      paste0("CFHI_data_", format(Sys.Date(), "%Y%m%d"), ".csv")
-    },
-    content = function(file) {
-      df <- df_filtered()
-      # Select relevant columns for export
-      export_df <- df %>%
-        select(date, CFHI, S_star, W_star, I_star, R_star, 
-               savings_rate, wage_yoy, inflation_yoy, borrow_rate)
-      write.csv(export_df, file, row.names = FALSE)
-    }
-  )
-  
-  output$download_cfhi_plot <- downloadHandler(
-    filename = function() {
-      paste0("CFHI_plot_", format(Sys.Date(), "%Y%m%d"), ".png")
-    },
-    content = function(file) {
-      # Use plotly to export as static image
-      # Note: This requires kaleido package or orca
-      p <- output$cfhi_plot
-      # For now, save as HTML (fully interactive)
-      htmlwidgets::saveWidget(plotly::as_widget(p), file)
-    }
-  )
 }
 
 

@@ -183,6 +183,8 @@ The application requires the following R packages (auto-installed on first run):
 - Data import: readxl, DT
 - Time series: zoo, lubridate, forecast
 - Visualization: plotly
+
+See [REPRODUCIBILITY.md](REPRODUCIBILITY.md) for complete environment details, package versions, and instructions for reproducing all analyses.
 - Modeling: glmnet
 
 ## Development Notes
