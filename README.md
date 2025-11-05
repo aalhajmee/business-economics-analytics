@@ -193,71 +193,19 @@ This dashboard was developed as a class project for Business and Economics Analy
 
 ## Team Contributions
 
-This project was a collaborative effort with clearly defined roles and responsibilities:
 
 ### Ammar Alhajmee
-**Primary Focus:** Data Engineering & CFHI Methodology
-- Designed and implemented the CFHI composite index formula
-- Developed data processing pipeline for economic indicators (FRED, BLS data)
-- Built the forecasting engine (ARIMA/ETS ensemble methods)
-- Created model validation and backtesting framework
-- Implemented reproducibility features (seed management, session documentation)
-- Set up Git repository and version control workflow
-- **Key Files:** `server/forecast_server.R`, `REPRODUCIBILITY.md`, data pipeline scripts
+**Primary Focus:** 
+- fill later
 
 ### Bemnet Ali
-**Primary Focus:** Market Analysis & Geographic Visualizations
-- Developed S&P 500 correlation analysis module
-- Implemented formal hypothesis testing framework with effect size calculations
-- Built state-level economic comparison features
-- Created interactive chloropleth maps with percentile-based coloring
-- Designed market correlation UI and automated insights system
-- Integrated FactSet data and Census/BLS state data
-- **Key Files:** `server/market_correlation_server.R`, `server/state_analysis_server.R`, `tabs/market_correlation_tab.R`
+**Primary Focus:** 
+- fill later
 
 ### Colin Bridges
-**Primary Focus:** Personal Finance Tools & User Experience
-- Designed and implemented all personal finance calculators
-- Built Monte Carlo retirement simulation with dual scenario comparison
-- Created loan approval probability calculator
-- Developed 50/30/20 budgeting savings guide
-- Designed homepage hero sections and visual branding
-- Implemented UI/UX enhancements across all tabs
-- Conducted user testing and bug fixes
-- **Key Files:** `server/retirement_calculator.R`, `server/calculations.R`, `tabs/loans.R`, `tabs/savingsguide.R`, `tabs/frontpage.R`
+**Primary Focus:** 
+- fill later
 
-### Shared Responsibilities
-- **Architecture & Integration:** All team members contributed to modular design decisions
-- **Documentation:** Collaborative effort on README, WORKFLOW.md, and in-code comments
-- **Testing:** Each member tested others' features and reported issues
-- **Code Review:** Regular check-ins and peer review of major changes
-- **Presentation:** Joint preparation of project presentation and demo
 
-### Development Statistics
-
-**Total Commits:** See Git history for detailed contribution tracking
-```bash
-# View individual contributions
-git shortlog -sn --all --no-merges
-```
-
-**Lines of Code by Component:**
-- CFHI & Forecasting: ~600 lines (Ammar)
-- Market & State Analysis: ~800 lines (Bemnet)  
-- Personal Finance Tools: ~700 lines (Colin)
-- Shared Infrastructure: ~400 lines (All)
-
-**Time Investment:** Each team member contributed approximately 40-50 hours over the project duration, including:
-- Data collection and cleaning: ~10 hours
-- Feature development: ~25 hours
-- Testing and debugging: ~8 hours
-- Documentation: ~5 hours
-- Integration and final polish: ~5 hours
-
-### Collaboration Tools
-- **Version Control:** GitHub (WL-Biol185-ShinyProjects/Financial-Health-Analytics-Dashboard)
-- **Communication:** Regular in-class check-ins and online discussions
-- **Task Management:** Documented in WORKFLOW.md with clear feature ownership
-- **Code Standards:** Consistent naming conventions and modular structure across all contributions
 
 **Note:** While individual contributions are documented above, this was a truly collaborative project where team members frequently consulted each other, shared ideas, and helped debug issues across all components. The final product reflects the collective effort and expertise of all three team members.
