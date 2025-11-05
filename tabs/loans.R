@@ -21,13 +21,13 @@ loan_ui <- tabItem(
   
   fluidRow(
     column(5, wellPanel(
-      numericInput("inNumber", "Income (after tax):",
+      numericInput("loan_income", "Income (after tax):",
                    min = 0, max = 1000000000, value = 50000, step = 1000),
-      numericInput("inNumber2", "Credit Score:",
+      numericInput("loan_credit_score", "Credit Score:",
                    min = 300, max = 850, value = 650, step = 10),
-      numericInput("inNumber3", "Loan Amount:",
+      numericInput("loan_amount_input", "Loan Amount:",
                    min = 1000, max = 1000000000, value = 20000, step = 1000),
-      numericInput("inNumber4", "Years Employed:",
+      numericInput("loan_years_employed", "Years Employed:",
                    min = 0, max = 100, value = 5, step = 1),
       actionButton("calculateBtn", "Calculate Approval Odds", 
                    class = "btn-primary", width = "100%"),
@@ -54,10 +54,10 @@ loan_server <- function(input, output, session) {
   loan_approval <- reactive({
     req(input$calculateBtn)
     
-    income <- input$inNumber
-    credit_score <- input$inNumber2
-    loan_amount <- input$inNumber3
-    years_employed <- input$inNumber4
+    income <- input$loan_income
+    credit_score <- input$loan_credit_score
+    loan_amount <- input$loan_amount_input
+    years_employed <- input$loan_years_employed
     
     # Simple scoring model (replace with your glmnet model if you have trained data)
     # This uses a basic heuristic approach
@@ -159,9 +159,9 @@ loan_server <- function(input, output, session) {
   # Recommendations
   output$recommendations <- renderUI({
     result <- loan_approval()
-    income <- input$inNumber
-    credit_score <- input$inNumber2
-    loan_amount <- input$inNumber3
+    income <- input$loan_income
+    credit_score <- input$loan_credit_score
+    loan_amount <- input$loan_amount_input
     
     recommendations <- list()
     
@@ -175,7 +175,7 @@ loan_server <- function(input, output, session) {
                            "💰 Consider requesting a smaller loan amount to reduce your debt-to-income ratio")
     }
     
-    if(input$inNumber4 < 2) {
+    if(input$loan_years_employed < 2) {
       recommendations <- c(recommendations,
                            "💼 Build more employment history before applying for larger loans")
     }
@@ -193,50 +193,7 @@ loan_server <- function(input, output, session) {
       lapply(recommendations, function(rec) tags$li(rec))
     )
   })
-  
-  return(loan_ui)
-  
-  # 50/30/20 Budget boxes for Loans tab
-  output$loan_needsBox <- renderUI({
-    income <- input$inNumber
-    needs <- income * 0.50
-    
-    valueBox(
-      value = paste0("$", formatC(needs, format = "f", digits = 0, big.mark = ",")),
-      subtitle = "Needs (50%)",
-      icon = icon("home"),
-      color = "blue"
-    )
-  })
-  
-  output$loan_wantsBox <- renderUI({
-    income <- input$inNumber
-    wants <- input$inNumber * 0.30
-    
-    valueBox(
-      value = paste0("$", formatC(wants, format = "f", digits = 0, big.mark = ",")),
-      subtitle = "Wants (30%)",
-      icon = icon("shopping-cart"),
-      color = "yellow"
-    )
-  })
-  
-  output$loan_savingsBox <- renderUI({
-    income <- input$inNumber
-    savings <- input$inNumber * 0.20
-    
-    valueBox(
-      value = paste0("$", formatC(savings, format = "f", digits = 0, big.mark = ",")),
-      subtitle = "Savings (20%)",
-      icon = icon("piggy-bank"),
-      color = "green"
-    )
-  })
 }
-
-# Export for use in main app
-# In your main server.R, call: loan_server(input, output, session)
-# In your main ui.R, include: loan_ui
 
 # Return the UI component for safe_source_tab
 loan_ui
