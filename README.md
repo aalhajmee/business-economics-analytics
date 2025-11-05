@@ -1,8 +1,6 @@
-# Financial Health Dashboard
+# Financial Health Analytics Dashboard
 
-Business and Economics Analytics group project by Ammar Alhajmee, Bemnet Ali, and Colin Bridges.
-
-An interactive R Shiny dashboard for analyzing household financial well-being through the Composite Financial Health Index (CFHI), macroeconomic correlations, state-level economic comparisons, and personal finance tools.
+Dashboard analyzing U.S. household financial health with economic indicators, forecasting models, market correlations, and personal finance calculators.
 
 ## ⚠️ Disclaimer
 
