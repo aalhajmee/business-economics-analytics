@@ -60,7 +60,7 @@ loan_tab       <- safe_source_tab("tabs/loans.R", "loans")
 dashboardPage(
   dashboardHeader(title = span("FINANCIAL HEALTH", style = "
   font-family: 'Poppins', sans-serif;
-  font-size: 19px;
+  font-size: 24px;
   font-weight: 600;
   color: white;
   letter-spacing: 0.5px;
@@ -72,7 +72,7 @@ dashboardPage(
       id = "tabs", 
       menuItem("Home",            tabName = "home",     icon = icon("home")),
       menuItem("CFHI Analysis",   icon = icon("chart-line"),
-               menuSubItem("Dashboard", tabName = "cfhi"),
+               menuSubItem("Analysis", tabName = "cfhi"),
                menuSubItem("Data Sources", tabName = "cfhi_data")
       ),
       menuItem("State Analysis", icon = icon("map-marked-alt"),
