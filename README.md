@@ -13,6 +13,7 @@ An interactive R Shiny dashboard for analyzing household financial well-being th
 Rscript -e "shiny::runApp()"
 ```
 
+
 The application automatically detects and installs missing R packages on first run. Access the dashboard at http://127.0.0.1:3838 after startup.
 
 ### Manual Installation
