@@ -80,7 +80,7 @@ tabItem(
       box(
         title = "Pick Any Two States to Compare",
         width = 12,
-        status = "warning",
+        status = "primary",
         solidHeader = TRUE,
         
         p(style = "font-size:13px; color:#555;", 
@@ -101,7 +101,7 @@ tabItem(
         actionButton(
           "compare_states",
           "Show Comparison",
-          class = "btn-info",
+          class = "btn-primary",
           style = "width:100%; font-weight:bold;"
         )
       ),
@@ -110,6 +110,7 @@ tabItem(
         title = "Top 5 Best States",
         width = 12,
         status = "success",
+        solidHeader = TRUE,
         
         p(style = "font-size:12px; color:#666; margin-bottom:10px;",
           "States with the best (highest/lowest) values for selected metric:"),
@@ -119,7 +120,8 @@ tabItem(
       box(
         title = "Bottom 5 Worst States",
         width = 12,
-        status = "danger",
+        status = "success",
+        solidHeader = TRUE,
         
         p(style = "font-size:12px; color:#666; margin-bottom:10px;",
           "States with the worst (lowest/highest) values for selected metric:"),
@@ -148,7 +150,8 @@ tabItem(
       box(
         title = "Side-by-Side State Comparison",
         width = 12,
-        status = "warning",
+        status = "success",
+        solidHeader = TRUE,
         
         p(style = "font-size:13px; color:#555; margin-bottom:10px;",
           "Select two states from the left sidebar and click 'Show Comparison' to see detailed data:"),

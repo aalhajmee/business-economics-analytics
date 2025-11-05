@@ -28,7 +28,7 @@ tabItem(
         
         hr(),
         
-        downloadButton("download_data", "Download CSV", class = "btn-primary"),
+        downloadButton("download_data", "Download CSV", class = "btn-success"),
         br(), br(),
         DT::dataTableOutput("data_table")
       )

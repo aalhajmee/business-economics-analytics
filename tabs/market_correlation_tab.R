@@ -101,7 +101,7 @@ tabItem(
     ),
     box(
       title = "Rolling 12-Month Correlation",
-      status = "warning",
+      status = "info",
       solidHeader = TRUE,
       width = 6,
       plotlyOutput("rolling_correlation_plot", height = "400px")
@@ -112,14 +112,14 @@ tabItem(
   fluidRow(
     box(
       title = "Regression Model Summary",
-      status = "primary",
+      status = "success",
       solidHeader = TRUE,
       width = 6,
       verbatimTextOutput("regression_summary")
     ),
     box(
       title = "Key Insights",
-      status = "info",
+      status = "success",
       solidHeader = TRUE,
       width = 6,
       htmlOutput("correlation_insights")

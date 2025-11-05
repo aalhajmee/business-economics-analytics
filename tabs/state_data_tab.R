@@ -132,7 +132,7 @@ tabItem(
         tags$p(style = "font-size:14px; margin-bottom:15px;", 
                "Complete dataset showing all 50 U.S. states with economic indicators. Use the search box to find specific states, or click column headers to sort."),
         
-        downloadButton("download_state_data", "Download Data (CSV)", class = "btn-primary", style = "margin-bottom:15px;"),
+        downloadButton("download_state_data", "Download Data (CSV)", class = "btn-success", style = "margin-bottom:15px;"),
         
         DT::DTOutput("state_data_table")
       )

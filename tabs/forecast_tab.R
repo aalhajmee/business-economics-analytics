@@ -132,7 +132,7 @@ tabItem(
       box(
         title = "Forecast Results",
         width = 12,
-        status = "info",
+        status = "success",
         solidHeader = TRUE,
         
         plotlyOutput("forecast_plot", height = "450px"),
