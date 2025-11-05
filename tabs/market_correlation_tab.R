@@ -101,31 +101,71 @@ tabItem(
       status = "success",
       solidHeader = TRUE,
       width = 6,
-      plotlyOutput("scatter_regression_plot", height = "400px")
+      plotlyOutput("scatter_regression_plot", height = "400px"),
+      
+      tags$div(
+        style = "background:#f0fdf4; padding:10px; border-radius:5px; border-left:4px solid #16a34a; margin-top:10px;",
+        tags$p(style="margin:0; font-size:12px;",
+          tags$b(icon("chart-line"), " What This Shows:"),
+          " Each point represents one month. If points cluster along the diagonal line, CFHI and S&P 500 move together predictably. ",
+          "Scattered points mean the relationship is weak or unpredictable."
+        )
+      )
     ),
     box(
       title = "Rolling 12-Month Correlation",
       status = "info",
       solidHeader = TRUE,
       width = 6,
-      plotlyOutput("rolling_correlation_plot", height = "400px")
+      plotlyOutput("rolling_correlation_plot", height = "400px"),
+      
+      tags$div(
+        style = "background:#eff6ff; padding:10px; border-radius:5px; border-left:4px solid #3b82f6; margin-top:10px;",
+        tags$p(style="margin:0; font-size:12px;",
+          tags$b(icon("calendar"), " What This Shows:"),
+          " How the relationship between CFHI and S&P 500 changes over time (calculated every 12 months). ",
+          "Values above 0.5 = strong positive link, below -0.5 = strong negative link, near 0 = weak/no link."
+        )
+      )
     )
   ),
   
   # Insights and Model Summary
   fluidRow(
     box(
-      title = "Regression Model Summary",
-      status = "success",
+      title = "Statistical Details",
+      status = "warning",
       solidHeader = TRUE,
       width = 6,
+      
+      tags$div(
+        style = "background:#fff7ed; padding:10px; border-radius:5px; border-left:4px solid #f59e0b; margin-bottom:10px;",
+        tags$p(style="margin:0; font-size:12px;",
+          tags$b(icon("calculator"), " Technical Details:"),
+          " This shows the statistical regression model output. Key things to look for: ",
+          tags$b("R-squared"), " (how much variance is explained), ",
+          tags$b("p-value"), " (< 0.05 means statistically significant), and ",
+          tags$b("coefficients"), " (how much CFHI changes per unit change in S&P 500)."
+        )
+      ),
+      
       verbatimTextOutput("regression_summary")
     ),
     box(
-      title = "Key Insights",
+      title = "Plain English Summary",
       status = "success",
       solidHeader = TRUE,
       width = 6,
+      
+      tags$div(
+        style = "background:#f0fdf4; padding:10px; border-radius:5px; border-left:4px solid #16a34a; margin-bottom:10px;",
+        tags$p(style="margin:0; font-size:12px;",
+          tags$b(icon("lightbulb"), " What It Means:"),
+          " This translates the statistics into practical insights about whether CFHI and stock market performance are related, ",
+          "and if that relationship is strong enough to be meaningful."
+        )
+      ),
+      
       htmlOutput("correlation_insights")
     )
   )

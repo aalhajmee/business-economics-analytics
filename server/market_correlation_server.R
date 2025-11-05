@@ -446,8 +446,23 @@ output$correlation_insights <- renderUI({
     "N/A for Spearman"
   }
   
+  # Simple summary for non-technical users
+  simple_summary <- if (is_significant) {
+    paste0("There IS a ", cor_strength, " ", cor_direction, " relationship between CFHI and S&P 500. ",
+           "When the stock market ", if (cor_val > 0) "goes up" else "goes down", 
+           ", household financial health tends to ", if (cor_val > 0) "improve" else "worsen", " too.")
+  } else {
+    "There is NO statistically significant relationship between CFHI and S&P 500 in this time period. They appear to move independently."
+  }
+  
   insights_html <- paste0(
     "<div style='padding: 15px; line-height: 1.8;'>",
+    
+    # Simple Summary at Top
+    "<div style='background: #f0fdf4; border-left: 4px solid #16a34a; padding: 15px; margin-bottom: 15px; border-radius: 4px;'>",
+    "<h4 style='margin-top: 0; color: #166534;'><i class='fa fa-check-circle'></i> Bottom Line</h4>",
+    "<p style='margin: 0; color: #166534; font-size: 15px; font-weight: 500;'>", simple_summary, "</p>",
+    "</div>",
     
     # Hypothesis Testing Section
     "<div style='background: #f0f9ff; border-left: 4px solid #0284c7; padding: 12px; margin-bottom: 15px; border-radius: 4px;'>",
