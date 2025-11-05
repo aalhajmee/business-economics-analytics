@@ -1,3 +1,25 @@
+# --- Navigation buttons for Personal Finance section ---
+observeEvent(input$go_to_savings_guide, {
+  updateTabItems(session, "tabs", "guide")
+})
+
+observeEvent(input$go_to_loan_calculator, {
+  updateTabItems(session, "tabs", "loans")
+})
+
+observeEvent(input$go_to_credit_resources, {
+  updateTabItems(session, "tabs", "credit") # if you add a credit tab later
+})
+
+observeEvent(input$go_to_debt_tools, {
+  updateTabItems(session, "tabs", "forecast") # or whatever your debt tools tab is named
+})
+
+observeEvent(input$go_to_overview, {
+  updateTabItems(session, "tabs", "home")
+})
+
+
 #Recommended
 calc_recommended <- reactive({
   income <- input$inNumber
