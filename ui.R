@@ -98,6 +98,44 @@ dashboardPage(
           font-weight: 600 !important;
           letter-spacing: 0.5px !important;
         }
+        
+        /* Fix button text visibility */
+        .btn-primary,
+        .btn-primary:hover,
+        .btn-primary:focus,
+        .btn-primary:active,
+        .btn-success,
+        .btn-success:hover,
+        .btn-success:focus,
+        .btn-success:active,
+        .btn-info,
+        .btn-info:hover,
+        .btn-info:focus,
+        .btn-info:active,
+        .btn-warning,
+        .btn-warning:hover,
+        .btn-warning:focus,
+        .btn-warning:active,
+        .btn-danger,
+        .btn-danger:hover,
+        .btn-danger:focus,
+        .btn-danger:active,
+        .shiny-download-link.btn-primary,
+        .shiny-download-link.btn-success,
+        .shiny-download-link.btn-info,
+        .action-button {
+          color: #ffffff !important;
+        }
+        
+        /* Ensure icons are also white */
+        .btn-primary i,
+        .btn-success i,
+        .btn-info i,
+        .btn-warning i,
+        .btn-danger i,
+        .shiny-download-link i {
+          color: #ffffff !important;
+        }
       "))
     ),
     tags$script(HTML("
