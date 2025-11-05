@@ -78,7 +78,8 @@ renderInputs <- function(prefix) {
       actionButton(
         paste0(prefix, "_recalculate"),
         "Re-run Simulation",
-        icon("random")
+        icon("random"),
+        class = "btn-primary"
       )
     )
   )
@@ -96,17 +97,21 @@ tabItem(
              "label {font-size: 13px; font-weight: 500;}",
              ".recalculating {opacity: 1.0;}",
              ".retirement-scenario-header {
-               background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-               color: white;
+               background-color: #f8f9fa;
+               border-left: 4px solid #3c8dbc;
                padding: 15px;
-               border-radius: 8px;
+               border-radius: 4px;
                margin-bottom: 20px;
-               text-align: center;
+             }",
+             ".retirement-scenario-header h3 {
+               color: #3c8dbc;
+               margin: 0;
+               font-weight: 600;
              }",
              ".retirement-results {
                background-color: #f8f9fa;
-               border: 2px solid #e9ecef;
-               border-radius: 8px;
+               border: 1px solid #e9ecef;
+               border-radius: 4px;
                padding: 20px;
                margin-bottom: 20px;
              }",
@@ -119,7 +124,7 @@ tabItem(
              ".retirement-results pre {
                background-color: white;
                border: 1px solid #dee2e6;
-               border-radius: 6px;
+               border-radius: 4px;
                padding: 15px;
                font-size: 14px;
                line-height: 1.8;
@@ -127,28 +132,18 @@ tabItem(
              ".retirement-plot-container {
                background-color: white;
                border: 1px solid #dee2e6;
-               border-radius: 8px;
+               border-radius: 4px;
                padding: 15px;
                margin-top: 10px;
+               margin-bottom: 20px;
              }",
-             "#case_a_for_retirement_recalculate, #case_b_for_retirement_recalculate {
-               background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-               color: white !important;
-               border: none !important;
-               padding: 10px 25px !important;
-               font-size: 14px !important;
-               font-weight: 600 !important;
-               border-radius: 6px !important;
-               box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-               transition: all 0.3s ease !important;
-               margin-top: 10px !important;
+             ".retirement-section {
+               margin-bottom: 40px;
+               padding-bottom: 30px;
+               border-bottom: 2px solid #e9ecef;
              }",
-             "#case_a_for_retirement_recalculate:hover, #case_b_for_retirement_recalculate:hover {
-               transform: translateY(-2px) !important;
-               box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
-             }",
-             "#case_a_for_retirement_recalculate i, #case_b_for_retirement_recalculate i {
-               color: white !important;
+             ".retirement-section:last-of-type {
+               border-bottom: none;
              }"
   ),
   
@@ -163,68 +158,74 @@ tabItem(
   
   hr(style = "border-top: 2px solid #e9ecef; margin-bottom: 30px;"),
   
-  # Scenario labels
-  fluidRow(
-    column(
-      6,
+  # Scenario A - stacked on top
+  div(class = "retirement-section",
       div(class = "retirement-scenario-header",
-          h3("Scenario A", style = "margin: 0; font-weight: 600;")
+          h3("Scenario A")
+      ),
+      
+      # Input panel
+      fluidRow(
+        column(12, 
+               renderInputs("case_a_for_retirement")
+        )
+      ),
+      
+      # Results and plot
+      fluidRow(
+        column(
+          12,
+          div(class = "retirement-results",
+              h4("Scenario A Results"),
+              verbatimTextOutput("a_summary")
+          )
+        )
+      ),
+      
+      fluidRow(
+        column(
+          12,
+          div(class = "retirement-plot-container",
+              h4("Scenario A Simulation", style = "color: #495057; margin-top: 0; margin-bottom: 15px;"),
+              plotOutput("a_distPlot", height = "500px")
+          )
+        )
       )
-    ),
-    column(
-      6,
+  ),
+  
+  # Scenario B - stacked below
+  div(class = "retirement-section",
       div(class = "retirement-scenario-header",
-          h3("Scenario B", style = "margin: 0; font-weight: 600;")
+          h3("Scenario B")
+      ),
+      
+      # Input panel
+      fluidRow(
+        column(12, 
+               renderInputs("case_b_for_retirement")
+        )
+      ),
+      
+      # Results and plot
+      fluidRow(
+        column(
+          12,
+          div(class = "retirement-results",
+              h4("Scenario B Results"),
+              verbatimTextOutput("b_summary")
+          )
+        )
+      ),
+      
+      fluidRow(
+        column(
+          12,
+          div(class = "retirement-plot-container",
+              h4("Scenario B Simulation", style = "color: #495057; margin-top: 0; margin-bottom: 15px;"),
+              plotOutput("b_distPlot", height = "500px")
+          )
+        )
       )
-    )
-  ),
-  
-  # Input panels with improved styling
-  fluidRow(
-    column(6, 
-           div(style = "padding-right: 10px;",
-               renderInputs("case_a_for_retirement"))
-    ),
-    column(6, 
-           div(style = "padding-left: 10px;",
-               renderInputs("case_b_for_retirement"))
-    )
-  ),
-  
-  # Summary text boxes for each scenario
-  fluidRow(
-    column(
-      6,
-      div(class = "retirement-results",
-          h4("Scenario A Results"),
-          verbatimTextOutput("a_summary")
-      )
-    ),
-    column(
-      6,
-      div(class = "retirement-results",
-          h4("Scenario B Results"),
-          verbatimTextOutput("b_summary")
-      )
-    )
-  ),
-  
-  # Plots (one per scenario) with improved containers
-  fluidRow(
-    column(
-      6,
-      div(class = "retirement-plot-container",
-          h4("Scenario A Simulation", style = "color: #495057; margin-top: 0; margin-bottom: 15px;"),
-          plotOutput("a_distPlot", height = "550px")
-      )
-    ),
-    column(
-      6,
-      div(class = "retirement-plot-container",
-          h4("Scenario B Simulation", style = "color: #495057; margin-top: 0; margin-bottom: 15px;"),
-          plotOutput("b_distPlot", height = "550px")
-      )
-    )
   ),
   
   hr(style = "border-top: 2px solid #e9ecef; margin-top: 30px; margin-bottom: 30px;"),
