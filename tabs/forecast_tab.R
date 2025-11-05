@@ -1,12 +1,13 @@
 tabItem(
   tabName = "forecast",
-  h2("CFHI Future Predictions",
+  h2("CFHI Forecasting",
      style = "text-align:center;
               font-family:'Trebuchet MS',sans-serif;
               font-weight:600;
               font-size:32px;"),
   br(),
-  p("Use historical data to predict future trends in Consumer Financial Health. Adjust economic scenarios to see potential impacts."),
+  p(style = "text-align:center; font-size:16px;", 
+    "Predict future CFHI trends based on historical patterns and economic scenarios."),
   
   fluidRow(
     column(12,
@@ -41,77 +42,89 @@ tabItem(
         
         sliderInput(
           "forecast_months",
-          "How many months ahead to predict:",
+          "Forecast Period:",
           min = 3,
           max = 24,
           value = 12,
-          step = 3
+          step = 3,
+          post = " months"
         ),
         
         selectInput(
           "forecast_method",
-          "Prediction Method:",
+          "Method:",
           choices = c(
-            "ARIMA (Statistical Patterns)" = "arima",
-            "Exponential Smoothing (Weighted Average)" = "ets",
-            "Both Combined (Ensemble)" = "ensemble"
+            "ARIMA" = "arima",
+            "Exponential Smoothing" = "ets",
+            "Ensemble" = "ensemble"
           ),
-          selected = "arima"
+          selected = "ensemble"
         ),
         
         hr(),
         
-        h4("What-If Scenario Analysis"),
+        h4("Economic Scenarios"),
         p(style = "font-size:12px; color:#666;", 
-          "Adjust these to simulate different economic futures:"),
+          "Simulate economic changes (leave at 0 for baseline forecast):"),
         
         sliderInput(
           "scenario_savings",
-          "Change in Avg Savings Rate (%):",
+          "Savings Rate:",
           min = -5,
           max = 5,
           value = 0,
-          step = 0.5
+          step = 0.5,
+          post = "%"
         ),
-        helpText("If people save 2% more, set to +2"),
         
         sliderInput(
           "scenario_wage",
-          "Change in Avg Wage Growth (%):",
+          "Wage Growth:",
           min = -3,
           max = 3,
           value = 0,
-          step = 0.5
+          step = 0.5,
+          post = "%"
         ),
-        helpText("If wages grow 1.5% faster, set to +1.5"),
         
         sliderInput(
           "scenario_inflation",
-          "Change in Avg Inflation (%):",
+          "Inflation:",
           min = -2,
           max = 2,
           value = 0,
-          step = 0.5
+          step = 0.5,
+          post = "%"
         ),
-        helpText("If inflation rises 1%, set to +1"),
         
         sliderInput(
           "scenario_borrow",
-          "Change in Avg Interest Rates (%):",
+          "Interest Rates:",
           min = -1,
           max = 1,
           value = 0,
-          step = 0.25
+          step = 0.25,
+          post = "%"
         ),
-        helpText("If Fed raises rates 0.5%, set to +0.5"),
         
         br(),
         
         actionButton(
           "apply_scenario",
-          "Apply Scenario & Update Forecast",
-          class = "btn-warning",
-          style = "width:100%; font-weight:bold;"
+          "Generate Forecast",
+          class = "btn-primary",
+          icon = icon("chart-line"),
+          style = "width:100%; font-weight:bold; font-size:16px;"
+        ),
+        
+        br(), br(),
+        
+        actionButton(
+          "reset_scenario",
+          "Reset to Baseline",
+          class = "btn-default",
+          icon = icon("undo"),
+          style = "width:100%;"
         )
       )
     ),
@@ -119,13 +132,13 @@ tabItem(
     column(
       width = 9,
       box(
-        title = "CFHI Forecast Chart",
+        title = "Forecast Results",
         width = 12,
         status = "info",
         solidHeader = TRUE,
         
-        p(style = "font-size:13px; color:#555;",
-          tags$b("Blue line:"), " Historical CFHI data | ",
+        p(style = "font-size:14px; color:#555;",
+          tags$b("Blue:"), " Historical | ",
           tags$b("Orange dashed line:"), " Predicted future values | ",
           tags$b("Shaded areas:"), " Confidence ranges (darker = 80% confident, lighter = 95% confident)"),
         

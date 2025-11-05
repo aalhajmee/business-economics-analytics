@@ -15,6 +15,14 @@ forecast_data <- reactive({
   )
 })
 
+# Reset button handler
+observeEvent(input$reset_scenario, {
+  updateSliderInput(session, "scenario_savings", value = 0)
+  updateSliderInput(session, "scenario_wage", value = 0)
+  updateSliderInput(session, "scenario_inflation", value = 0)
+  updateSliderInput(session, "scenario_borrow", value = 0)
+})
+
 forecast_model <- eventReactive(input$apply_scenario, {
   data <- forecast_data()
   horizon <- input$forecast_months
@@ -67,11 +75,10 @@ output$forecast_plot <- renderPlotly({
     length.out = input$forecast_months
   )
   
-  historical_df <- data.frame(
-    date = as.Date(time(data$ts)),
-    value = as.numeric(data$ts),
-    type = "Historical"
-  )
+  historical_df <- data$df %>%
+    select(date, CFHI) %>%
+    mutate(type = "Historical") %>%
+    rename(value = CFHI)
   
   forecast_df <- data.frame(
     date = future_dates,

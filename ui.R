@@ -67,13 +67,13 @@ dashboardPage(
       menuItem("Home",            tabName = "home",     icon = icon("home")),
       menuItem("CFHI Analysis",   icon = icon("chart-line"),
                menuSubItem("Analysis", tabName = "cfhi"),
+               menuSubItem("Forecasting", tabName = "forecast"),
                menuSubItem("Data Sources", tabName = "cfhi_data")
       ),
       menuItem("State Analysis", icon = icon("map-marked-alt"),
                menuSubItem("Explore States", tabName = "explore"),
                menuSubItem("Data Sources", tabName = "state_data")
       ),
-      menuItem("Forecasting",     tabName = "forecast", icon = icon("line-chart")),
       menuItem("Personal Finance", icon = icon("lightbulb"),
                menuSubItem("Overview",   tabName = "overview",    icon = icon("lightbulb")),
                menuSubItem("Savings Guide",   tabName = "guide",    icon = icon("lightbulb")),
