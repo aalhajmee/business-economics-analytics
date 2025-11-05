@@ -45,7 +45,7 @@ market_data <- reactive({
   })
 })
 
-# Calculate correlation statistics
+# Calculate correlation statistics with hypothesis testing
 correlation_stats <- reactive({
   data <- market_data()
   
@@ -55,7 +55,10 @@ correlation_stats <- reactive({
       p_value = NA,
       r_squared = NA,
       n = nrow(data),
-      model = NULL
+      model = NULL,
+      conf_int = c(NA, NA),
+      effect_size = NA,
+      hypothesis_result = "Insufficient data"
     ))
   }
   
@@ -66,13 +69,45 @@ correlation_stats <- reactive({
   model <- lm(CFHI ~ sp500_price, data = data)
   r_squared <- summary(model)$r.squared
   
+  # Calculate confidence interval for correlation
+  conf_int <- if (method == "pearson") {
+    cor_test$conf.int
+  } else {
+    c(NA, NA)  # Spearman doesn't provide CI in standard cor.test
+  }
+  
+  # Cohen's interpretation of effect size (for Pearson r)
+  effect_size <- if (method == "pearson") {
+    r_val <- abs(cor_test$estimate)
+    if (r_val >= 0.5) "Large"
+    else if (r_val >= 0.3) "Medium"
+    else if (r_val >= 0.1) "Small"
+    else "Negligible"
+  } else {
+    "See Spearman rho"
+  }
+  
+  # Hypothesis test interpretation (α = 0.05)
+  alpha <- 0.05
+  hypothesis_result <- if (cor_test$p.value < alpha) {
+    paste0("REJECT H₀ (p = ", sprintf("%.4f", cor_test$p.value), " < ", alpha, 
+           "): Significant correlation exists between CFHI and S&P 500.")
+  } else {
+    paste0("FAIL TO REJECT H₀ (p = ", sprintf("%.4f", cor_test$p.value), " ≥ ", alpha, 
+           "): No significant correlation detected.")
+  }
+  
   list(
     correlation = cor_test$estimate,
     p_value = cor_test$p.value,
     r_squared = r_squared,
     n = nrow(data),
     model = model,
-    method = method
+    method = method,
+    conf_int = conf_int,
+    effect_size = effect_size,
+    hypothesis_result = hypothesis_result,
+    cor_test = cor_test
   )
 })
 
@@ -361,7 +396,7 @@ output$regression_summary <- renderPrint({
   }
 })
 
-# Key insights
+# Key insights with formal hypothesis testing
 output$correlation_insights <- renderUI({
   stats <- correlation_stats()
   data <- market_data()
@@ -405,18 +440,48 @@ output$correlation_insights <- renderUI({
     "remained stable"
   }
   
+  # Confidence interval display
+  ci_text <- if (!is.na(stats$conf_int[1])) {
+    paste0("[", round(stats$conf_int[1], 3), ", ", round(stats$conf_int[2], 3), "]")
+  } else {
+    "N/A for Spearman"
+  }
+  
   insights_html <- paste0(
     "<div style='padding: 15px; line-height: 1.8;'>",
-    "<h4 style='margin-top: 0; color: #1e293b;'>Analysis Summary</h4>",
+    
+    # Hypothesis Testing Section
+    "<div style='background: #f0f9ff; border-left: 4px solid #0284c7; padding: 12px; margin-bottom: 15px; border-radius: 4px;'>",
+    "<h4 style='margin-top: 0; color: #0c4a6e;'><i class='fa fa-flask'></i> Formal Hypothesis Test</h4>",
+    "<p style='margin: 5px 0; color: #0c4a6e; font-size: 13px;'><b>H₀ (Null Hypothesis):</b> There is no correlation between CFHI and S&P 500 (ρ = 0)</p>",
+    "<p style='margin: 5px 0; color: #0c4a6e; font-size: 13px;'><b>Hₐ (Alternative Hypothesis):</b> There is a correlation between CFHI and S&P 500 (ρ ≠ 0)</p>",
+    "<p style='margin: 5px 0; color: #0c4a6e; font-size: 13px;'><b>Significance Level:</b> α = 0.05</p>",
+    "<p style='margin: 10px 0 5px 0; color: #0c4a6e; font-size: 14px; font-weight: 600;'><b>Result:</b> ", stats$hypothesis_result, "</p>",
+    "</div>",
+    
+    # Statistical Summary
+    "<h4 style='margin-top: 0; color: #1e293b;'>Statistical Summary</h4>",
+    "<ul style='color: #475569; font-size: 14px;'>",
+    "<li><b>Correlation Coefficient:</b> r = ", round(cor_val, 3), " (", cor_strength, " ", cor_direction, ")</li>",
+    "<li><b>95% Confidence Interval:</b> ", ci_text, "</li>",
+    "<li><b>Effect Size (Cohen's d):</b> ", stats$effect_size, "</li>",
+    "<li><b>P-value:</b> ", if (p_val < 0.001) "< 0.001" else round(p_val, 4), 
+    " → ", sig_text, "</li>",
+    "<li><b>R² (Variance Explained):</b> ", variance_pct, "%</li>",
+    "<li><b>Sample Size:</b> n = ", stats$n, " months</li>",
+    "</ul>",
+    
+    # Key Findings
+    "<h4 style='margin-top: 15px; color: #1e293b;'>Key Findings</h4>",
     "<ul style='color: #475569; font-size: 14px;'>",
     "<li>The analysis reveals a <b>", cor_strength, " ", cor_direction, " correlation</b> ",
-    "(r = ", round(cor_val, 3), ") between CFHI and S&P 500 over this period.</li>",
-    "<li>This relationship is ", sig_text, " (p = ", 
-    if (p_val < 0.001) "< 0.001" else round(p_val, 4), ").</li>",
+    "between CFHI and S&P 500 over this period.</li>",
     "<li>The S&P 500 explains approximately <b>", variance_pct, "%</b> of the variance in CFHI values.</li>",
     "<li>Over the past 12 months, the correlation has <b>", recent_change, "</b> ",
     "(recent r = ", round(recent_cor, 3), ").</li>",
     "</ul>",
+    
+    # Interpretation
     "<h4 style='color: #1e293b; margin-bottom: 10px;'>Interpretation</h4>",
     "<p style='color: #475569; font-size: 14px; margin: 0;'>",
     if (cor_val > 0.5) {
@@ -429,6 +494,16 @@ output$correlation_insights <- renderUI({
       "Weak correlation suggests that stock market movements have limited direct impact on overall household financial health, highlighting the importance of wage growth, savings rates, and inflation control."
     },
     "</p>",
+    
+    # Important Note
+    "<div style='background: #fef3c7; border-left: 4px solid #f59e0b; padding: 10px; margin-top: 15px; border-radius: 4px;'>",
+    "<p style='margin: 0; color: #78350f; font-size: 13px;'><b><i class='fa fa-exclamation-triangle'></i> Important:</b> ",
+    "Correlation does not imply causation. While we observe a ", cor_strength, " ", cor_direction, 
+    " relationship, this could be due to: (1) S&P 500 influencing CFHI, (2) CFHI influencing S&P 500, ",
+    "(3) a third variable influencing both (e.g., Federal Reserve policy), or (4) coincidental patterns. ",
+    "Further analysis would be needed to establish causal mechanisms.</p>",
+    "</div>",
+    
     "</div>"
   )
   

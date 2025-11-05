@@ -361,5 +361,34 @@ cfhi_feature_server <- function(id,
       ", ns("comparison_text"), color, message))
     })
   })
+  
+  # Download handlers
+  output$download_cfhi_data <- downloadHandler(
+    filename = function() {
+      paste0("CFHI_data_", format(Sys.Date(), "%Y%m%d"), ".csv")
+    },
+    content = function(file) {
+      df <- df_filtered()
+      # Select relevant columns for export
+      export_df <- df %>%
+        select(date, CFHI, S_star, W_star, I_star, R_star, 
+               savings_rate, wage_yoy, inflation_yoy, borrow_rate)
+      write.csv(export_df, file, row.names = FALSE)
+    }
+  )
+  
+  output$download_cfhi_plot <- downloadHandler(
+    filename = function() {
+      paste0("CFHI_plot_", format(Sys.Date(), "%Y%m%d"), ".png")
+    },
+    content = function(file) {
+      # Use plotly to export as static image
+      # Note: This requires kaleido package or orca
+      p <- output$cfhi_plot
+      # For now, save as HTML (fully interactive)
+      htmlwidgets::saveWidget(plotly::as_widget(p), file)
+    }
+  )
 }
+
 

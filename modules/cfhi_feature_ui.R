@@ -21,11 +21,11 @@ cfhi_feature_ui <- function(id) {
           style = "border:1px solid #e5e7eb; border-radius:12px; padding:16px; margin-bottom:16px;",
           fluidRow(
             column(
-              width = 4,
+              width = 3,
               uiOutput(ns("date_range_ui"))
             ),
             column(
-              width = 8,
+              width = 6,
               checkboxGroupInput(
                 ns("show_components"),
                 "Select Components to Display:",
@@ -38,6 +38,12 @@ cfhi_feature_ui <- function(id) {
                 selected = NULL,
                 inline = TRUE
               )
+            ),
+            column(
+              width = 3,
+              tags$label("Export Data:", style = "font-size: 13px; font-weight: 600; margin-bottom: 8px; display: block;"),
+              downloadButton(ns("download_cfhi_data"), "Download CSV", class = "btn-primary btn-sm", style = "width: 100%; margin-bottom: 5px;"),
+              downloadButton(ns("download_cfhi_plot"), "Download Plot", class = "btn-info btn-sm", style = "width: 100%;")
             )
           )
         ),

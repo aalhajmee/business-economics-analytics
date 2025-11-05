@@ -6,7 +6,12 @@
 # ------------------------------------------------------------------------------
 sim <- function(startAmount = 100000, growthRate = 5.0, standardDev = 7.0, 
                 inflation = 2.5, infStandardDev = 1.5, withdrawals = 1000, 
-                years = 20, sims = 200) {
+                years = 20, sims = 200, seed = NULL) {
+  
+  # Set seed for reproducibility
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
   
   # Convert percentages to decimals
   growthRate = growthRate / 100
@@ -93,16 +98,42 @@ observeEvent(input$case_b_for_retirement_recalculate, {
 })
 
 # ------------------------------------------------------------------------------
-# Reactive simulations for scenarios A and B
+# Reactive simulations for scenarios A and B with input validation
 # ------------------------------------------------------------------------------
 navA <- reactive({
   trigger_a()  # Dependency on trigger
-  do.call(sim, getParameters("case_a_for_retirement", input))
+  params <- getParameters("case_a_for_retirement", input)
+  
+  # Validate inputs
+  validate(
+    need(params$startAmount > 0, "Starting amount must be positive"),
+    need(params$withdrawals > 0, "Monthly withdrawals must be positive"),
+    need(params$years > 0, "Years must be positive"),
+    need(params$growthRate >= 0 && params$growthRate <= 30, "Growth rate must be between 0% and 30%"),
+    need(params$inflation >= 0 && params$inflation <= 20, "Inflation must be between 0% and 20%"),
+    need(params$withdrawals < params$startAmount, "Monthly withdrawals exceed starting amount")
+  )
+  
+  params$seed <- 12345  # Fixed seed for reproducibility
+  do.call(sim, params)
 })
 
 navB <- reactive({
   trigger_b()  # Dependency on trigger
-  do.call(sim, getParameters("case_b_for_retirement", input))
+  params <- getParameters("case_b_for_retirement", input)
+  
+  # Validate inputs
+  validate(
+    need(params$startAmount > 0, "Starting amount must be positive"),
+    need(params$withdrawals > 0, "Monthly withdrawals must be positive"),
+    need(params$years > 0, "Years must be positive"),
+    need(params$growthRate >= 0 && params$growthRate <= 30, "Growth rate must be between 0% and 30%"),
+    need(params$inflation >= 0 && params$inflation <= 20, "Inflation must be between 0% and 20%"),
+    need(params$withdrawals < params$startAmount, "Monthly withdrawals exceed starting amount")
+  )
+  
+  params$seed <- 12346  # Different seed for scenario B
+  do.call(sim, params)
 })
 
 # ------------------------------------------------------------------------------

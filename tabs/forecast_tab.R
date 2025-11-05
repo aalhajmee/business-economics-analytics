@@ -113,6 +113,16 @@ tabItem(
           class = "btn-primary btn-lg",
           icon = icon("chart-line"),
           style = "width:100%; font-weight:bold;"
+        ),
+        
+        br(), br(),
+        
+        downloadButton(
+          "download_forecast_data",
+          "Download Forecast Data",
+          class = "btn-success",
+          icon = icon("download"),
+          style = "width:100%;"
         )
       )
     ),
@@ -134,7 +144,65 @@ tabItem(
             tags$b(icon("info-circle"), " Reading the chart:"),
             " The ", tags$b("blue line"), " shows historical data. The ",
             tags$b("orange dashed line"), " shows the forecast. ",
-            tags$b("Shaded areas"), " represent confidence intervals (darker = more confident)."
+            tags$b("Shaded areas"), " represent confidence intervals: ",
+            tags$b("80% band"), " (darker) means 80% probability the true value falls within this range; ",
+            tags$b("95% band"), " (lighter) provides 95% confidence. Wider bands indicate greater uncertainty."
+          )
+        )
+      )
+    )
+  ),
+  
+  # Model Diagnostics Section
+  fluidRow(
+    column(
+      width = 12,
+      box(
+        title = "Model Validation & Diagnostics",
+        width = 12,
+        status = "warning",
+        solidHeader = TRUE,
+        collapsible = TRUE,
+        collapsed = TRUE,
+        
+        h4("Model Comparison", style = "margin-top: 0;"),
+        p("Comparing ARIMA and ETS models on training data. Lower values indicate better fit."),
+        DTOutput("model_comparison_table"),
+        
+        br(),
+        
+        h4("Backtesting Results"),
+        p("Out-of-sample validation using last 12 months as test set. This shows how well models predict unseen data."),
+        DTOutput("backtest_accuracy_table"),
+        
+        br(),
+        
+        fluidRow(
+          column(6, plotlyOutput("backtest_plot", height = "350px")),
+          column(6, plotlyOutput("residual_diagnostics", height = "350px"))
+        ),
+        
+        br(),
+        
+        fluidRow(
+          column(6, plotOutput("arima_acf_plot", height = "300px")),
+          column(6, plotOutput("arima_qq_plot", height = "300px"))
+        ),
+        
+        br(),
+        
+        div(style="background:#fff3cd; padding:12px; border-radius:5px; border-left:4px solid #ffc107;",
+          tags$p(style="margin:0; font-size:13px;",
+            tags$b(icon("lightbulb"), " Interpretation Guide:"),
+            tags$ul(
+              style = "margin-bottom: 0;",
+              tags$li(tags$b("AIC/BIC:"), " Lower is better. Penalizes model complexity."),
+              tags$li(tags$b("RMSE:"), " Root Mean Square Error. Lower indicates better predictions."),
+              tags$li(tags$b("MAE:"), " Mean Absolute Error. Average prediction error in CFHI points."),
+              tags$li(tags$b("MAPE:"), " Mean Absolute Percentage Error. Average error as percentage."),
+              tags$li(tags$b("ACF Plot:"), " Should show no significant autocorrelation in residuals (all bars within blue lines)."),
+              tags$li(tags$b("Q-Q Plot:"), " Points should follow diagonal line for normally distributed residuals.")
+            )
           )
         )
       )
