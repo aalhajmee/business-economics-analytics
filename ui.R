@@ -69,7 +69,7 @@ about_tab      <- safe_source_tab("tabs/about_tab.R", "about")
 
 
 dashboardPage(
-  dashboardHeader(title = "FINANCIAL HEALTH"),
+  dashboardHeader(title = "Financial Health"),
   
   dashboardSidebar(
     sidebarMenu(
@@ -102,7 +102,7 @@ dashboardPage(
       tags$style(HTML("
        .main-header .logo {
          font-family: 'Poppins', sans-serif !important;
-         font-size: 24px !important;
+         font-size: 22px !important;
          font-weight: 600 !important;
          letter-spacing: 0.5px !important;
        }
