@@ -12,31 +12,31 @@ tabItem(tabName = "guide",
         fluidRow(
           column(5, wellPanel(
             numericInput("inNumber", "Income (after tax):",
-                         min = 0, max = 1000000000, value = 0, step = 1000),
+                         min = 0, max = 1000000000, value = 50000, step = 1000),
             numericInput("inNumber2", "Rent or Mortgage Payments:",
-                         min = 0, max = 1000000000, value = 0, step = 100),
+                         min = 0, max = 1000000000, value = 15000, step = 100),
             numericInput("inNumber3", "Utility Bills:",
-                         min = 0, max = 1000000000, value = 0, step = 100),
+                         min = 0, max = 1000000000, value = 1000, step = 100),
             numericInput("inNumber4", "Healthcare:",
-                         min = 0, max = 1000000000, value = 0, step = 100),
+                         min = 0, max = 1000000000, value = 1000, step = 100),
             numericInput("inNumber5", "Insurance Payments:",
-                         min = 0, max = 1000000000, value = 0, step = 100),
+                         min = 0, max = 1000000000, value = 1000, step = 100),
             numericInput("inNumber6", "Other Needs*:",
                          min = 0, max = 1000000000, value = 0, step = 100),
-            p("*If you can honestly say 'I can’t live without it,' you have identified a need. Minimum required payments on a credit card or a loan also belong in this category")
+            p("*If you can honestly say 'I can’t live without it,' you have identified a need. Gas, minimum required payments on a credit card, or a loan also belong in this category")
           )),
           
           column(5, wellPanel(
             numericInput("inNumber7", "Subscriptions:",
-                         min = 0, max = 1000000000, value = 0, step = 10),
+                         min = 0, max = 1000000000, value = 100, step = 10),
             numericInput("inNumber8", "Dining Out:",
-                         min = 0, max = 1000000000, value = 0, step = 100),
+                         min = 0, max = 1000000000, value = 100, step = 100),
             numericInput("inNumber9", "Entertainment:",
-                         min = 0, max = 1000000000, value = 0, step = 100),
+                         min = 0, max = 1000000000, value = 500, step = 100),
             numericInput("inNumber10", "Shopping:",
-                         min = 0, max = 1000000000, value = 0, step = 100),
+                         min = 0, max = 1000000000, value = 500, step = 100),
             numericInput("inNumber11", "Travel:",
-                         min = 0, max = 1000000000, value = 0, step = 100)
+                         min = 0, max = 1000000000, value = 1000, step = 100)
           ))
         ),
         
