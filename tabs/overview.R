@@ -10,7 +10,7 @@ tabItem(tabName = "overview",
            credit, savings, debt, and loans — to help you build lasting financial health."),
         br(),
         
-        # ===== Custom Button CSS =====
+# ===== Custom Button =====
         tags$style(HTML("
           .btn-flat {
             border: none !important;
@@ -24,9 +24,10 @@ tabItem(tabName = "overview",
 
           /* Specific button colors */
           button#go_to_credit_resources.btn-flat    { background-color: #0073b7 !important; }  /* blue */
-          button#go_to_savings_guide.btn-flat       { background-color: #00a65a !important; }  /* green */
+          button#go_to_savings_guide.btn-flat       { background-color: #00c0ef !important; }  /* green */
           button#go_to_debt_tools.btn-flat          { background-color: #f39c12 !important; }  /* amber */
           button#go_to_loan_calculator.btn-flat     { background-color: #3c8dbc !important; }  /* teal */
+          button#go_to_retirement.btn-flat          { background-color: #dd4b39 !important; }  /* teal */
           button#go_to_overview.btn-flat            { background-color: #00a65a !important; }  /* green */
 
           .btn-flat:hover {
@@ -35,7 +36,7 @@ tabItem(tabName = "overview",
           }
         ")),
         
-        # ===== CREDIT SECTION =====
+# ===== CREDIT SECTION =====
         box(
           title = tagList(icon("credit-card"), "Understanding Credit"),
           status = "primary", solidHeader = TRUE, width = 12,
@@ -57,7 +58,7 @@ tabItem(tabName = "overview",
                            icon = icon("arrow-right"), class = "btn-flat"))
         ),
         
-        # ===== SAVINGS SECTION =====
+# ===== SAVINGS SECTION =====
         box(
           title = tagList(icon("piggy-bank"), "Building Savings"),
           status = "info", solidHeader = TRUE, width = 12,
@@ -78,7 +79,7 @@ tabItem(tabName = "overview",
                            icon = icon("arrow-right"), class = "btn-flat"))
         ),
         
-        # ===== DEBT SECTION =====
+# ===== DEBT SECTION =====
         box(
           title = tagList(icon("balance-scale"), "Managing Debt"),
           status = "warning", solidHeader = TRUE, width = 12,
@@ -101,7 +102,7 @@ tabItem(tabName = "overview",
                            icon = icon("arrow-right"), class = "btn-flat"))
         ),
         
-        # ===== LOANS SECTION =====
+# ===== LOANS SECTION =====
         box(
           title = tagList(icon("university"), "Understanding Loans"),
           status = "primary", solidHeader = TRUE, width = 12,
@@ -125,16 +126,12 @@ tabItem(tabName = "overview",
                            icon = icon("arrow-right"), class = "btn-flat"))
         ),
         
-        # ===== RETIREMENT SECTION =====
-        # --- RETIREMENT PLANNING BLOCK ---
+# ===== RETIREMENT SECTION =====
         br(),
         box(
-          width = 12,
-          status = "primary",
-          solidHeader = TRUE,
+          status = "danger", solidHeader = TRUE, width = 12,
           title = tagList(icon("umbrella-beach"), "Retirement Planning"),
           div(
-            style = "font-size:16px; line-height:1.6; font-family:'Segoe UI', sans-serif;",
             p("Planning for retirement early can significantly improve your long-term financial security. 
        The earlier you begin contributing to retirement accounts like a 401(k), IRA, or Roth IRA, 
        the more time your money has to grow through compound interest."),
@@ -154,7 +151,7 @@ tabItem(tabName = "overview",
                            icon = icon("arrow-right"), class = "btn-flat"))
         ),
         
-        # ===== GENERAL FINANCIAL WELLNESS SECTION =====
+# ===== GENERAL FINANCIAL WELLNESS SECTION =====
         box(
           title = tagList(icon("chart-line"), "Financial Wellness Habits"),
           status = "success", solidHeader = TRUE, width = 12,
