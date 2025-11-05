@@ -4,6 +4,10 @@ Business and Economics Analytics group project by Ammar Alhajmee, Bemnet Ali, an
 
 An interactive R Shiny dashboard for analyzing household financial well-being through the Composite Financial Health Index (CFHI), macroeconomic correlations, state-level economic comparisons, and personal finance tools.
 
+## ⚠️ Disclaimer
+
+**AI-Assisted Development**: The code in this project was primarily written with the assistance of Large Language Model (LLM) AI tools, including ChatGPT and Claude. These AI models were used to generate code, provide implementation guidance, and assist with debugging throughout the development process. While the project concept, design decisions, and data analysis approaches were directed by the team members, the actual code implementation heavily relied on AI assistance.
+
 ## Quick Start
 
 ### Running the Application
