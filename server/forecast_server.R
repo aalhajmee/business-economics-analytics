@@ -76,8 +76,12 @@ output$forecast_plot <- renderPlotly({
     length.out = horizon
   )
   
-  # Historical data
+  # Show only last 5 years of historical data for better forecast visibility
+  lookback_date <- data$latest_date - years(5)
+  
+  # Historical data (limited to last 5 years)
   historical_df <- data$df %>%
+    filter(date >= lookback_date) %>%
     select(date, CFHI) %>%
     rename(value = CFHI)
   
