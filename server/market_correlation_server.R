@@ -7,22 +7,23 @@ market_data <- reactive({
   req(input$market_date_range)
   
   tryCatch({
-    # Load CFHI data
+    # Load CFHI data - normalize to first day of month
     cfhi <- read_csv("cfhi_data/cfhi_master_2000_onward.csv", show_col_types = FALSE) %>%
       select(date, CFHI) %>%
       filter(!is.na(CFHI)) %>%
-      mutate(date = as.Date(date))
+      mutate(date = floor_date(as.Date(date), "month"))
     
-    # Load S&P 500 data
+    # Load S&P 500 data - normalize to first day of month
     sp500 <- read_excel("cfhi_data/SP500_PriceHistory_Monthly_042006_082025_FactSet.xlsx", sheet = 1) %>%
       select(Date, Price, `% Change`) %>%
       rename(date = Date, sp500_price = Price, sp500_change = `% Change`) %>%
-      mutate(date = as.Date(date))
+      mutate(date = floor_date(as.Date(date), "month"))
     
-    # Merge datasets
+    # Merge datasets on normalized month
     merged <- inner_join(cfhi, sp500, by = "date") %>%
       arrange(date) %>%
-      filter(!is.na(CFHI), !is.na(sp500_price))
+      filter(!is.na(CFHI), !is.na(sp500_price)) %>%
+      distinct(date, .keep_all = TRUE)  # Remove any duplicate months
     
     # Apply date range filter
     date_range <- input$market_date_range
