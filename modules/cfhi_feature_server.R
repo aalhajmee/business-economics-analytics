@@ -72,28 +72,25 @@ cfhi_feature_server <- function(id,
                      min = min_d, max = max_d)
     })
     
-    # Compute CFHI for chosen window and smoothing
+    # Compute CFHI for chosen window
     df_filtered <- reactive({
-      df <- df_master()
+      df_full <- df_master()
       req(input$date_range)
-      rng <- as.Date(input$date_range)
-      df <- df[df$date >= rng[1] & df$date <= rng[2], , drop = FALSE]
-      # Fixed smoothing: k = 1 (no smoothing)
-      k <- 1
-      if ("cfhi_raw" %in% names(df)) {
-        cfhi_raw <- df$cfhi_raw
-      } else {
-        # derive if necessary
-        s <- 100 * scale01(df$savings_rate)
-        w <- 100 * scale01(df$wage_yoy)
-        i <- 100 - 100 * scale01(df$inflation_yoy)
-        r <- 100 - 100 * scale01(df$borrow_rate)
-        cfhi_raw <- rowMeans(cbind(s, w, i, r), na.rm = TRUE)
-        df$S_star <- s; df$W_star <- w; df$I_star <- i; df$R_star <- r
+      
+      # Calculate components using FULL dataset for consistent normalization
+      # This ensures scores are comparable across time periods
+      if (!all(c("S_star","W_star","I_star","R_star") %in% names(df_full))) {
+        df_full$S_star <- 100 * scale01(df_full$savings_rate)
+        df_full$W_star <- 100 * scale01(df_full$wage_yoy)
+        df_full$I_star <- 100 - 100 * scale01(df_full$inflation_yoy)
+        df_full$R_star <- 100 - 100 * scale01(df_full$borrow_rate)
+        df_full$CFHI_raw <- rowMeans(df_full[, c("S_star","W_star","I_star","R_star")], na.rm = TRUE)
+        df_full$CFHI <- df_full$CFHI_raw
       }
-      cfhi <- if (k > 1) zoo::rollapply(cfhi_raw, k, mean, align = "right", fill = NA) else cfhi_raw
-      df$CFHI_raw <- cfhi_raw
-      df$CFHI <- cfhi
+      
+      # Now filter to selected date range
+      rng <- as.Date(input$date_range)
+      df <- df_full[df_full$date >= rng[1] & df_full$date <= rng[2], , drop = FALSE]
       df
     })
     
