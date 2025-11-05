@@ -16,7 +16,6 @@ loan_ui <- tabItem(
               font-size:32px;"),
   br(),
   h3(""),
-  img(src = "savingchart.png", height = "auto", width = "800px"),
   p("Enter your information and calculate your likelihood of getting approved for a loan."),
   
   fluidRow(
