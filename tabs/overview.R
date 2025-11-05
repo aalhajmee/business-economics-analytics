@@ -1,15 +1,37 @@
+# --- PERSONAL FINANCE TAB ---
+
 tabItem(tabName = "overview",
-        h2("Personal Finance Essentials",
-           style = "text-align:center;
-              font-family:'Trebuchet MS',sans-serif;
-              font-weight:600;
-              font-size:32px;"),
+        h2("Personal Finance Essentials"),
         p("This section provides a foundational overview of key areas of personal finance — 
            credit, savings, debt, and loans — to help you build lasting financial health."),
-        
         br(),
         
-        # CREDIT SECTION
+        # ===== Custom Button CSS =====
+        tags$style(HTML("
+          .btn-flat {
+            border: none !important;
+            border-radius: 6px !important;
+            color: #fff !important;
+            font-weight: 500 !important;
+            padding: 8px 18px !important;
+            box-shadow: none !important;
+            transition: all 0.2s ease;
+          }
+
+          /* Specific button colors */
+          button#go_to_credit_resources.btn-flat    { background-color: #0073b7 !important; }  /* blue */
+          button#go_to_savings_guide.btn-flat       { background-color: #00a65a !important; }  /* green */
+          button#go_to_debt_tools.btn-flat          { background-color: #f39c12 !important; }  /* amber */
+          button#go_to_loan_calculator.btn-flat     { background-color: #3c8dbc !important; }  /* teal */
+          button#go_to_overview.btn-flat            { background-color: #00a65a !important; }  /* green */
+
+          .btn-flat:hover {
+            opacity: 0.9 !important;
+            transform: translateY(-1px);
+          }
+        ")),
+        
+        # ===== CREDIT SECTION =====
         box(
           title = tagList(icon("credit-card"), "Understanding Credit"),
           status = "primary", solidHeader = TRUE, width = 12,
@@ -26,13 +48,12 @@ tabItem(tabName = "overview",
           ),
           br(),
           p("Good credit can save you thousands in interest and open doors to better financial products."),
-          br(),
           div(style = "text-align:right;",
               actionButton("go_to_credit_resources", "Learn More About Credit", 
-                           icon = icon("arrow-right"), class = "btn btn-primary"))
+                           icon = icon("arrow-right"), class = "btn-flat"))
         ),
         
-        # SAVINGS SECTION
+        # ===== SAVINGS SECTION =====
         box(
           title = tagList(icon("piggy-bank"), "Building Savings"),
           status = "info", solidHeader = TRUE, width = 12,
@@ -48,13 +69,12 @@ tabItem(tabName = "overview",
           ),
           br(),
           p("Consistency matters more than the amount — saving regularly builds lifelong habits of financial discipline."),
-          br(),
           div(style = "text-align:right;",
               actionButton("go_to_savings_guide", "Explore the Savings Guide", 
-                           icon = icon("arrow-right"), class = "btn btn-info"))
+                           icon = icon("arrow-right"), class = "btn-flat"))
         ),
         
-        # DEBT SECTION
+        # ===== DEBT SECTION =====
         box(
           title = tagList(icon("balance-scale"), "Managing Debt"),
           status = "warning", solidHeader = TRUE, width = 12,
@@ -72,13 +92,12 @@ tabItem(tabName = "overview",
           ),
           br(),
           p("Responsible debt management strengthens credit and ensures financial stability over time."),
-          br(),
           div(style = "text-align:right;",
               actionButton("go_to_debt_tools", "View Debt & Budget Tools", 
-                           icon = icon("arrow-right"), class = "btn btn-warning"))
+                           icon = icon("arrow-right"), class = "btn-flat"))
         ),
         
-        # LOANS SECTION
+        # ===== LOANS SECTION =====
         box(
           title = tagList(icon("university"), "Understanding Loans"),
           status = "primary", solidHeader = TRUE, width = 12,
@@ -97,13 +116,12 @@ tabItem(tabName = "overview",
           ),
           br(),
           p("A well-chosen loan should align with your goals — not limit them."),
-          br(),
           div(style = "text-align:right;",
               actionButton("go_to_loan_calculator", "Go to Loan Calculator", 
-                           icon = icon("arrow-right"), class = "btn btn-primary"))
+                           icon = icon("arrow-right"), class = "btn-flat"))
         ),
         
-        # GENERAL FINANCIAL WELLNESS SECTION
+        # ===== GENERAL FINANCIAL WELLNESS SECTION =====
         box(
           title = tagList(icon("chart-line"), "Financial Wellness Habits"),
           status = "success", solidHeader = TRUE, width = 12,
@@ -117,9 +135,8 @@ tabItem(tabName = "overview",
           ),
           br(),
           p("Healthy financial habits compound just like savings — the earlier and more consistently you start, the stronger your results."),
-          br(),
           div(style = "text-align:right;",
               actionButton("go_to_overview", "Back to Overview", 
-                           icon = icon("arrow-left"), class = "btn btn-success"))
+                           icon = icon("arrow-left"), class = "btn-flat"))
         )
 )

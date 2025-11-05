@@ -1,23 +1,25 @@
-# --- Navigation buttons for Personal Finance section ---
-observeEvent(input$go_to_savings_guide, {
-  updateTabItems(session, "tabs", "guide")
-})
-
-observeEvent(input$go_to_loan_calculator, {
-  updateTabItems(session, "tabs", "loans")
-})
+# --- NAVIGATION BUTTONS FOR PERSONAL FINANCE SECTION ---
 
 observeEvent(input$go_to_credit_resources, {
-  updateTabItems(session, "tabs", "credit") # if you add a credit tab later
+  updateTabItems(session, "tabs", "credit")   # Change "credit" to your actual credit tab name if you have one
+})
+
+observeEvent(input$go_to_savings_guide, {
+  updateTabItems(session, "tabs", "guide")    # Savings Guide tab
 })
 
 observeEvent(input$go_to_debt_tools, {
-  updateTabItems(session, "tabs", "forecast") # or whatever your debt tools tab is named
+  updateTabItems(session, "tabs", "forecast") # Or wherever your debt/budget tools are
+})
+
+observeEvent(input$go_to_loan_calculator, {
+  updateTabItems(session, "tabs", "loans")     # Loan calculator tab
 })
 
 observeEvent(input$go_to_overview, {
-  updateTabItems(session, "tabs", "home")
+  updateTabItems(session, "tabs", "home")     # Back to overview/home
 })
+
 
 
 #Recommended
