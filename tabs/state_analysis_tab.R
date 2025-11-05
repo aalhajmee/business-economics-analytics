@@ -33,26 +33,6 @@ tabItem(
   ),
   
   fluidRow(
-    column(12,
-      box(
-        title = "Official Data Sources",
-        width = 12,
-        status = "info",
-        solidHeader = FALSE,
-        collapsible = FALSE,
-        
-        tags$ul(
-          tags$li(tags$b("Median Income & Poverty:"), " U.S. Census Bureau, American Community Survey 2023 5-Year Estimates"),
-          tags$li(tags$b("Unemployment Rate:"), " Bureau of Labor Statistics, Local Area Unemployment Statistics (August 2025)"),
-          tags$li(tags$b("Cost of Living Index:"), " Missouri Economic Research and Information Center (100 = U.S. average, higher values = more expensive)")
-        )
-      )
-    )
-  ),
-  
-  br(),
-  
-  fluidRow(
     column(
       width = 3,
       box(

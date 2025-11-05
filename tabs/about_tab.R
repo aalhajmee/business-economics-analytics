@@ -171,11 +171,15 @@ tabItem(
           style = "color: #334155; font-size: 14px; margin-top: 10px; margin-bottom: 0;",
           tags$strong("GitHub Repository:"), " ",
           tags$a(
-            href = "https://github.com/aalhajmee/business-economics-analytics",
+            href = "https://github.com/WL-Biol185-ShinyProjects/Financial-Health-Analytics-Dashboard",
             target = "_blank",
             style = "color: #3b82f6; text-decoration: none;",
-            "aalhajmee/business-economics-analytics"
+            "WL-Biol185-ShinyProjects/Financial-Health-Analytics-Dashboard"
           )
+        ),
+        tags$p(
+          style = "color: #334155; font-size: 14px; margin-top: 10px; margin-bottom: 0;",
+          tags$strong("Course:"), " BIOL 185 - Data Science: Visualizing and Exploring Big Data"
         ),
         tags$p(
           style = "color: #64748b; font-size: 13px; margin-top: 10px; margin-bottom: 0;",

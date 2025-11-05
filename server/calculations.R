@@ -100,12 +100,10 @@ colorBox <- function(current, recommended, title, icon_type = "circle") {
     color <- if (current >= recommended) "#e8f8f2" else "#fde8e8"
     border <- if (current >= recommended) "#00a65a" else "#dc3545"
     label <- if (current >= recommended) "Above recommended" else "Below recommended"
-    emoji <- if (current >= recommended) "✅" else "⚠️"
   } else {
     color <- if (current <= recommended) "#e8f8f2" else "#fde8e8"
     border <- if (current <= recommended) "#00a65a" else "#dc3545"
     label <- if (current <= recommended) "Below recommended" else "Above recommended"
-    emoji <- if (current <= recommended) "✅" else "⚠️"
   }
   
   # Card design
@@ -133,7 +131,7 @@ colorBox <- function(current, recommended, title, icon_type = "circle") {
          style = "margin:10px 0; font-weight:700; color:#222;"),
       
       # indicator pill
-      span(emoji, label,
+      span(label,
            style = paste0(
              "display:inline-block;",
              "margin-top:10px;",

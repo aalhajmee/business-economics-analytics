@@ -49,27 +49,7 @@ cfhi_feature_ui <- function(id) {
         ),
         
         # Plot
-        plotlyOutput(ns("cfhi_plot"), height = "480px"),
-        
-        # Methodology Section (collapsible or compact)
-        tags$div(
-          style = "border:1px solid #e5e7eb; border-radius:8px; padding:16px; background:#f9fafb; margin-top:16px;",
-          tags$h4(
-            style = "margin-top:0; margin-bottom:12px; color:#0f172a; font-size:14px; font-weight:600;",
-            "Methodology & Data Sources"
-          ),
-          tags$div(
-            style = "font-size:12px; color:#475569; line-height:1.6;",
-            tags$p(
-              style = "margin:8px 0;",
-              tags$strong("Formula:"), " CFHI = (S* + W* + I* + R*) / 4, where components are normalized to 0-100 scale and rebased to Oct 2006 = 100."
-            ),
-            tags$p(
-              style = "margin:8px 0;",
-              tags$strong("Sources:"), " Personal Saving Rate (BEA), Average Hourly Earnings YoY (BLS), CPI YoY (BLS), Federal Funds Rate (FRED)."
-            )
-          )
-        )
+        plotlyOutput(ns("cfhi_plot"), height = "480px")
       ),
       
       # RIGHT COLUMN - Personal Calculator

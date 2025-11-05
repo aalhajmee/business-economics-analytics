@@ -377,7 +377,7 @@ cfhi_feature_server <- function(id,
     
     output$download_cfhi_plot <- downloadHandler(
       filename = function() {
-        paste0("CFHI_plot_", format(Sys.Date(), "%Y%m%d"), ".html")
+        paste0("CFHI_plot_", format(Sys.Date(), "%Y%m%d"), ".png")
       },
       content = function(file) {
         df <- df_filtered()
@@ -385,10 +385,11 @@ cfhi_feature_server <- function(id,
         
         selected_comps <- input$show_components
         
-        fig <- plot_ly(df, x = ~date, y = ~CFHI, type = 'scatter', mode = 'lines+markers',
-                       name = 'CFHI (Composite)',
-                       line = list(color = '#1e40af', width = 3),
-                       marker = list(size = 4, color = '#1e40af'))
+        # Use ggplot2 for reliable PNG export
+        p <- ggplot(df, aes(x = date, y = CFHI)) +
+          geom_line(aes(color = "CFHI (Composite)"), linewidth = 1.2) +
+          geom_point(aes(color = "CFHI (Composite)"), size = 1.5) +
+          scale_color_manual(name = "", values = c("CFHI (Composite)" = "#1e40af"))
         
         if (!is.null(selected_comps) && length(selected_comps) > 0) {
           if (!all(c("S_star","W_star","I_star","R_star") %in% names(df))) {
@@ -399,35 +400,47 @@ cfhi_feature_server <- function(id,
             df$S_star <- s; df$W_star <- w; df$I_star <- i; df$R_star <- r
           }
           
+          colors <- c("CFHI (Composite)" = "#1e40af")
+          linetypes <- c("CFHI (Composite)" = "solid")
+          
           if ("savings" %in% selected_comps) {
-            fig <- fig %>% add_trace(x = ~date, y = ~S_star, data = df, type = 'scatter', 
-                                    mode = 'lines', name = 'Savings Rate ↑',
-                                    line = list(color = '#16a34a', dash = 'dash', width = 2))
+            p <- p + geom_line(data = df, aes(x = date, y = S_star, color = "Savings Rate ↑"), 
+                              linetype = "dashed", linewidth = 0.8)
+            colors["Savings Rate ↑"] <- "#16a34a"
+            linetypes["Savings Rate ↑"] <- "dashed"
           }
           if ("wages" %in% selected_comps) {
-            fig <- fig %>% add_trace(x = ~date, y = ~W_star, data = df, type = 'scatter',
-                                    mode = 'lines', name = 'Wage Growth ↑',
-                                    line = list(color = '#0891b2', dash = 'dash', width = 2))
+            p <- p + geom_line(data = df, aes(x = date, y = W_star, color = "Wage Growth ↑"), 
+                              linetype = "dashed", linewidth = 0.8)
+            colors["Wage Growth ↑"] <- "#0891b2"
+            linetypes["Wage Growth ↑"] <- "dashed"
           }
           if ("inflation" %in% selected_comps) {
-            fig <- fig %>% add_trace(x = ~date, y = ~I_star, data = df, type = 'scatter',
-                                    mode = 'lines', name = 'Inflation ↓',
-                                    line = list(color = '#ea580c', dash = 'dash', width = 2))
+            p <- p + geom_line(data = df, aes(x = date, y = I_star, color = "Inflation ↓"), 
+                              linetype = "dashed", linewidth = 0.8)
+            colors["Inflation ↓"] <- "#ea580c"
+            linetypes["Inflation ↓"] <- "dashed"
           }
           if ("borrow" %in% selected_comps) {
-            fig <- fig %>% add_trace(x = ~date, y = ~R_star, data = df, type = 'scatter',
-                                    mode = 'lines', name = 'Borrow Rate ↓',
-                                    line = list(color = '#c026d3', dash = 'dash', width = 2))
+            p <- p + geom_line(data = df, aes(x = date, y = R_star, color = "Borrow Rate ↓"), 
+                              linetype = "dashed", linewidth = 0.8)
+            colors["Borrow Rate ↓"] <- "#c026d3"
+            linetypes["Borrow Rate ↓"] <- "dashed"
           }
+          
+          p <- p + scale_color_manual(name = "", values = colors) +
+                   scale_linetype_manual(name = "", values = linetypes)
         }
         
-        fig <- fig %>% layout(
-          title = paste0("CFHI: ", format(min(df$date), "%b %Y"), " - ", format(max(df$date), "%b %Y")),
-          xaxis = list(title = ""), yaxis = list(title = "Index (Oct 2006 = 100)"),
-          hovermode = 'x unified', legend = list(orientation = "h", yanchor = "bottom", y = -0.25)
-        )
+        p <- p + 
+          labs(title = paste0("CFHI: ", format(min(df$date), "%b %Y"), " - ", format(max(df$date), "%b %Y")),
+               x = "", y = "Index (Oct 2006 = 100)") +
+          theme_minimal() +
+          theme(legend.position = "bottom",
+                plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+                panel.grid.minor = element_blank())
         
-        htmlwidgets::saveWidget(plotly::as_widget(fig), file, selfcontained = TRUE)
+        ggsave(file, plot = p, width = 12, height = 6, dpi = 300, bg = "white")
       }
     )
   })

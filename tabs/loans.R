@@ -166,26 +166,26 @@ loan_server <- function(input, output, session) {
     
     if(credit_score < 700) {
       recommendations <- c(recommendations, 
-                           "📊 Improve your credit score by paying bills on time and reducing credit card balances")
+                           "Improve your credit score by paying bills on time and reducing credit card balances")
     }
     
     if(result$dti > 0.40) {
       recommendations <- c(recommendations,
-                           "💰 Consider requesting a smaller loan amount to reduce your debt-to-income ratio")
+                           "Consider requesting a smaller loan amount to reduce your debt-to-income ratio")
     }
     
     if(input$loan_years_employed < 2) {
       recommendations <- c(recommendations,
-                           "💼 Build more employment history before applying for larger loans")
+                           "Build more employment history before applying for larger loans")
     }
     
     if(loan_amount > income * 0.5) {
       recommendations <- c(recommendations,
-                           "🎯 Your loan amount is high relative to your income. Consider saving for a larger down payment")
+                           "Your loan amount is high relative to your income. Consider saving for a larger down payment")
     }
     
     if(length(recommendations) == 0) {
-      recommendations <- c("✅ Your financial profile is strong! You're in good shape to apply.")
+      recommendations <- c("Your financial profile is strong! You're in good shape to apply.")
     }
     
     tags$ul(

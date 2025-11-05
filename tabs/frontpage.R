@@ -48,7 +48,7 @@ tabItem(
     width: 80%;
   }
 
-  /* ✅ Box faint by default, darkens on hover */
+  /* Box faint by default, darkens on hover */
   .caption-bg {
     background-color: rgba(0, 0, 0, 0.2);
     border-radius: 12px;
