@@ -27,6 +27,7 @@ library(shinydashboard)
 library(shinythemes)
 library(shinyjs)
 library(plotly)
+library(DT)
 
 
 # CFHI UI module
