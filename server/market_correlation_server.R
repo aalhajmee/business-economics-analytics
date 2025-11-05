@@ -62,7 +62,8 @@ correlation_stats <- reactive({
     ))
   }
   
-  method <- input$correlation_method
+  # Use Pearson correlation method
+  method <- "pearson"
   cor_test <- cor.test(data$CFHI, data$sp500_price, method = method)
   
   # Linear regression model
@@ -70,21 +71,18 @@ correlation_stats <- reactive({
   r_squared <- summary(model)$r.squared
   
   # Calculate confidence interval for correlation
-  conf_int <- if (method == "pearson") {
-    cor_test$conf.int
-  } else {
-    c(NA, NA)  # Spearman doesn't provide CI in standard cor.test
-  }
+  conf_int <- cor_test$conf.int
   
   # Cohen's interpretation of effect size (for Pearson r)
-  effect_size <- if (method == "pearson") {
-    r_val <- abs(cor_test$estimate)
-    if (r_val >= 0.5) "Large"
-    else if (r_val >= 0.3) "Medium"
-    else if (r_val >= 0.1) "Small"
-    else "Negligible"
+  r_val <- abs(cor_test$estimate)
+  effect_size <- if (r_val >= 0.5) {
+    "Large"
+  } else if (r_val >= 0.3) {
+    "Medium"
+  } else if (r_val >= 0.1) {
+    "Small"
   } else {
-    "See Spearman rho"
+    "Negligible"
   }
   
   # Hypothesis test interpretation (α = 0.05)
@@ -325,7 +323,8 @@ output$rolling_correlation_plot <- renderPlotly({
     return(plotly_empty())
   }
   
-  method <- input$correlation_method
+  # Use Pearson correlation method
+  method <- "pearson"
   
   # Calculate 12-month rolling correlation
   rolling_cor <- data.frame(

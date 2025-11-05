@@ -58,14 +58,18 @@ tabItem(
               max = Sys.Date()
             )
           )
-        ),
-        column(3,
-          selectInput(
-            "correlation_method",
-            "Correlation Method:",
-            choices = c("Pearson" = "pearson", "Spearman" = "spearman"),
-            selected = "pearson"
-          )
+        )
+      ),
+      
+      tags$div(
+        style = "background:#e3f2fd; padding:12px; border-radius:5px; border-left:4px solid #2196f3; margin-top:15px;",
+        tags$p(style="margin:0; font-size:13px;",
+          tags$b(icon("info-circle"), " Correlation Method:"),
+          " This analysis uses ", tags$b("Pearson correlation"), " to measure the linear relationship between CFHI and S&P 500 returns. ",
+          "Pearson is appropriate here because both variables are continuous numeric measurements and we're testing if they move together in a straight-line pattern. ",
+          "The correlation coefficient (r) ranges from -1 to +1: values near +1 indicate strong positive correlation (both increase together), ",
+          "values near -1 indicate strong negative correlation (one increases while the other decreases), and values near 0 suggest no linear relationship. ",
+          "The p-value tests if this correlation is statistically significant (p < 0.05 indicates the relationship is unlikely due to chance)."
         )
       )
     )
