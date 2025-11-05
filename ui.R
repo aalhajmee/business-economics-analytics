@@ -101,7 +101,7 @@ dashboardPage(
     tags$head(
       tags$style(HTML("
        .main-header .logo {
-         font-family: 'Poppins', sans-serif !important;
+         font-family: 'Trebuchet MS', sans-serif !important;
          font-size: 22px !important;
          font-weight: 600 !important;
          letter-spacing: 0.5px !important;

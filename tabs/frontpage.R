@@ -6,6 +6,13 @@ tags$script(HTML("
 
 tabItem(
   tabName = "home",
+  # --- Page Title ---
+  h2("Take control of your financial future!",
+     style = "text-align:center;
+              font-family:'Trebuchet MS', sans-serif;
+              font-weight:700;
+              font-size:30px;"),
+  br(),
   
   # Section styling
   tags$style(HTML("
@@ -108,7 +115,7 @@ tabItem(
       tags$div(
         class = "caption-bg",
         tags$h1("BUILD STRONG FINANCIAL FOUNDATIONS"),
-        tags$p("Explore trends, markets, and opportunities that drive long-term success."),
+        tags$p("Explore trends and opportunities that drive long-term success."),
         tags$button(
           class = "btn btn-primary btn-lg",
           onclick = "goToTab('cfhi')",
@@ -140,6 +147,25 @@ tabItem(
   # --- Slide 3 ---
   tags$div(
     class = "hero-section",
+    tags$img(src = "stock.jpg"),
+    tags$div(
+      class = "hero-caption",
+      tags$div(
+        class = "caption-bg",
+        tags$h1("CORRELATION WITH FINANCIAL MARKETS"),
+        tags$p("Track the relationship between the S&P 500 and your financial health"),
+        tags$button(
+          class = "btn btn-primary btn-lg",
+          onclick = "goToTab('market_correlation')",
+          "Compare»"
+        )
+      )
+    )
+  ),
+  
+  # --- Slide 4 ---
+  tags$div(
+    class = "hero-section",
     tags$img(src = "plant.jpg"),
     tags$div(
       class = "hero-caption",
@@ -155,7 +181,4 @@ tabItem(
       )
     )
   ),
-  
-  br(),
-  h2(style="text-align:center; font-weight:600;", "WE'VE GOT YOU COVERED!")
 )
