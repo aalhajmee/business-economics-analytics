@@ -89,8 +89,8 @@ dashboardPage(
                menuSubItem("Market Data Sources", tabName = "market_data")
       ),
       menuItem("Personal Finance", icon = icon("lightbulb"),
-               menuSubItem("Overview",   tabName = "overview",    icon = icon("lightbulb")),
-               menuSubItem("Savings Guide",   tabName = "guide",    icon = icon("lightbulb")),
+               menuSubItem("Overview",   tabName = "overview",    icon = icon("compass")),
+               menuSubItem("Savings Guide",   tabName = "guide",    icon = icon("money-check-alt")),
                menuSubItem("Loan Calculator", tabName = "loans",     icon = icon("university")),
                menuSubItem("Retirement", tabName = "retirement",     icon = icon("umbrella-beach"))
       ),

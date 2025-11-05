@@ -1,7 +1,11 @@
 # --- PERSONAL FINANCE TAB ---
 
 tabItem(tabName = "overview",
-        h2("Personal Finance Essentials"),
+        h2("Personal Finance Essentials",
+           style = "text-align:center;
+              font-family:'Trebuchet MS',sans-serif;
+              font-weight:600;
+              font-size:32px;"),
         p("This section provides a foundational overview of key areas of personal finance — 
            credit, savings, debt, and loans — to help you build lasting financial health."),
         br(),
@@ -138,5 +142,10 @@ tabItem(tabName = "overview",
           div(style = "text-align:right;",
               actionButton("go_to_overview", "Back to Overview", 
                            icon = icon("arrow-left"), class = "btn-flat"))
-        )
+        ),
+        p("." ,
+        style = "text-align:center;
+              font-family:'Trebuchet MS',sans-serif;
+              font-weight:600;
+              font-size:1px;")
 )

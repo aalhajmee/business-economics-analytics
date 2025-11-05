@@ -22,7 +22,7 @@ observeEvent(input$go_to_overview, {
 
 
 
-#Recommended
+# === Recommended Calculation ===
 calc_recommended <- reactive({
   income <- input$inNumber
   
@@ -37,25 +37,23 @@ calc_recommended <- reactive({
   )
 })
 
-#Current Spending
+# === Current Spending Calculation ===
 calc_current <- reactive({
-  # Needs inputs
   needs <- sum(
-    input$inNumber2,  #Rent
-    input$inNumber3,  #Utilities
-    input$inNumber4,  #Healthcare
-    input$inNumber5,  #Insurance
-    input$inNumber6,  #Other Needs
+    input$inNumber2,  # Rent
+    input$inNumber3,  # Utilities
+    input$inNumber4,  # Healthcare
+    input$inNumber5,  # Insurance
+    input$inNumber6,  # Other Needs
     na.rm = TRUE
   )
   
-  # Wants inputs
   wants <- sum(
-    input$inNumber7,  #Subscriptions
-    input$inNumber8,  #Dining Out
-    input$inNumber9,  #Entertainment
-    input$inNumber10, #Shopping
-    input$inNumber11, #Travel
+    input$inNumber7,  # Subscriptions
+    input$inNumber8,  # Dining Out
+    input$inNumber9,  # Entertainment
+    input$inNumber10, # Shopping
+    input$inNumber11, # Travel
     na.rm = TRUE
   )
   
@@ -65,7 +63,7 @@ calc_current <- reactive({
   list(needs = needs, wants = wants, savings = savings)
 })
 
-#Recommended
+# === Recommended Outputs ===
 output$needs_out <- renderText({
   paste0("$", format(round(calc_recommended()$needs, 2), big.mark = ","))
 })
@@ -78,7 +76,7 @@ output$savings_out <- renderText({
   paste0("$", format(round(calc_recommended()$savings, 2), big.mark = ","))
 })
 
-# === Current Budget Outputs ===
+# === Current Spending Outputs ===
 output$needs_current <- renderText({
   paste0("$", format(round(calc_current()$needs, 2), big.mark = ","))
 })
@@ -91,61 +89,107 @@ output$savings_current <- renderText({
   paste0("$", format(round(calc_current()$savings, 2), big.mark = ","))
 })
 
-
-#CHANGING COLORS DEPENDING ON THE INPUT MATCHING RECOMMENDED
-colorBox <- function(current, recommended, title) {
-  color <- if (current <= recommended) "#d9fcd9" else "#ffd6d6"   # green or red background
-  border <- if (current <= recommended) "#28a745" else "#dc3545"  # green or red border
-  symbol <- if (current <= recommended) "✅" else "⚠️"
+# === Fancy Dynamic Color Boxes ===
+colorBox <- function(current, recommended, title, icon_type = "circle") {
+  # Logic: savings = inverse condition
+  if (title == "Savings") {
+    color <- if (current >= recommended) "#e8f8f2" else "#fde8e8"
+    border <- if (current >= recommended) "#00a65a" else "#dc3545"
+    label <- if (current >= recommended) "Above recommended" else "Below recommended"
+    emoji <- if (current >= recommended) "✅" else "⚠️"
+  } else {
+    color <- if (current <= recommended) "#e8f8f2" else "#fde8e8"
+    border <- if (current <= recommended) "#00a65a" else "#dc3545"
+    label <- if (current <= recommended) "Below recommended" else "Above recommended"
+    emoji <- if (current <= recommended) "✅" else "⚠️"
+  }
   
+  # Card design
   wellPanel(
     div(
       style = paste0(
-        "background-color:", color, ";",
+        "background:", color, ";",
         "border: 2px solid ", border, ";",
-        "border-radius: 8px;",
-        "padding: 15px;",
+        "border-radius: 14px;",
+        "padding: 25px;",
         "text-align: center;",
-        "box-shadow: 1px 1px 4px rgba(0,0,0,0.1);"
+        "font-family: 'Segoe UI', sans-serif;",
+        "box-shadow: 0 4px 12px rgba(0,0,0,0.1);",
+        "transition: transform 0.2s ease-in-out;",
+        "cursor: default;"
       ),
-      h4(title),
-      h3(paste0("$", format(round(current, 2), big.mark = ","))),
-      p(symbol, if (current <= recommended) "Below recommended" else "Above recommended")
+     
+      # title
+      h4(tags$i(class = paste0("fa fa-", icon_type)), 
+         paste0(" ", title),
+         style = "font-weight:600; margin-bottom:10px;"),
+      
+      # main amount
+      h2(paste0("$", format(round(current, 0), big.mark = ",")),
+         style = "margin:10px 0; font-weight:700; color:#222;"),
+      
+      # indicator pill
+      span(emoji, label,
+           style = paste0(
+             "display:inline-block;",
+             "margin-top:10px;",
+             "padding:6px 12px;",
+             "border-radius:6px;",
+             "background-color:", border, ";",
+             "color:white;",
+             "font-size:14px;"
+           ))
     )
   )
 }
 
-# Render the dynamic boxes
+# === Render the UI Boxes ===
 output$needsBox <- renderUI({
-  colorBox(calc_current()$needs, calc_recommended()$needs, "Needs")
+  colorBox(calc_current()$needs, calc_recommended()$needs, "Needs", "shopping-basket")
 })
 
 output$wantsBox <- renderUI({
-  colorBox(calc_current()$wants, calc_recommended()$wants, "Wants")
+  colorBox(calc_current()$wants, calc_recommended()$wants, "Wants", "heart")
 })
 
 output$savingsBox <- renderUI({
-  current <- calc_current()$savings
-  recommended <- calc_recommended()$savings
-  
-  # For savings: green if current >= recommended
-  color <- if (current >= recommended) "#d9fcd9" else "#ffd6d6"
-  border <- if (current >= recommended) "#28a745" else "#dc3545"
-  symbol <- if (current >= recommended) "✅" else "⚠️"
-  
+  colorBox(calc_current()$savings, calc_recommended()$savings, "Savings", "piggy-bank")
+})
+
+
+# Function for static recommended boxes (styled like colorBox but neutral)
+recommendedBox <- function(title, amount, icon_type = "circle") {
   wellPanel(
     div(
       style = paste0(
-        "background-color:", color, ";",
-        "border: 2px solid ", border, ";",
-        "border-radius: 8px;",
-        "padding: 15px;",
+        "background:#fafafa;",
+        "border: 2px solid #dcdcdc;",
+        "border-radius: 14px;",
+        "padding: 25px;",
         "text-align: center;",
-        "box-shadow: 1px 1px 4px rgba(0,0,0,0.1);"
+        "font-family: 'Segoe UI', sans-serif;",
+        "box-shadow: 0 4px 12px rgba(0,0,0,0.05);"
       ),
-      h4("Savings"),
-      h3(paste0("$", format(round(current, 2), big.mark = ","))),
-      p(symbol, if (current >= recommended) "Above recommended" else "Below recommended")
+      h4(tags$i(class = paste0("fa fa-", icon_type)), 
+         paste0(" ", title),
+         style = "font-weight:600; margin-bottom:10px;"),
+      
+      h2(paste0("$", format(round(amount, 0), big.mark = ",")),
+         style = "margin:10px 0; font-weight:700; color:#222;")
     )
   )
-}) 
+}
+
+# Render the recommended boxes
+output$recNeedsBox <- renderUI({
+  recommendedBox("Needs (50%)", calc_recommended()$needs, "shopping-basket")
+})
+
+output$recWantsBox <- renderUI({
+  recommendedBox("Wants (30%)", calc_recommended()$wants, "heart")
+})
+
+output$recSavingsBox <- renderUI({
+  recommendedBox("Savings (20%)", calc_recommended()$savings, "piggy-bank")
+})
+
