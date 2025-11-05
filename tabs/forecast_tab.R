@@ -6,28 +6,8 @@ tabItem(
               font-weight:600;
               font-size:32px;"),
   br(),
-  p(style = "text-align:center; font-size:16px;", 
-    "Predict future CFHI trends based on historical patterns and economic scenarios."),
-  
-  fluidRow(
-    column(12,
-      box(
-        title = "How to Use This Tool",
-        width = 12,
-        status = "info",
-        solidHeader = FALSE,
-        collapsible = TRUE,
-        collapsed = TRUE,
-        
-        tags$ol(
-          tags$li(tags$b("Choose how far ahead to predict:"), " Use the slider to select 3-24 months into the future."),
-          tags$li(tags$b("Select forecasting method:"), " ARIMA uses statistical patterns, Exponential Smoothing uses weighted averages."),
-          tags$li(tags$b("Run 'what-if' scenarios:"), " Adjust the sliders to see how changes in savings, wages, inflation, or interest rates might affect the future."),
-          tags$li(tags$b("Click 'Apply Scenario':"), " The chart updates to show your custom prediction.")
-        )
-      )
-    )
-  ),
+  p(style = "text-align:center; font-size:16px; max-width:800px; margin:0 auto;", 
+    "See how CFHI might trend in the future. Choose a timeframe and scenario to explore different economic possibilities."),
   
   br(),
   
@@ -40,71 +20,39 @@ tabItem(
         status = "primary",
         solidHeader = TRUE,
         
-        sliderInput(
+        h4("Time Period", style="margin-top:0;"),
+        radioButtons(
           "forecast_months",
-          "Forecast Period:",
-          min = 3,
-          max = 24,
-          value = 12,
-          step = 3,
-          post = " months"
-        ),
-        
-        selectInput(
-          "forecast_method",
-          "Method:",
-          choices = c(
-            "ARIMA" = "arima",
-            "Exponential Smoothing" = "ets",
-            "Ensemble" = "ensemble"
-          ),
-          selected = "ensemble"
+          NULL,
+          choices = c("6 months" = 6, "1 year" = 12, "2 years" = 24),
+          selected = 12,
+          inline = FALSE
         ),
         
         hr(),
         
-        h4("Economic Scenarios"),
-        p(style = "font-size:12px; color:#666;", 
-          "Simulate economic changes (leave at 0 for baseline forecast):"),
-        
-        sliderInput(
-          "scenario_savings",
-          "Savings Rate:",
-          min = -5,
-          max = 5,
-          value = 0,
-          step = 0.5,
-          post = "%"
+        h4("Economic Scenario"),
+        radioButtons(
+          "scenario_preset",
+          NULL,
+          choices = c(
+            "Current Trends (Baseline)" = "baseline",
+            "Economic Growth" = "growth",
+            "Economic Decline" = "decline",
+            "High Inflation" = "inflation"
+          ),
+          selected = "baseline",
+          inline = FALSE
         ),
         
-        sliderInput(
-          "scenario_wage",
-          "Wage Growth:",
-          min = -3,
-          max = 3,
-          value = 0,
-          step = 0.5,
-          post = "%"
-        ),
-        
-        sliderInput(
-          "scenario_inflation",
-          "Inflation:",
-          min = -2,
-          max = 2,
-          value = 0,
-          step = 0.5,
-          post = "%"
-        ),
-        
-        sliderInput(
-          "scenario_borrow",
-          "Interest Rates:",
-          min = -1,
-          max = 1,
-          value = 0,
-          step = 0.25,
-          post = "%"
+        div(style="background:#f8f9fa; padding:12px; border-radius:5px; margin-top:15px; font-size:12px;",
+          tags$b("What do these mean?"),
+          tags$ul(style="margin:8px 0 0 0; padding-left:18px;",
+            tags$li(tags$b("Current Trends:"), " Historical patterns continue"),
+            tags$li(tags$b("Economic Growth:"), " Rising wages, stable savings"),
+            tags$li(tags$b("Economic Decline:"), " Lower wages, higher costs"),
+            tags$li(tags$b("High Inflation:"), " Increased prices, reduced purchasing power")
+          )
         ),
         
         br(),
@@ -112,19 +60,9 @@ tabItem(
         actionButton(
           "apply_scenario",
           "Generate Forecast",
-          class = "btn-primary",
+          class = "btn-primary btn-lg",
           icon = icon("chart-line"),
-          style = "width:100%; font-weight:bold; font-size:16px;"
-        ),
-        
-        br(), br(),
-        
-        actionButton(
-          "reset_scenario",
-          "Reset to Baseline",
-          class = "btn-default",
-          icon = icon("undo"),
-          style = "width:100%;"
+          style = "width:100%; font-weight:bold;"
         )
       )
     ),
@@ -137,56 +75,20 @@ tabItem(
         status = "info",
         solidHeader = TRUE,
         
-        p(style = "font-size:14px; color:#555;",
-          tags$b("Blue:"), " Historical | ",
-          tags$b("Orange dashed line:"), " Predicted future values | ",
-          tags$b("Shaded areas:"), " Confidence ranges (darker = 80% confident, lighter = 95% confident)"),
+        plotlyOutput("forecast_plot", height = "500px"),
         
-        plotlyOutput("forecast_plot", height = "500px")
-      ),
-      
-      box(
-        title = "Forecast Summary",
-        width = 12,
-        status = "success",
+        br(),
         
-        fluidRow(
-          column(4, 
-            div(style = "text-align:center; padding:15px;",
-              uiOutput("forecast_stat_current")
-            )
-          ),
-          column(4,
-            div(style = "text-align:center; padding:15px;",
-              uiOutput("forecast_stat_predicted")
-            )
-          ),
-          column(4,
-            div(style = "text-align:center; padding:15px;",
-              uiOutput("forecast_stat_change")
+        div(style="background:#e3f2fd; padding:15px; border-radius:5px; border-left:4px solid #2196f3;",
+          tags$p(style="margin:0; font-size:14px;",
+            tags$b(icon("info-circle"), " How to read this chart:"),
+            tags$ul(style="margin:8px 0 0 0; padding-left:20px;",
+              tags$li(tags$b("Blue line:"), " Historical CFHI values (what actually happened)"),
+              tags$li(tags$b("Orange line:"), " Forecasted CFHI (predicted future values)"),
+              tags$li(tags$b("Shaded areas:"), " Confidence intervals (where values will likely fall)")
             )
           )
         )
-      ),
-      
-      box(
-        title = "Technical Details (Optional)",
-        width = 12,
-        status = "warning",
-        collapsible = TRUE,
-        collapsed = TRUE,
-        
-        p(tags$b("What do these methods mean?")),
-        tags$ul(
-          tags$li(tags$b("ARIMA:"), " Finds patterns in how the index changes over time (trends, seasonality)"),
-          tags$li(tags$b("Exponential Smoothing:"), " Gives more weight to recent data when predicting"),
-          tags$li(tags$b("Ensemble:"), " Combines both methods for a balanced prediction")
-        ),
-        
-        hr(),
-        
-        p(tags$b("Model Statistics:")),
-        verbatimTextOutput("forecast_metrics")
       )
     )
   )

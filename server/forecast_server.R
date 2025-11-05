@@ -15,81 +15,66 @@ forecast_data <- reactive({
   )
 })
 
-# Reset button handler
-observeEvent(input$reset_scenario, {
-  updateSliderInput(session, "scenario_savings", value = 0)
-  updateSliderInput(session, "scenario_wage", value = 0)
-  updateSliderInput(session, "scenario_inflation", value = 0)
-  updateSliderInput(session, "scenario_borrow", value = 0)
-})
-
 forecast_model <- eventReactive(input$apply_scenario, {
   data <- forecast_data()
-  horizon <- input$forecast_months
-  method <- input$forecast_method
+  horizon <- as.numeric(input$forecast_months)
   
-  base_forecast <- if (method == "arima") {
-    fit <- auto.arima(data$ts)
-    forecast(fit, h = horizon)
-  } else if (method == "ets") {
-    fit <- ets(data$ts)
-    forecast(fit, h = horizon)
-  } else {
-    fit1 <- auto.arima(data$ts)
-    fit2 <- ets(data$ts)
-    f1 <- forecast(fit1, h = horizon)
-    f2 <- forecast(fit2, h = horizon)
-    
-    f1$mean <- (f1$mean + f2$mean) / 2
-    f1$lower <- (f1$lower + f2$lower) / 2
-    f1$upper <- (f1$upper + f2$upper) / 2
-    f1
-  }
+  # Use ensemble method (average of ARIMA and ETS) for robustness
+  fit1 <- auto.arima(data$ts)
+  fit2 <- ets(data$ts)
+  f1 <- forecast(fit1, h = horizon)
+  f2 <- forecast(fit2, h = horizon)
   
-  scenario_adj <- (
-    input$scenario_savings * 0.25 +
-    input$scenario_wage * 0.25 +
-    input$scenario_inflation * -0.25 +
-    input$scenario_borrow * -0.25
+  # Average the forecasts
+  base_forecast <- f1
+  base_forecast$mean <- (f1$mean + f2$mean) / 2
+  base_forecast$lower <- (f1$lower + f2$lower) / 2
+  base_forecast$upper <- (f1$upper + f2$upper) / 2
+  
+  # Apply scenario adjustments
+  scenario <- input$scenario_preset
+  scenario_adj <- switch(scenario,
+    "baseline" = 0,
+    "growth" = 2,      # +2 points (wages up, savings stable)
+    "decline" = -2,    # -2 points (wages down, costs up)
+    "inflation" = -1.5, # -1.5 points (purchasing power down)
+    0
   )
   
   base_forecast$mean <- base_forecast$mean + scenario_adj
   base_forecast$lower <- base_forecast$lower + scenario_adj
   base_forecast$upper <- base_forecast$upper + scenario_adj
   
-  list(
-    forecast = base_forecast,
-    fit = if (exists("fit1")) fit1 else fit,
-    method = method
-  )
+  base_forecast
 }, ignoreNULL = FALSE)
 
 output$forecast_plot <- renderPlotly({
   data <- forecast_data()
-  model <- forecast_model()
-  fcast <- model$forecast
+  fcast <- forecast_model()
   
+  horizon <- as.numeric(input$forecast_months)
   future_dates <- seq.Date(
     from = data$latest_date + months(1),
     by = "month",
-    length.out = input$forecast_months
+    length.out = horizon
   )
   
+  # Historical data
   historical_df <- data$df %>%
     select(date, CFHI) %>%
-    mutate(type = "Historical") %>%
     rename(value = CFHI)
   
+  # Forecast data
   forecast_df <- data.frame(
     date = future_dates,
     value = as.numeric(fcast$mean),
     lower80 = as.numeric(fcast$lower[,1]),
     upper80 = as.numeric(fcast$upper[,1]),
     lower95 = as.numeric(fcast$lower[,2]),
-    upper95 = as.numeric(fcast$upper[,2]),
-    type = "Forecast"
+    upper95 = as.numeric(fcast$upper[,2])
   )
   
+  # Create plot
   plot_ly() %>%
     add_trace(
       data = historical_df,
@@ -97,8 +82,28 @@ output$forecast_plot <- renderPlotly({
       y = ~value,
       type = "scatter",
       mode = "lines",
-      name = "Historical CFHI",
+      name = "Historical",
       line = list(color = "#1e40af", width = 2)
+    ) %>%
+    add_ribbons(
+      data = forecast_df,
+      x = ~date,
+      ymin = ~lower95,
+      ymax = ~upper95,
+      name = "95% Confidence",
+      fillcolor = "rgba(251, 146, 60, 0.15)",
+      line = list(width = 0),
+      showlegend = TRUE
+    ) %>%
+    add_ribbons(
+      data = forecast_df,
+      x = ~date,
+      ymin = ~lower80,
+      ymax = ~upper80,
+      name = "80% Confidence",
+      fillcolor = "rgba(251, 146, 60, 0.25)",
+      line = list(width = 0),
+      showlegend = TRUE
     ) %>%
     add_trace(
       data = forecast_df,
@@ -107,107 +112,31 @@ output$forecast_plot <- renderPlotly({
       type = "scatter",
       mode = "lines",
       name = "Forecast",
-      line = list(color = "#ea580c", width = 2, dash = "dash")
-    ) %>%
-    add_ribbons(
-      data = forecast_df,
-      x = ~date,
-      ymin = ~lower80,
-      ymax = ~upper80,
-      name = "80% Confidence",
-      fillcolor = "rgba(234, 88, 12, 0.2)",
-      line = list(width = 0),
-      showlegend = TRUE
-    ) %>%
-    add_ribbons(
-      data = forecast_df,
-      x = ~date,
-      ymin = ~lower95,
-      ymax = ~upper95,
-      name = "95% Confidence",
-      fillcolor = "rgba(234, 88, 12, 0.1)",
-      line = list(width = 0),
-      showlegend = TRUE
+      line = list(color = "#fb923c", width = 3, dash = "dash")
     ) %>%
     layout(
-      title = paste("CFHI Forecast -", input$forecast_method),
-      xaxis = list(title = "Date"),
-      yaxis = list(title = "CFHI Value"),
-      hovermode = "x unified"
+      title = list(
+        text = paste0("<b>CFHI Forecast: ", input$scenario_preset, " scenario</b>"),
+        font = list(size = 18)
+      ),
+      xaxis = list(
+        title = "Date",
+        showgrid = TRUE,
+        gridcolor = "#f0f0f0"
+      ),
+      yaxis = list(
+        title = "CFHI Value",
+        showgrid = TRUE,
+        gridcolor = "#f0f0f0"
+      ),
+      hovermode = "x unified",
+      plot_bgcolor = "#ffffff",
+      paper_bgcolor = "#ffffff",
+      legend = list(
+        orientation = "h",
+        x = 0.5,
+        xanchor = "center",
+        y = -0.2
+      )
     )
-})
-
-output$forecast_stat_current <- renderUI({
-  data <- forecast_data()
-  
-  div(style = "text-align:center;",
-    h3(style = "color:#2563eb; margin:0;", round(data$latest_value, 2)),
-    p(style = "font-size:14px; color:#666; margin:5px 0;", strong("Current CFHI")),
-    p(style = "font-size:11px; color:#999;", paste("As of", format(data$latest_date, "%b %Y")))
-  )
-})
-
-output$forecast_stat_predicted <- renderUI({
-  model <- forecast_model()
-  fcast <- model$forecast
-  final_value <- as.numeric(tail(fcast$mean, 1))
-  
-  div(style = "text-align:center;",
-    h3(style = "color:#f97316; margin:0;", round(final_value, 2)),
-    p(style = "font-size:14px; color:#666; margin:5px 0;", strong("Predicted CFHI")),
-    p(style = "font-size:11px; color:#999;", 
-       paste("In", input$forecast_months, "months"))
-  )
-})
-
-output$forecast_stat_change <- renderUI({
-  data <- forecast_data()
-  model <- forecast_model()
-  fcast <- model$forecast
-  
-  current <- data$latest_value
-  predicted <- as.numeric(tail(fcast$mean, 1))
-  change <- predicted - current
-  change_pct <- (change / current) * 100
-  
-  color <- if (change > 0) "#16a34a" else "#dc2626"
-  arrow <- if (change > 0) "↑" else "↓"
-  direction <- if (change > 0) "Improvement" else "Decline"
-  
-  div(style = "text-align:center;",
-    h3(style = paste0("color:", color, "; margin:0;"), 
-       paste0(arrow, " ", round(abs(change), 2))),
-    p(style = "font-size:14px; color:#666; margin:5px 0;", strong(paste("Expected", direction))),
-    p(style = paste0("font-size:11px; color:", color, ";"), 
-       paste0(ifelse(change > 0, "+", ""), round(change_pct, 1), "%"))
-  )
-})
-
-output$forecast_metrics <- renderPrint({
-  model <- forecast_model()
-  data <- forecast_data()
-  
-  cat("===== FORECAST CONFIGURATION =====\n\n")
-  cat("Historical Data Range:", format(min(data$ts_data_dates), "%b %Y"), "to", 
-      format(max(data$ts_data_dates), "%b %Y"), "\n")
-  cat("Number of Historical Points:", length(data$ts_data), "\n")
-  cat("Prediction Method:", toupper(input$forecast_method), "\n")
-  cat("Forecast Horizon:", input$forecast_months, "months ahead\n\n")
-  
-  if (input$scenario_savings != 0 || input$scenario_wage != 0 || 
-      input$scenario_inflation != 0 || input$scenario_borrow != 0) {
-    cat("===== SCENARIO ADJUSTMENTS =====\n\n")
-    if (input$scenario_savings != 0) 
-      cat("  Savings Rate Change:", sprintf("%+.1f%%", input$scenario_savings), "\n")
-    if (input$scenario_wage != 0) 
-      cat("  Wage Growth Change:", sprintf("%+.1f%%", input$scenario_wage), "\n")
-    if (input$scenario_inflation != 0) 
-      cat("  Inflation Change:", sprintf("%+.1f%%", input$scenario_inflation), "\n")
-    if (input$scenario_borrow != 0) 
-      cat("  Interest Rate Change:", sprintf("%+.2f%%", input$scenario_borrow), "\n")
-    cat("\n")
-  }
-  
-  cat("===== STATISTICAL MODEL DETAILS =====\n\n")
-  print(model$fit)
 })
