@@ -31,31 +31,35 @@ forecast_model <- eventReactive(input$apply_scenario, {
   base_forecast$lower <- (f1$lower + f2$lower) / 2
   base_forecast$upper <- (f1$upper + f2$upper) / 2
   
-  # Apply scenario adjustments
+  # Apply scenario adjustments as a TREND (not constant)
   scenario <- input$scenario_preset
   
   if (scenario == "custom") {
     # Custom scenario: use user inputs
-    scenario_adj <- (
+    monthly_change <- (
       input$custom_savings * 0.25 +
       input$custom_wage * 0.25 +
       input$custom_inflation * -0.25 +
       input$custom_borrow * -0.25
-    )
+    ) / 12  # Convert to monthly rate of change
   } else {
-    # Preset scenarios
-    scenario_adj <- switch(scenario,
+    # Preset scenarios - monthly change rate
+    monthly_change <- switch(scenario,
       "baseline" = 0,
-      "growth" = 2,      # +2 points (wages up, savings stable)
-      "decline" = -2,    # -2 points (wages down, costs up)
-      "inflation" = -1.5, # -1.5 points (purchasing power down)
+      "growth" = 2 / 12,      # +2 points over 12 months
+      "decline" = -2 / 12,    # -2 points over 12 months
+      "inflation" = -1.5 / 12, # -1.5 points over 12 months
       0
     )
   }
   
-  base_forecast$mean <- base_forecast$mean + scenario_adj
-  base_forecast$lower <- base_forecast$lower + scenario_adj
-  base_forecast$upper <- base_forecast$upper + scenario_adj
+  # Apply cumulative trend adjustment
+  if (monthly_change != 0) {
+    trend_adjustment <- seq(monthly_change, monthly_change * horizon, by = monthly_change)
+    base_forecast$mean <- base_forecast$mean + trend_adjustment
+    base_forecast$lower <- base_forecast$lower + trend_adjustment
+    base_forecast$upper <- base_forecast$upper + trend_adjustment
+  }
   
   list(
     forecast = base_forecast,
