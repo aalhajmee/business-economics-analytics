@@ -7,8 +7,15 @@ library(shinydashboard)
 # ------------------------------------------------------------------------------
 
 renderInputs <- function(prefix) {
-  wellPanel(
-    style = "background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);",
+  div(
+    style = "
+      border: 2px solid #1e2a38;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+      background-color: #f9f9f9;
+      margin-bottom: 15px;
+    ",
     fluidRow(
       # Column 1: Investment parameters
       column(
@@ -79,7 +86,14 @@ renderInputs <- function(prefix) {
         paste0(prefix, "_recalculate"),
         "Re-run Simulation",
         icon("random"),
-        class = "btn-primary"
+        style = "
+          background-color: #3c8dbc;
+          color: white;
+          border: none;
+          padding: 8px 20px;
+          border-radius: 4px;
+          font-weight: 600;
+        "
       )
     )
   )
@@ -95,160 +109,103 @@ tabItem(
   # Inline CSS styling for cleaner visuals
   tags$style(type = "text/css",
              "label {font-size: 13px; font-weight: 500;}",
-             ".recalculating {opacity: 1.0;}",
-             ".retirement-scenario-header {
-               background-color: #f8f9fa;
-               border-left: 4px solid #3c8dbc;
-               padding: 15px;
-               border-radius: 4px;
-               margin-bottom: 20px;
-             }",
-             ".retirement-scenario-header h3 {
-               color: #3c8dbc;
-               margin: 0;
-               font-weight: 600;
-             }",
-             ".retirement-results {
-               background-color: #f8f9fa;
-               border: 1px solid #e9ecef;
-               border-radius: 4px;
-               padding: 20px;
-               margin-bottom: 20px;
-             }",
-             ".retirement-results h4 {
-               color: #495057;
-               margin-top: 0;
-               margin-bottom: 15px;
-               font-weight: 600;
-             }",
-             ".retirement-results pre {
-               background-color: white;
-               border: 1px solid #dee2e6;
-               border-radius: 4px;
-               padding: 15px;
-               font-size: 14px;
-               line-height: 1.8;
-             }",
-             ".retirement-plot-container {
-               background-color: white;
-               border: 1px solid #dee2e6;
-               border-radius: 4px;
-               padding: 15px;
-               margin-top: 10px;
-               margin-bottom: 20px;
-             }",
-             ".retirement-section {
-               margin-bottom: 40px;
-               padding-bottom: 30px;
-               border-bottom: 2px solid #e9ecef;
-             }",
-             ".retirement-section:last-of-type {
-               border-bottom: none;
-             }"
+             ".recalculating {opacity: 1.0;}"
   ),
   
-  # Page title and description
-  div(
-    style = "margin-bottom: 30px;",
-    h2("Retirement Planning: Monte Carlo Simulation", 
-       style = "color: #2c3e50; font-weight: 600; margin-bottom: 10px;"),
-    p("Compare two retirement scenarios by adjusting investment parameters and withdrawal rates. Each simulation runs 200 possible outcomes.",
-      style = "color: #6c757d; font-size: 15px;")
-  ),
+  # Page title - centered with matching font
+  h2("Retirement Planning: Monte Carlo Simulation",
+     style = "text-align:center;
+              font-family:'Trebuchet MS',sans-serif;
+              font-weight:600;
+              font-size:32px;"),
+  br(),
   
-  hr(style = "border-top: 2px solid #e9ecef; margin-bottom: 30px;"),
-  
-  # Scenario A - stacked on top
-  div(class = "retirement-section",
-      div(class = "retirement-scenario-header",
-          h3("Scenario A")
-      ),
-      
-      # Input panel
-      fluidRow(
-        column(12, 
-               renderInputs("case_a_for_retirement")
-        )
-      ),
-      
-      # Results and plot
-      fluidRow(
-        column(
-          12,
-          div(class = "retirement-results",
-              h4("Scenario A Results"),
-              verbatimTextOutput("a_summary")
-          )
-        )
-      ),
-      
-      fluidRow(
-        column(
-          12,
-          div(class = "retirement-plot-container",
-              h4("Scenario A Simulation", style = "color: #495057; margin-top: 0; margin-bottom: 15px;"),
-              plotOutput("a_distPlot", height = "500px")
-          )
-        )
-      )
-  ),
-  
-  # Scenario B - stacked below
-  div(class = "retirement-section",
-      div(class = "retirement-scenario-header",
-          h3("Scenario B")
-      ),
-      
-      # Input panel
-      fluidRow(
-        column(12, 
-               renderInputs("case_b_for_retirement")
-        )
-      ),
-      
-      # Results and plot
-      fluidRow(
-        column(
-          12,
-          div(class = "retirement-results",
-              h4("Scenario B Results"),
-              verbatimTextOutput("b_summary")
-          )
-        )
-      ),
-      
-      fluidRow(
-        column(
-          12,
-          div(class = "retirement-plot-container",
-              h4("Scenario B Simulation", style = "color: #495057; margin-top: 0; margin-bottom: 15px;"),
-              plotOutput("b_distPlot", height = "500px")
-          )
-        )
-      )
-  ),
-  
-  hr(style = "border-top: 2px solid #e9ecef; margin-top: 30px; margin-bottom: 30px;"),
-  
-  # Explanatory text with better styling
-  fluidRow(
-    column(
-      12,
-      div(
-        style = "background-color: #f8f9fa; border-left: 4px solid #667eea; padding: 20px; border-radius: 6px;",
-        h4("How to Read the Charts", style = "color: #495057; margin-top: 0; margin-bottom: 15px;"),
-        div(style = "color: #6c757d; font-size: 14px; line-height: 1.8;",
-            p(strong("Left Plot:"), "Displays 200 possible portfolio value trajectories over time. Each line represents one simulation outcome based on random market returns and inflation."),
-            p(strong("Right Plot:"), "Shows the success rate over time - the percentage of simulations where money is still available at each point."),
-            p(strong("Success Rate Interpretation:"), 
-              tags$ul(
-                tags$li(strong("Above 75%:"), " Generally considered safe for retirement planning"),
-                tags$li(strong("50-75%:"), " Moderate risk - consider adjusting parameters"),
-                tags$li(strong("Below 50%:"), " High risk of running out of money")
-              )
-            )
-        )
-      )
+  # === Scenario A Box ===
+  shinydashboard::box(
+    title = "Scenario A — Monte Carlo Retirement Simulation",
+    width = 12, status = "primary", solidHeader = TRUE,
+    
+    # Input panel
+    renderInputs("case_a_for_retirement"),
+    
+    # Results
+    div(
+      style = "
+        border: 2px solid #1e2a38;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        background-color: #ffffff;
+        margin-bottom: 15px;
+      ",
+      h4("Scenario A Results", style = "margin-top: 0; color: #495057;"),
+      verbatimTextOutput("a_summary")
+    ),
+    
+    # Plot
+    div(
+      style = "
+        border: 2px solid #1e2a38;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        background-color: #ffffff;
+      ",
+      plotOutput("a_distPlot", height = "500px")
     )
-  )
+  ),
+  
+  # === Scenario B Box ===
+  shinydashboard::box(
+    title = "Scenario B — Monte Carlo Retirement Simulation",
+    width = 12, status = "primary", solidHeader = TRUE,
+    
+    # Input panel
+    renderInputs("case_b_for_retirement"),
+    
+    # Results
+    div(
+      style = "
+        border: 2px solid #1e2a38;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        background-color: #ffffff;
+        margin-bottom: 15px;
+      ",
+      h4("Scenario B Results", style = "margin-top: 0; color: #495057;"),
+      verbatimTextOutput("b_summary")
+    ),
+    
+    # Plot
+    div(
+      style = "
+        border: 2px solid #1e2a38;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        background-color: #ffffff;
+      ",
+      plotOutput("b_distPlot", height = "500px")
+    )
+  ),
+  
+  # === Explanatory text box ===
+  shinydashboard::box(
+    title = "How to Read the Charts",
+    width = 12, status = "info", solidHeader = TRUE,
+    div(style = "color: #6c757d; font-size: 14px; line-height: 1.8;",
+        p(strong("Left Plot:"), "Displays 200 possible portfolio value trajectories over time. Each line represents one simulation outcome based on random market returns and inflation."),
+        p(strong("Right Plot:"), "Shows the success rate over time - the percentage of simulations where money is still available at each point."),
+        p(strong("Success Rate Interpretation:"), 
+          tags$ul(
+            tags$li(strong("Above 75%:"), " Generally considered safe for retirement planning"),
+            tags$li(strong("50-75%:"), " Moderate risk - consider adjusting parameters"),
+            tags$li(strong("Below 50%:"), " High risk of running out of money")
+          )
+        )
+    )
+  ),
+  
+  p(".")
 )
