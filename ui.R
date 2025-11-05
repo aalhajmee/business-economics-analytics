@@ -92,7 +92,7 @@ dashboardPage(
                menuSubItem("Overview",   tabName = "overview",    icon = icon("lightbulb")),
                menuSubItem("Savings Guide",   tabName = "guide",    icon = icon("lightbulb")),
                menuSubItem("Loan Calculator", tabName = "loans",     icon = icon("university")),
-               menuSubItem("Retirement", tabName = "retirement_tab",     icon = icon("umbrella-beach"))
+               menuSubItem("Retirement", tabName = "retirement",     icon = icon("umbrella-beach"))
       ),
       menuItem("About",           tabName = "about",    icon = icon("info-circle"))
     )

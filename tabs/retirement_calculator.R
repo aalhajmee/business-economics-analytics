@@ -96,12 +96,12 @@ server <- function(input, output, session) {
   # Update reactive expressions to depend on triggers
   navA <- reactive({
     trigger_a() 
-    do.call(sim, getParameters("a"))
+    do.call(sim, getParameters("case_a_for_retirement"))
   })
   
   navB <- reactive({
     trigger_b()  
-    do.call(sim, getParameters("b"))
+    do.call(sim, getParameters("case_b_for_retirement"))
   })
   
   output$a_distPlot <- renderPlot({

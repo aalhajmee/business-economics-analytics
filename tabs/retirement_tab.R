@@ -94,8 +94,8 @@ tabItem(
   
   # Input panels
   fluidRow(
-    column(6, renderInputs("a")),
-    column(6, renderInputs("b"))
+    column(6, renderInputs("case_a_for_retirement")),
+    column(6, renderInputs("case_b_for_retirement"))
   ),
   
   # Summary text boxes for each scenario
