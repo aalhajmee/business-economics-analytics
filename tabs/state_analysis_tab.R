@@ -39,8 +39,7 @@ tabItem(
         width = 12,
         status = "info",
         solidHeader = FALSE,
-        collapsible = TRUE,
-        collapsed = TRUE,
+        collapsible = FALSE,
         
         tags$ul(
           tags$li(tags$b("Median Income & Poverty:"), " U.S. Census Bureau, American Community Survey 2023 5-Year Estimates"),

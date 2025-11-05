@@ -162,8 +162,7 @@ tabItem(
         width = 12,
         status = "warning",
         solidHeader = TRUE,
-        collapsible = TRUE,
-        collapsed = TRUE,
+        collapsible = FALSE,
         
         h4("Model Comparison", style = "margin-top: 0;"),
         p("Comparing ARIMA and ETS models on training data. Lower values indicate better fit."),

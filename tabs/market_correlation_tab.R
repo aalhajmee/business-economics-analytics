@@ -18,7 +18,7 @@ tabItem(
       status = "primary",
       solidHeader = TRUE,
       width = 12,
-      collapsible = TRUE,
+      collapsible = FALSE,
       
       fluidRow(
         column(3,

@@ -59,8 +59,7 @@ tabItem(
         width = 12,
         status = "warning",
         solidHeader = TRUE,
-        collapsible = TRUE,
-        collapsed = TRUE,
+        collapsible = FALSE,
         
         tags$h4(style = "color:#1e40af; margin-top:0;", "Overview"),
         tags$p(

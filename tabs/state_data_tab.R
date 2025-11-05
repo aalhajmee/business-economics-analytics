@@ -90,8 +90,7 @@ tabItem(
         width = 12,
         status = "warning",
         solidHeader = TRUE,
-        collapsible = TRUE,
-        collapsed = TRUE,
+        collapsible = FALSE,
         
         tags$div(style = "font-size:14px;",
           tags$h4("ETL Process:"),
