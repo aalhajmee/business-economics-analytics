@@ -116,8 +116,9 @@ shinyServer(function(input, output, session) {
       return(data.frame(Error = paste("File not found:", data_path)))
     }
   })
-  # Render data table
-  output$cfhi_data_table <- DT::renderDT({
+  
+  # Render data table (correct output name to match UI)
+  output$data_table <- DT::renderDT({
     df <- selected_data()
     DT::datatable(
       df,
@@ -130,8 +131,75 @@ shinyServer(function(input, output, session) {
       class = 'cell-border stripe hover'
     )
   })
-  # Download handler
-  output$download_cfhi_data <- downloadHandler(
+  
+  # Data description based on selection
+  output$data_description <- renderUI({
+    source <- input$data_source_select
+    
+    description <- switch(source,
+      "master" = tagList(
+        tags$h4("Master Dataset", style = "color:#2c3e50;"),
+        tags$p("Complete historical dataset containing all CFHI components from October 2006 to present."),
+        tags$ul(
+          tags$li(tags$strong("Date:"), " Monthly observations"),
+          tags$li(tags$strong("Savings Rate:"), " Personal saving as percentage of disposable income (BEA)"),
+          tags$li(tags$strong("Wage Growth:"), " Year-over-year change in average hourly earnings (BLS)"),
+          tags$li(tags$strong("Inflation:"), " Year-over-year CPI-U change (BLS)"),
+          tags$li(tags$strong("Borrow Rate:"), " Federal Funds Effective Rate (FRED)"),
+          tags$li(tags$strong("Normalized Components:"), " S*, W*, I*, R* (0-100 scale)"),
+          tags$li(tags$strong("CFHI:"), " Consumer Financial Health Index (rebased to Oct 2006 = 100)")
+        )
+      ),
+      "savings" = tagList(
+        tags$h4("Personal Savings Rate", style = "color:#2e7d32;"),
+        tags$p("Personal saving as a percentage of disposable personal income."),
+        tags$ul(
+          tags$li(tags$strong("Source:"), " U.S. Bureau of Economic Analysis (BEA) Table 2.1"),
+          tags$li(tags$strong("Frequency:"), " Monthly"),
+          tags$li(tags$strong("Formula:"), " (Personal Saving ÷ Disposable Personal Income) × 100"),
+          tags$li(tags$strong("Interpretation:"), " Higher values indicate greater financial resilience")
+        )
+      ),
+      "wage" = tagList(
+        tags$h4("Wage Growth (Year-over-Year)", style = "color:#0277bd;"),
+        tags$p("Percentage change in average hourly earnings compared to same month previous year."),
+        tags$ul(
+          tags$li(tags$strong("Source:"), " U.S. Bureau of Labor Statistics (BLS) Current Employment Statistics"),
+          tags$li(tags$strong("Frequency:"), " Monthly"),
+          tags$li(tags$strong("Formula:"), " ((Current Wage - Previous Year Wage) ÷ Previous Year Wage) × 100"),
+          tags$li(tags$strong("Interpretation:"), " Positive growth indicates improving earning power")
+        )
+      ),
+      "inflation" = tagList(
+        tags$h4("Inflation Rate (Year-over-Year)", style = "color:#d84315;"),
+        tags$p("Percentage change in Consumer Price Index for all urban consumers."),
+        tags$ul(
+          tags$li(tags$strong("Source:"), " U.S. Bureau of Labor Statistics (BLS) CPI-U"),
+          tags$li(tags$strong("Frequency:"), " Monthly"),
+          tags$li(tags$strong("Formula:"), " ((Current CPI - Previous Year CPI) ÷ Previous Year CPI) × 100"),
+          tags$li(tags$strong("Interpretation:"), " Lower inflation is better for consumer purchasing power"),
+          tags$li(tags$strong("Note:"), " Inverted in CFHI calculation (high inflation = lower score)")
+        )
+      ),
+      "borrow" = tagList(
+        tags$h4("Borrowing Rate", style = "color:#7b1fa2;"),
+        tags$p("Federal Funds Effective Rate - the overnight lending rate between banks."),
+        tags$ul(
+          tags$li(tags$strong("Source:"), " Federal Reserve Economic Data (FRED)"),
+          tags$li(tags$strong("Frequency:"), " Monthly average"),
+          tags$li(tags$strong("Impact:"), " Influences all consumer borrowing costs (mortgages, credit cards, auto loans)"),
+          tags$li(tags$strong("Interpretation:"), " Lower rates make borrowing cheaper for consumers"),
+          tags$li(tags$strong("Note:"), " Inverted in CFHI calculation (high rates = lower score)")
+        )
+      ),
+      tagList(tags$p("Select a data source to view details."))
+    )
+    
+    description
+  })
+  
+  # Download handler (correct output name to match UI)
+  output$download_data <- downloadHandler(
     filename = function() {
       source_name <- input$data_source_select
       paste0("cfhi_", source_name, "_", Sys.Date(), ".csv")
