@@ -33,24 +33,41 @@ forecast_model <- eventReactive(input$apply_scenario, {
   
   # Apply scenario adjustments
   scenario <- input$scenario_preset
-  scenario_adj <- switch(scenario,
-    "baseline" = 0,
-    "growth" = 2,      # +2 points (wages up, savings stable)
-    "decline" = -2,    # -2 points (wages down, costs up)
-    "inflation" = -1.5, # -1.5 points (purchasing power down)
-    0
-  )
+  
+  if (scenario == "custom") {
+    # Custom scenario: use user inputs
+    scenario_adj <- (
+      input$custom_savings * 0.25 +
+      input$custom_wage * 0.25 +
+      input$custom_inflation * -0.25 +
+      input$custom_borrow * -0.25
+    )
+  } else {
+    # Preset scenarios
+    scenario_adj <- switch(scenario,
+      "baseline" = 0,
+      "growth" = 2,      # +2 points (wages up, savings stable)
+      "decline" = -2,    # -2 points (wages down, costs up)
+      "inflation" = -1.5, # -1.5 points (purchasing power down)
+      0
+    )
+  }
   
   base_forecast$mean <- base_forecast$mean + scenario_adj
   base_forecast$lower <- base_forecast$lower + scenario_adj
   base_forecast$upper <- base_forecast$upper + scenario_adj
   
-  base_forecast
+  list(
+    forecast = base_forecast,
+    scenario = scenario,
+    adjustment = scenario_adj
+  )
 }, ignoreNULL = FALSE)
 
 output$forecast_plot <- renderPlotly({
   data <- forecast_data()
-  fcast <- forecast_model()
+  model <- forecast_model()
+  fcast <- model$forecast
   
   horizon <- as.numeric(input$forecast_months)
   future_dates <- seq.Date(
@@ -74,6 +91,19 @@ output$forecast_plot <- renderPlotly({
     upper95 = as.numeric(fcast$upper[,2])
   )
   
+  # Determine title based on scenario
+  scenario_name <- if (model$scenario == "custom") {
+    "Custom Scenario"
+  } else {
+    switch(model$scenario,
+      "baseline" = "Current Trends",
+      "growth" = "Economic Growth",
+      "decline" = "Economic Decline",
+      "inflation" = "High Inflation",
+      "Current Trends"
+    )
+  }
+  
   # Create plot
   plot_ly() %>%
     add_trace(
@@ -83,7 +113,8 @@ output$forecast_plot <- renderPlotly({
       type = "scatter",
       mode = "lines",
       name = "Historical",
-      line = list(color = "#1e40af", width = 2)
+      line = list(color = "#1e40af", width = 2.5),
+      hovertemplate = "Date: %{x}<br>CFHI: %{y:.2f}<extra></extra>"
     ) %>%
     add_ribbons(
       data = forecast_df,
@@ -91,9 +122,10 @@ output$forecast_plot <- renderPlotly({
       ymin = ~lower95,
       ymax = ~upper95,
       name = "95% Confidence",
-      fillcolor = "rgba(251, 146, 60, 0.15)",
+      fillcolor = "rgba(251, 146, 60, 0.12)",
       line = list(width = 0),
-      showlegend = TRUE
+      showlegend = TRUE,
+      hoverinfo = "skip"
     ) %>%
     add_ribbons(
       data = forecast_df,
@@ -103,7 +135,8 @@ output$forecast_plot <- renderPlotly({
       name = "80% Confidence",
       fillcolor = "rgba(251, 146, 60, 0.25)",
       line = list(width = 0),
-      showlegend = TRUE
+      showlegend = TRUE,
+      hoverinfo = "skip"
     ) %>%
     add_trace(
       data = forecast_df,
@@ -112,22 +145,23 @@ output$forecast_plot <- renderPlotly({
       type = "scatter",
       mode = "lines",
       name = "Forecast",
-      line = list(color = "#fb923c", width = 3, dash = "dash")
+      line = list(color = "#fb923c", width = 3, dash = "dash"),
+      hovertemplate = "Date: %{x}<br>Forecast: %{y:.2f}<extra></extra>"
     ) %>%
     layout(
       title = list(
-        text = paste0("<b>CFHI Forecast: ", input$scenario_preset, " scenario</b>"),
-        font = list(size = 18)
+        text = paste0("<b>", scenario_name, "</b> - ", horizon, " Month Forecast"),
+        font = list(size = 16)
       ),
       xaxis = list(
         title = "Date",
         showgrid = TRUE,
-        gridcolor = "#f0f0f0"
+        gridcolor = "#e5e5e5"
       ),
       yaxis = list(
         title = "CFHI Value",
         showgrid = TRUE,
-        gridcolor = "#f0f0f0"
+        gridcolor = "#e5e5e5"
       ),
       hovermode = "x unified",
       plot_bgcolor = "#ffffff",
@@ -136,7 +170,8 @@ output$forecast_plot <- renderPlotly({
         orientation = "h",
         x = 0.5,
         xanchor = "center",
-        y = -0.2
-      )
+        y = -0.15
+      ),
+      margin = list(t = 50, b = 60, l = 60, r = 20)
     )
 })
