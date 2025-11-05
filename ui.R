@@ -208,7 +208,7 @@ dashboardPage(
                 style = "color: #475569; font-size: 15px;",
                 "This interactive dashboard provides comprehensive analysis of household financial well-being through the Composite Financial Health Index (CFHI). ",
                 "The platform integrates multiple economic indicators, state-level comparisons, market correlations, and personal finance tools to offer ",
-                "insights into financial health trends and forecasts."
+                "insights into financial health trends and forecasts. Built as a data science visualization project for BIOL 185."
               ),
               
               tags$h4(style = "color: #1e293b; margin-top: 25px; margin-bottom: 15px;", "Key Capabilities"),
@@ -246,7 +246,7 @@ dashboardPage(
               ),
               tags$p(
                 style = "color: #64748b; font-size: 14px; margin-top: 20px;",
-                "Course: Business and Economics Analytics"
+                "Course: BIOL 185 - Data Science: Visualizing and Exploring Big Data"
               )
             )
           ),
