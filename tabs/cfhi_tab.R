@@ -64,7 +64,7 @@ tabItem(
   
   # === CFHI feature panel ===
   shinydashboard::box(
-    title = "Consumer Financial Health Index (CFHI) — Current Realistic CHFI",
+    title = "Consumer Financial Health Index (CFHI)",
     width = 12, status = "primary", solidHeader = TRUE,
     cfhi_feature_ui("cfhi")
   ),

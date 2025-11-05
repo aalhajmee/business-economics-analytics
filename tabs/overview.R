@@ -6,8 +6,8 @@ tabItem(tabName = "overview",
               font-family:'Trebuchet MS',sans-serif;
               font-weight:600;
               font-size:32px;"),
-        p("This section provides a foundational overview of key areas of personal finance — 
-           credit, savings, debt, and loans — to help you build lasting financial health."),
+        p("This section provides a foundational overview of key areas of personal finance: 
+           credit, savings, debt, and loans to help you build lasting financial health."),
         br(),
         
 # ===== Custom Button =====
@@ -73,7 +73,7 @@ tabItem(tabName = "overview",
                     " Prioritize retirement accounts like IRAs and 401(k)s early to benefit from compound growth.")
           ),
           br(),
-          p("Consistency matters more than the amount — saving regularly builds lifelong habits of financial discipline."),
+          p("Consistency matters more than the amount. Saving regularly builds lifelong habits of financial discipline."),
           div(style = "text-align:right;",
               actionButton("go_to_savings_guide", "Explore the Savings Guide", 
                            icon = icon("arrow-right"), class = "btn-flat"))
@@ -120,7 +120,7 @@ tabItem(tabName = "overview",
                       significantly shorten repayment time.")
           ),
           br(),
-          p("A well-chosen loan should align with your goals — not limit them."),
+          p("A well-chosen loan should align with your goals, not limit them."),
           div(style = "text-align:right;",
               actionButton("go_to_loan_calculator", "Go to Loan Calculator", 
                            icon = icon("arrow-right"), class = "btn-flat"))
@@ -160,11 +160,11 @@ tabItem(tabName = "overview",
             tags$li("Create and follow a monthly budget."),
             tags$li("Automate bill payments and savings transfers."),
             tags$li("Review your credit report annually for accuracy."),
-            tags$li("Build financial literacy — understanding how interest, inflation, and taxes affect your money."),
+            tags$li("Build financial literacy: understanding how interest, inflation, and taxes affect your money."),
             tags$li("Invest in yourself through education and skill-building to increase earning potential.")
           ),
           br(),
-          p("Healthy financial habits compound just like savings — the earlier and more consistently you start, the stronger your results."),
+          p("Healthy financial habits compound just like savings. The earlier and more consistently you start, the stronger your results."),
           div(style = "text-align:right;",
               actionButton("go_to_overview", "Back to Overview", 
                            icon = icon("arrow-left"), class = "btn-flat"))

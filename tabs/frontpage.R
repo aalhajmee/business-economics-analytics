@@ -172,7 +172,7 @@ tabItem(
       tags$div(
         class = "caption-bg",
         tags$h1("WHERE GROWTH BEGINS"),
-        tags$p("Track, plan, and grow your wealth — one smart decision at a time."),
+        tags$p("Track, plan, and grow your wealth, one smart decision at a time."),
         tags$button(
           class = "btn btn-primary btn-lg",
           onclick = "goToTab('overview')",

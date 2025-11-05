@@ -12,7 +12,7 @@ cfhi_feature_ui <- function(id) {
         tags$div(
           style = "border:1px solid #e5e7eb; border-radius:12px; padding:16px; background:#f8fafc; margin-bottom:16px;",
           tags$div(style="font-size:13px; color:#64748b; text-transform:uppercase; letter-spacing:0.08em;", "Current U.S. CFHI"),
-          tags$div(id = ns("current_label"), style="font-size:28px; font-weight:700; color:#0f172a; margin-top:6px;", "—"),
+          tags$div(id = ns("current_label"), style="font-size:28px; font-weight:700; color:#0f172a; margin-top:6px;", "-"),
           tags$div(id = ns("current_sub"), style="font-size:13px; color:#64748b;", "Latest available month")
         ),
         

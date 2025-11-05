@@ -122,7 +122,7 @@ tabItem(
   
   # === Scenario A Box ===
   shinydashboard::box(
-    title = "Scenario A — Monte Carlo Retirement Simulation",
+    title = "Scenario A - Monte Carlo Retirement Simulation",
     width = 12, status = "primary", solidHeader = TRUE,
     
     # Input panel
@@ -157,7 +157,7 @@ tabItem(
   
   # === Scenario B Box ===
   shinydashboard::box(
-    title = "Scenario B — Monte Carlo Retirement Simulation",
+    title = "Scenario B - Monte Carlo Retirement Simulation",
     width = 12, status = "primary", solidHeader = TRUE,
     
     # Input panel

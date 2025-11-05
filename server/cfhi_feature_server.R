@@ -196,7 +196,7 @@ cfhi_feature_server <- function(id,
       # Layout
       fig <- fig %>% layout(
         title = list(text = paste0(title_prefix, "<br><sub>", 
-                                   format(min(df$date), "%b %Y"), " — ", 
+                                   format(min(df$date), "%b %Y"), " - ", 
                                    format(max(df$date), "%b %Y"), "</sub>")),
         xaxis = list(title = "", showgrid = TRUE, gridcolor = '#e5e7eb'),
         yaxis = list(title = "Index (Oct 2006 = 100)", showgrid = TRUE, gridcolor = '#e5e7eb'),
@@ -422,7 +422,7 @@ cfhi_feature_server <- function(id,
         }
         
         fig <- fig %>% layout(
-          title = paste0("CFHI: ", format(min(df$date), "%b %Y"), " — ", format(max(df$date), "%b %Y")),
+          title = paste0("CFHI: ", format(min(df$date), "%b %Y"), " - ", format(max(df$date), "%b %Y")),
           xaxis = list(title = ""), yaxis = list(title = "Index (Oct 2006 = 100)"),
           hovermode = 'x unified', legend = list(orientation = "h", yanchor = "bottom", y = -0.25)
         )
