@@ -64,7 +64,7 @@ forecast_model <- eventReactive(input$apply_scenario, {
   list(
     forecast = base_forecast,
     scenario = scenario,
-    adjustment = scenario_adj
+    adjustment = monthly_change * horizon  # Total adjustment over forecast period
   )
 }, ignoreNULL = FALSE)
 
