@@ -31,6 +31,9 @@ shinyServer(function(input, output, session) {
   if (file.exists("server/Loan_Approval_Calculator.R")) {
     source("server/Loan_Approval_Calculator.R", local = TRUE)
   }
+  if (file.exists("server/retirement_calculator.R")) {
+    source("server/retirement_calculator.R", local = TRUE)
+  }
   
   # ---- LOAN CALCULATOR TAB ----
   # Source the loans.R file to get the loan_server function

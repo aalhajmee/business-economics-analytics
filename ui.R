@@ -56,6 +56,7 @@ forecast_tab   <- safe_source_tab("tabs/forecast_tab.R", "forecast")
 guide_tab      <- safe_source_tab("tabs/savingsguide.R", "guide")
 overview_tab   <- safe_source_tab("tabs/overview.R", "overview")
 loan_tab       <- safe_source_tab("tabs/loans.R", "loans")
+retirement_tab <- safe_source_tab("tabs/retirement_tab.R", "retirement")
 
 dashboardPage(
   dashboardHeader(title = span("FINANCIAL HEALTH", style = "
@@ -83,7 +84,8 @@ dashboardPage(
       menuItem("Personal Finance", icon = icon("lightbulb"),
                menuSubItem("Overview",   tabName = "overview",    icon = icon("lightbulb")),
                menuSubItem("Savings Guide",   tabName = "guide",    icon = icon("lightbulb")),
-               menuSubItem("Loan Calculator", tabName = "loans",     icon = icon("university"))
+               menuSubItem("Loan Calculator", tabName = "loans",     icon = icon("university")),
+               menuSubItem("Retirement", tabName = "retirement",     icon = icon("umbrella-beach"))
       ),
       menuItem("About",           tabName = "about",    icon = icon("info-circle"))
     )
@@ -125,6 +127,9 @@ dashboardPage(
       
       # LOAN CALCULATOR (from loans.R)
       loan_tab,
+      
+      # RETIREMENT CALCULATOR (from retirement_tab.R)
+      retirement_tab,
       
       # ABOUT
       tabItem(
