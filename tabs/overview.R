@@ -61,7 +61,7 @@ tabItem(tabName = "overview",
 # ===== SAVINGS SECTION =====
         box(
           title = tagList(icon("piggy-bank"), "Building Savings"),
-          status = "success", solidHeader = TRUE, width = 12,
+          status = "info", solidHeader = TRUE, width = 12,
           p("Savings provide financial security and flexibility. Having enough set aside protects you 
              from emergencies and allows you to pursue future goals confidently."),
           tags$ul(
@@ -105,7 +105,7 @@ tabItem(tabName = "overview",
 # ===== LOANS SECTION =====
         box(
           title = tagList(icon("university"), "Understanding Loans"),
-          status = "info", solidHeader = TRUE, width = 12,
+          status = "primary", solidHeader = TRUE, width = 12,
           p("Loans allow you to make large purchases or investments that would otherwise be out of reach. 
              Understanding loan types and terms helps you make smarter borrowing decisions."),
           tags$ul(
@@ -129,7 +129,7 @@ tabItem(tabName = "overview",
 # ===== RETIREMENT SECTION =====
         br(),
         box(
-          status = "primary", solidHeader = TRUE, width = 12,
+          status = "danger", solidHeader = TRUE, width = 12,
           title = tagList(icon("umbrella-beach"), "Retirement Planning"),
           div(
             p("Planning for retirement early can significantly improve your long-term financial security. 
