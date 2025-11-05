@@ -45,7 +45,7 @@ tabItem(
   fluidRow(
     box(
       title = "Development Team",
-      status = "info",
+      status = "primary",
       solidHeader = TRUE,
       width = 6,
       
@@ -70,7 +70,7 @@ tabItem(
     
     box(
       title = "Technical Stack",
-      status = "success",
+      status = "primary",
       solidHeader = TRUE,
       width = 6,
       
@@ -136,7 +136,7 @@ tabItem(
   fluidRow(
     box(
       title = "Methodology Notes",
-      status = "primary",
+      status = "info",
       solidHeader = TRUE,
       width = 12,
       
@@ -157,7 +157,7 @@ tabItem(
   fluidRow(
     box(
       title = "Repository Information",
-      status = "info",
+      status = "success",
       solidHeader = TRUE,
       width = 12,
       
