@@ -53,6 +53,8 @@ cfhi_data_tab  <- safe_source_tab("tabs/cfhi_data_tab.R", "cfhi_data")
 explore_tab    <- safe_source_tab("tabs/state_analysis_tab.R", "explore")
 state_data_tab <- safe_source_tab("tabs/state_data_tab.R", "state_data")
 forecast_tab   <- safe_source_tab("tabs/forecast_tab.R", "forecast")
+market_correlation_tab <- safe_source_tab("tabs/market_correlation_tab.R", "market_correlation")
+market_data_tab <- safe_source_tab("tabs/market_data_sources_tab.R", "market_data")
 guide_tab      <- safe_source_tab("tabs/savingsguide.R", "guide")
 overview_tab   <- safe_source_tab("tabs/overview.R", "overview")
 loan_tab       <- safe_source_tab("tabs/loans.R", "loans")
@@ -73,6 +75,10 @@ dashboardPage(
       menuItem("State Analysis", icon = icon("map-marked-alt"),
                menuSubItem("Explore States", tabName = "explore"),
                menuSubItem("Data Sources", tabName = "state_data")
+      ),
+      menuItem("Market Analysis", icon = icon("chart-bar"),
+               menuSubItem("S&P 500 Correlation", tabName = "market_correlation"),
+               menuSubItem("Market Data Sources", tabName = "market_data")
       ),
       menuItem("Personal Finance", icon = icon("lightbulb"),
                menuSubItem("Overview",   tabName = "overview",    icon = icon("lightbulb")),
@@ -120,6 +126,12 @@ dashboardPage(
       
       # FORECASTING (from forecast_tab.R)
       forecast_tab,
+      
+      # MARKET CORRELATION ANALYSIS
+      market_correlation_tab,
+      
+      # MARKET DATA SOURCES
+      market_data_tab,
       
       # OVERVIEW TAB (from overview.R)
       overview_tab,
