@@ -64,12 +64,13 @@ tabItem(
       tags$div(
         style = "background:#e3f2fd; padding:12px; border-radius:5px; border-left:4px solid #2196f3; margin-top:15px;",
         tags$p(style="margin:0; font-size:13px;",
-          tags$b(icon("info-circle"), " Correlation Method:"),
-          " This analysis uses ", tags$b("Pearson correlation"), " to measure the linear relationship between CFHI and S&P 500 returns. ",
-          "Pearson is appropriate here because both variables are continuous numeric measurements and we're testing if they move together in a straight-line pattern. ",
-          "The correlation coefficient (r) ranges from -1 to +1: values near +1 indicate strong positive correlation (both increase together), ",
-          "values near -1 indicate strong negative correlation (one increases while the other decreases), and values near 0 suggest no linear relationship. ",
-          "The p-value tests if this correlation is statistically significant (p < 0.05 indicates the relationship is unlikely due to chance)."
+          tags$b(icon("info-circle"), " Methodology:"),
+          " This analysis employs ", tags$b("Pearson correlation"), " to quantify the linear association between CFHI and S&P 500 values. ",
+          "Pearson correlation is appropriate for continuous variables when assessing linear relationships. ",
+          "The correlation coefficient (r) ranges from -1 to +1, where |r| > 0.7 indicates strong correlation, ",
+          "0.3 < |r| < 0.7 indicates moderate correlation, and |r| < 0.3 indicates weak correlation. ",
+          "Positive values indicate variables move in the same direction; negative values indicate inverse movement. ",
+          "Statistical significance is tested at α = 0.05 level (p < 0.05 rejects the null hypothesis of no correlation)."
         )
       )
     )
@@ -106,9 +107,9 @@ tabItem(
       tags$div(
         style = "background:#f0fdf4; padding:10px; border-radius:5px; border-left:4px solid #16a34a; margin-top:10px;",
         tags$p(style="margin:0; font-size:12px;",
-          tags$b(icon("chart-line"), " What This Shows:"),
-          " Each point represents one month. If points cluster along the diagonal line, CFHI and S&P 500 move together predictably. ",
-          "Scattered points mean the relationship is weak or unpredictable."
+          tags$b(icon("chart-line"), " Regression Scatter Plot:"),
+          " Each point represents monthly observations. Points clustered along the fitted regression line indicate a strong linear relationship. ",
+          "Greater scatter suggests weaker predictive power. The slope indicates the direction and magnitude of the relationship."
         )
       )
     ),
@@ -122,9 +123,9 @@ tabItem(
       tags$div(
         style = "background:#eff6ff; padding:10px; border-radius:5px; border-left:4px solid #3b82f6; margin-top:10px;",
         tags$p(style="margin:0; font-size:12px;",
-          tags$b(icon("calendar"), " What This Shows:"),
-          " How the relationship between CFHI and S&P 500 changes over time (calculated every 12 months). ",
-          "Values above 0.5 = strong positive link, below -0.5 = strong negative link, near 0 = weak/no link."
+          tags$b(icon("calendar"), " Rolling Correlation:"),
+          " Displays 12-month windowed correlation coefficients to examine temporal stability of the relationship. ",
+          "Values consistently above |0.5| indicate persistent strong correlation. Fluctuations suggest the relationship varies across different economic periods."
         )
       )
     )
@@ -141,11 +142,12 @@ tabItem(
       tags$div(
         style = "background:#fff7ed; padding:10px; border-radius:5px; border-left:4px solid #f59e0b; margin-bottom:10px;",
         tags$p(style="margin:0; font-size:12px;",
-          tags$b(icon("calculator"), " Technical Details:"),
-          " This shows the statistical regression model output. Key things to look for: ",
-          tags$b("R-squared"), " (how much variance is explained), ",
-          tags$b("p-value"), " (< 0.05 means statistically significant), and ",
-          tags$b("coefficients"), " (how much CFHI changes per unit change in S&P 500)."
+          tags$b(icon("calculator"), " Regression Output:"),
+          " Linear regression model summary with key diagnostics: ",
+          tags$b("R²"), " (proportion of variance explained), ",
+          tags$b("coefficients"), " (estimated effect size and direction), ",
+          tags$b("p-values"), " (significance at α = 0.05 threshold), and ",
+          tags$b("residual standard error"), " (model fit quality)."
         )
       ),
       
@@ -160,9 +162,9 @@ tabItem(
       tags$div(
         style = "background:#f0fdf4; padding:10px; border-radius:5px; border-left:4px solid #16a34a; margin-bottom:10px;",
         tags$p(style="margin:0; font-size:12px;",
-          tags$b(icon("lightbulb"), " What It Means:"),
-          " This translates the statistics into practical insights about whether CFHI and stock market performance are related, ",
-          "and if that relationship is strong enough to be meaningful."
+          tags$b(icon("lightbulb"), " Interpretation Guide:"),
+          " This section synthesizes statistical findings into contextual interpretations, assessing the practical significance of the correlation, ",
+          "hypothesis test results, and potential economic mechanisms underlying observed relationships."
         )
       ),
       

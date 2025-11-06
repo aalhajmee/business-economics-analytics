@@ -446,21 +446,28 @@ output$correlation_insights <- renderUI({
     "N/A for Spearman"
   }
   
-  # Simple summary for non-technical users
+  # Simple summary for non-technical users (fixed logic)
   simple_summary <- if (is_significant) {
-    paste0("There IS a ", cor_strength, " ", cor_direction, " relationship between CFHI and S&P 500. ",
-           "When the stock market ", if (cor_val > 0) "goes up" else "goes down", 
-           ", household financial health tends to ", if (cor_val > 0) "improve" else "worsen", " too.")
+    if (cor_val > 0) {
+      paste0("A ", cor_strength, " positive correlation (r = ", round(cor_val, 3), ") indicates that ",
+             "when S&P 500 increases, CFHI tends to increase as well. ",
+             "The relationship explains ", variance_pct, "% of CFHI variation.")
+    } else {
+      paste0("A ", cor_strength, " negative correlation (r = ", round(cor_val, 3), ") indicates that ",
+             "when S&P 500 increases, CFHI tends to decrease. ",
+             "This inverse relationship explains ", variance_pct, "% of CFHI variation.")
+    }
   } else {
-    "There is NO statistically significant relationship between CFHI and S&P 500 in this time period. They appear to move independently."
+    paste0("No statistically significant correlation was detected (p = ", round(p_val, 4), "). ",
+           "S&P 500 and CFHI appear to move independently during this period.")
   }
   
   insights_html <- paste0(
     "<div style='padding: 15px; line-height: 1.8;'>",
     
-    # Simple Summary at Top
+    # Summary Statement
     "<div style='background: #f0fdf4; border-left: 4px solid #16a34a; padding: 15px; margin-bottom: 15px; border-radius: 4px;'>",
-    "<h4 style='margin-top: 0; color: #166534;'><i class='fa fa-check-circle'></i> Bottom Line</h4>",
+    "<h4 style='margin-top: 0; color: #166534;'><i class='fa fa-check-circle'></i> Summary Finding</h4>",
     "<p style='margin: 0; color: #166534; font-size: 15px; font-weight: 500;'>", simple_summary, "</p>",
     "</div>",
     
@@ -496,16 +503,31 @@ output$correlation_insights <- renderUI({
     "</ul>",
     
     # Interpretation
-    "<h4 style='color: #1e293b; margin-bottom: 10px;'>Interpretation</h4>",
-    "<p style='color: #475569; font-size: 14px; margin: 0;'>",
-    if (cor_val > 0.5) {
-      "Strong positive correlation suggests that household financial health tends to improve when stock markets perform well, likely due to wealth effects, retirement account values, and consumer confidence."
-    } else if (cor_val > 0) {
-      "Moderate positive correlation indicates some linkage between market performance and household finances, though other factors also play significant roles in financial health outcomes."
-    } else if (cor_val < -0.3) {
-      "Negative correlation suggests an inverse relationship, which may indicate periods where market gains did not translate to broad household financial improvements, possibly due to income inequality or economic conditions."
+    "<h4 style='color: #1e293b; margin-bottom: 10px;'>Analysis Interpretation</h4>",
+    "<p style='color: #475569; font-size: 14px; margin-bottom: 10px;'>",
+    if (abs(cor_val) >= 0.5) {
+      if (cor_val > 0) {
+        paste0("The strong positive correlation suggests that S&P 500 performance and household financial health move in the same direction. ",
+               "This may be attributed to wealth effects (retirement accounts and investments), consumer confidence, and broader economic conditions that affect both markets and households.")
+      } else {
+        paste0("The strong negative correlation indicates an inverse relationship where S&P 500 gains coincide with declining household financial health. ",
+               "This counterintuitive pattern may reflect periods where market growth was concentrated among high-wealth individuals while median households faced wage stagnation or rising costs.")
+      }
+    } else if (abs(cor_val) >= 0.3) {
+      if (cor_val > 0) {
+        paste0("The moderate positive correlation indicates that market performance and household finances are somewhat linked, but other factors play substantial roles. ",
+               "Variables such as wage growth, employment rates, and inflation independently influence household financial health beyond market effects.")
+      } else {
+        paste0("The moderate negative correlation suggests that market gains may not benefit median households proportionally. ",
+               "This could reflect income inequality dynamics where equity ownership is concentrated, or periods where market optimism diverged from household economic realities.")
+      }
     } else {
-      "Weak correlation suggests that stock market movements have limited direct impact on overall household financial health, highlighting the importance of wage growth, savings rates, and inflation control."
+      if (cor_val != 0) {
+        paste0("The weak correlation (r = ", round(cor_val, 3), ") indicates that S&P 500 movements have minimal direct association with household financial health. ",
+               "This finding emphasizes that household well-being depends primarily on factors like wage growth, savings rates, inflation control, and borrowing costs rather than equity market performance.")
+      } else {
+        "No meaningful correlation was detected, suggesting that S&P 500 performance and household financial health operate independently during this period."
+      }
     },
     "</p>",
     
