@@ -74,6 +74,20 @@ market_data <- reactive({
       filter(!is.na(CFHI), !is.na(sp500_price)) %>%
       distinct(date, .keep_all = TRUE)
     
+    # Index S&P 500 to October 2006 = 100 (same baseline as CFHI)
+    sp500_baseline <- merged %>%
+      filter(date == base_date) %>%
+      pull(sp500_price) %>%
+      first()
+    
+    if (!is.na(sp500_baseline) && sp500_baseline != 0) {
+      merged <- merged %>%
+        mutate(sp500_indexed = (sp500_price / sp500_baseline) * 100)
+    } else {
+      merged <- merged %>%
+        mutate(sp500_indexed = sp500_price)
+    }
+    
     # Apply date range filter AFTER calculating CFHI with full dataset normalization
     date_range <- input$market_date_range
     
@@ -239,6 +253,59 @@ output$data_points <- renderValueBox({
   )
 })
 
+# Data verification display - proves values are stable
+output$data_verification_display <- renderUI({
+  data <- market_data()
+  
+  if (nrow(data) == 0) {
+    return(tags$p(style="color:#dc2626; margin-top:8px;", "No data available for verification."))
+  }
+  
+  # Test specific dates that should always have the same values
+  test_dates <- c(
+    as.Date("2006-10-01"),  # Baseline (should always be 100)
+    as.Date("2020-01-01"),  # Pre-pandemic
+    as.Date("2024-01-01")   # Recent data
+  )
+  
+  verification_rows <- lapply(test_dates, function(test_date) {
+    row_data <- data %>% filter(date == test_date)
+    
+    if (nrow(row_data) > 0) {
+      cfhi_val <- round(row_data$CFHI, 2)
+      sp500_val <- round(row_data$sp500_indexed, 2)
+      date_str <- format(test_date, "%B %Y")
+      
+      tags$tr(
+        tags$td(style="padding:4px 12px; border-bottom:1px solid #e5e7eb;", date_str),
+        tags$td(style="padding:4px 12px; border-bottom:1px solid #e5e7eb; text-align:right; font-family:monospace;", 
+                tags$b(cfhi_val)),
+        tags$td(style="padding:4px 12px; border-bottom:1px solid #e5e7eb; text-align:right; font-family:monospace;", 
+                tags$b(sp500_val))
+      )
+    } else {
+      NULL
+    }
+  })
+  
+  tags$div(
+    style = "margin-top:8px;",
+    tags$p(style="font-size:12px; color:#475569; margin-bottom:6px;",
+      "Verification: These index values remain constant across all date range selections:"),
+    tags$table(
+      style = "width:100%; font-size:12px; background:white; border-radius:4px;",
+      tags$thead(
+        tags$tr(style="background:#f8fafc;",
+          tags$th(style="padding:6px 12px; text-align:left; border-bottom:2px solid #cbd5e1;", "Date"),
+          tags$th(style="padding:6px 12px; text-align:right; border-bottom:2px solid #cbd5e1;", "CFHI Index"),
+          tags$th(style="padding:6px 12px; text-align:right; border-bottom:2px solid #cbd5e1;", "S&P 500 Index")
+        )
+      ),
+      tags$tbody(verification_rows)
+    )
+  )
+})
+
 # Dual-axis time series plot
 output$dual_axis_plot <- renderPlotly({
   data <- market_data()
@@ -247,75 +314,7 @@ output$dual_axis_plot <- renderPlotly({
     return(plotly_empty())
   }
   
-  # Use CFHI as-is (already indexed to Oct 2006 = 100)
-  # For S&P 500, normalize to its Oct 2006 value for comparable indexing
-  base_date <- as.Date("2006-10-01")
-  
-  # Get all data to find Oct 2006 baseline (need full dataset for consistent indexing)
-  all_data <- tryCatch({
-    cfhi_raw <- read_csv("data/cfhi/cfhi_master_2000_onward.csv", show_col_types = FALSE) %>%
-      mutate(date = floor_date(as.Date(date), "month")) %>%
-      select(date, savings_rate, wage_yoy, inflation_yoy, borrow_rate) %>%
-      distinct(date, .keep_all = TRUE) %>%
-      arrange(date) %>%
-      filter(!is.na(savings_rate), !is.na(wage_yoy), !is.na(inflation_yoy), !is.na(borrow_rate))
-    
-    savings_min <- min(cfhi_raw$savings_rate, na.rm = TRUE)
-    savings_max <- max(cfhi_raw$savings_rate, na.rm = TRUE)
-    wage_min <- min(cfhi_raw$wage_yoy, na.rm = TRUE)
-    wage_max <- max(cfhi_raw$wage_yoy, na.rm = TRUE)
-    inflation_min <- min(cfhi_raw$inflation_yoy, na.rm = TRUE)
-    inflation_max <- max(cfhi_raw$inflation_yoy, na.rm = TRUE)
-    borrow_min <- min(cfhi_raw$borrow_rate, na.rm = TRUE)
-    borrow_max <- max(cfhi_raw$borrow_rate, na.rm = TRUE)
-    
-    cfhi_full <- cfhi_raw %>%
-      mutate(
-        S_star = 100 * scale01(savings_rate, savings_min, savings_max),
-        W_star = 100 * scale01(wage_yoy, wage_min, wage_max),
-        I_star = 100 - 100 * scale01(inflation_yoy, inflation_min, inflation_max),
-        R_star = 100 - 100 * scale01(borrow_rate, borrow_min, borrow_max),
-        CFHI_raw = (S_star + W_star + I_star + R_star) / 4,
-        CFHI = CFHI_raw
-      ) %>%
-      select(date, CFHI)
-    
-    base_value <- cfhi_full %>%
-      filter(date == base_date) %>%
-      pull(CFHI) %>%
-      first()
-    
-    if (!is.na(base_value) && base_value != 0) {
-      cfhi_full <- cfhi_full %>%
-        mutate(CFHI = (CFHI / base_value) * 100)
-    }
-    
-    sp500_full <- read_excel("data/market/SP500_PriceHistory_Monthly_042006_082025_FactSet.xlsx", sheet = 1) %>%
-      select(Date, Price) %>%
-      rename(date = Date, sp500_price = Price) %>%
-      mutate(date = floor_date(as.Date(date), "month"))
-    
-    inner_join(cfhi_full, sp500_full, by = "date") %>%
-      arrange(date) %>%
-      filter(!is.na(CFHI), !is.na(sp500_price)) %>%
-      distinct(date, .keep_all = TRUE)
-  }, error = function(e) {
-    data.frame(date = as.Date(character()), CFHI = numeric(), sp500_price = numeric())
-  })
-  
-  # Get Oct 2006 baseline for S&P 500
-  sp500_baseline <- all_data %>%
-    filter(date == base_date) %>%
-    pull(sp500_price) %>%
-    first()
-  
-  # Index S&P 500 to Oct 2006 = 100 (same as CFHI)
-  if (!is.na(sp500_baseline) && sp500_baseline != 0) {
-    data$sp500_indexed <- (data$sp500_price / sp500_baseline) * 100
-  } else {
-    data$sp500_indexed <- data$sp500_price
-  }
-  
+  # Data already has CFHI and sp500_indexed both indexed to Oct 2006 = 100
   plot_ly(data) %>%
     add_trace(
       x = ~date,

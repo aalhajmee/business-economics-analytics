@@ -84,6 +84,29 @@ tabItem(
     valueBoxOutput("data_points", width = 3)
   ),
   
+  # Data Verification Box - Shows stability of normalization
+  fluidRow(
+    box(
+      title = "Data Verification (Fixed Baseline Normalization)",
+      status = "success",
+      solidHeader = TRUE,
+      width = 12,
+      collapsible = FALSE,
+      
+      tags$div(
+        style = "background:#f0fdf4; padding:12px; border-radius:5px; border-left:4px solid #22c55e;",
+        tags$p(style="margin:0 0 8px 0; font-size:13px;",
+          tags$b(icon("check-circle"), " Fixed Baseline Guarantee:"),
+          " All CFHI and S&P 500 values are indexed to ", tags$b("October 2006 = 100"), 
+          " using the full dataset (April 2006 - August 2025) for normalization. ",
+          tags$b("These values remain constant regardless of the date range you select."),
+          " This ensures mathematically valid correlation analysis across all time periods."
+        ),
+        htmlOutput("data_verification_display")
+      )
+    )
+  ),
+  
   # Dual-Axis Time Series
   fluidRow(
     box(
