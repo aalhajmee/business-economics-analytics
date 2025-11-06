@@ -32,44 +32,45 @@ Rscript -e "shiny::runApp()"
 
 ### CFHI Analysis
 
-The Composite Financial Health Index (CFHI) aggregates multiple economic indicators to measure household financial well-being over time.
+The Composite Financial Health Index (CFHI) synthesizes four economic indicators into a single measure of household financial well-being.
 
-**Analysis Tab**
-- Time series visualization of CFHI from 2000-2025
-- Interactive component breakdown showing individual indicator contributions
-- Correlation matrix analyzing relationships between financial components
-- Statistical summaries and trend analysis
+**Overview Tab**
+- Time series visualization from January 2000 to August 2025 (233 monthly observations)
+- Interactive component breakdown: Savings Rate, Wage Growth, Inflation, Borrowing Rate
+- Each component min-max normalized to 0-100 scale (inflation and interest rates inverted)
+- CFHI = simple average of four components, naturally ranging 0-100
+- Historical range: 17.90 (May 2007 pre-crisis) to 93.34 (April 2020 pandemic peak)
+
+**Key Findings Tab**
+- Academic analysis of three major historical patterns
+- Finding 1: 2007 pre-crisis financial deterioration (CFHI = 17.90 months before market crash)
+- Finding 2: 2020 pandemic savings peak (forced savings, stimulus, zero rates)
+- Finding 3: 2024-2025 affordability crisis (current 28.38 similar to pre-2008 levels)
+- Finding 4: Stock market disconnect (1,000-point S&P gain = 0.7 CFHI increase)
+- Professional academic writing with comprehensive methodology documentation
 
 **Forecasting Tab**
-- Ensemble time series forecasting combining ARIMA and ETS models
-- Multiple forecast horizons: 6 months, 1 year, 2 years
-- Four preset economic scenarios: baseline, growth, decline, high inflation
-- Custom scenario modeling with adjustable parameters for savings rates, wage growth, inflation, and borrowing costs
-- Confidence interval visualization (80% and 95%)
-
-**Data Sources Tab**
-- Detailed methodology documentation
-- Component variable descriptions and sources
-- Data processing pipeline explanation
-- Coverage period and frequency information
-
-### Market Analysis
-
-Analysis of the relationship between stock market performance and household financial health using S&P 500 index data.
+- Ensemble ARIMA/ETS time series models
+- Forecast horizons: 6 months, 1 year, 2 years
+- Scenario-based projections: baseline, economic growth, recession, high inflation
+- Custom parameter adjustments for each component
+- Confidence intervals (80% and 95%) with uncertainty quantification
 
 **S&P 500 Correlation Tab**
-- Dual-axis time series comparing CFHI and S&P 500 trends (2006-2025)
-- Linear regression analysis with scatter plots
+- Regression analysis of market impact on household finances
+- Dual-axis time series comparing CFHI and S&P 500 (April 2006 - August 2025)
+- Multiple regression controlling for Federal Reserve policy
+- Statistical finding: β = 0.0007 per S&P point (statistically significant, practically negligible)
 - Rolling 12-month correlation tracking
-- Statistical metrics: Pearson/Spearman correlation coefficients, R-squared, p-values
-- Dynamic date range filtering: full period, 10/5/3 years, or custom ranges
-- Automated insight generation interpreting correlation strength and significance
+- Dynamic date filtering and automated interpretation
 
-**Market Data Sources Tab**
-- FactSet data documentation
-- S&P 500 methodology and relevance to household finances
-- Data overlap and quality considerations
+**Data Sources Tabs**
+- CFHI methodology: BEA savings, BLS wages/inflation, FRED interest rates
+- Market data: FactSet S&P 500 historical prices
+- Comprehensive coverage periods and update frequencies
 - Limitations and interpretation guidelines
+
+
 
 ### State Analysis
 
@@ -111,11 +112,12 @@ Practical calculators and guides for individual financial planning.
 
 ## Technical Architecture
 
-**Framework**: R Shiny with shinydashboard
-**Data Processing**: tidyverse (dplyr, tidyr, readr, lubridate)
-**Visualization**: plotly, ggplot2
-**Time Series**: forecast package (auto.arima, ets)
-**Statistical Modeling**: glmnet for regularized regression
+- **Framework**: R Shiny 1.9.1 with shinydashboard
+- **Data Processing**: tidyverse (dplyr, tidyr, readr, lubridate)
+- **Visualization**: plotly for interactive graphics, ggplot2 for static plots
+- **Time Series**: forecast package (auto.arima, ets)
+- **Statistical Analysis**: Linear regression, correlation analysis
+- **Data Tables**: DT package for interactive tables
 
 ### Project Structure
 
@@ -153,15 +155,17 @@ business-economics-analytics/
 
 ## Data Sources
 
-**CFHI Components**
-- Federal Reserve Economic Data (FRED): savings rates, borrowing rates, inflation
-- Bureau of Labor Statistics (BLS): wage data, CPI
-- Coverage: January 2000 to December 2025, monthly frequency
+**CFHI Components** (233 monthly observations)
+- Personal Savings Rate: Bureau of Economic Analysis (BEA)
+- Average Hourly Earnings Growth: Bureau of Labor Statistics (BLS)
+- Consumer Price Index (CPI-U): Bureau of Labor Statistics (BLS)
+- Federal Funds Effective Rate: Federal Reserve Economic Data (FRED)
+- Coverage: January 2000 to August 2025, monthly frequency
 
-**S&P 500 Index**
-- Source: FactSet Research Systems
+**S&P 500 Index** (233 observations overlapping with CFHI)
+- Source: FactSet Research Systems (equivalent data available via Yahoo Finance)
 - Coverage: April 2006 to August 2025, end-of-month prices
-- Includes: price, volume, total return, cumulative return
+- Fields: closing price, monthly returns, volume, total return index
 
 **State Economic Data**
 - U.S. Census Bureau: income statistics
@@ -185,9 +189,28 @@ The application requires the following R packages (auto-installed on first run):
 See [REPRODUCIBILITY.md](REPRODUCIBILITY.md) for complete environment details, package versions, and instructions for reproducing all analyses.
 - Modeling: glmnet
 
-## Development Notes
+## Methodology Notes
 
-This dashboard was developed as a class project for Business and Economics Analytics (BIOL 185). The CFHI methodology synthesizes multiple economic indicators into a composite measure of household financial health. Forecasting models use ensemble methods to improve prediction accuracy. Market correlation analysis employs both Pearson and Spearman methods to capture linear and monotonic relationships. All visualizations are interactive using plotly for enhanced data exploration.
+**CFHI Calculation**
+- Four components normalized independently using min-max scaling (0-100)
+- Inflation and interest rates inverted (lower = better)
+- Simple average: CFHI = (S* + W* + I* + R*) / 4
+- No rebasing or additional transformations
+- Naturally bounded 0-100 where extremes represent historical worst/best
+
+**Key Findings**
+- 2007 Trough (17.90): Pre-crisis financial stress with negative savings, peak rates
+- 2020 Peak (93.34): Pandemic-era forced savings, stimulus, zero rates
+- 2025 Current (28.38): Post-inflation affordability crisis near 2007 levels
+- Stock Market Impact: Minimal (1,000 S&P points = 0.7 CFHI change = <1% of range)
+
+**Statistical Approach**
+- Time series: Ensemble ARIMA/ETS averaging for robustness
+- Correlation: Multiple regression isolating S&P 500 effect from Fed policy
+- Scenarios: Adjustments applied to base forecast via component-specific multipliers
+- Confidence intervals: Derived from model prediction variance
+
+This project was developed for BIOL 185 - Data Science at Washington and Lee University.
 
 ## Team Contributions
 

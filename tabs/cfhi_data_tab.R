@@ -63,8 +63,8 @@ tabItem(
         
         tags$h4(style = "color:#1e40af; margin-top:0;", "Overview"),
         tags$p(
-          "The Consumer Financial Health Index (CFHI) measures financial wellbeing by combining four key economic indicators. 
-          There are two versions: National CFHI (for tracking U.S. economic trends) and Personal CFHI (for individual assessment)."
+          "The Composite Financial Health Index (CFHI) measures household financial wellbeing by combining four key economic indicators. 
+          The index uses historical U.S. economic data to track financial health trends from 2000 to present."
         ),
         
         tags$hr(style = "border-top: 2px solid #3b82f6;"),
@@ -73,136 +73,72 @@ tabItem(
         tags$div(
           style = "background:#f0f9ff; padding:15px; border-left:4px solid #3b82f6; margin:10px 0;",
           tags$ul(
-            tags$li(tags$strong("Savings Rate (S*):"), " Percentage of income saved after expenses"),
-            tags$li(tags$strong("Wage Growth (W*):"), " Year-over-year change in income/earnings"),
-            tags$li(tags$strong("Inflation Rate (I*):"), " Year-over-year cost of living increase ", tags$em("(inverted - lower is better)")),
-            tags$li(tags$strong("Borrowing Rate (R*):"), " Interest rate on debt or lending rates ", tags$em("(inverted - lower is better)"))
+            tags$li(tags$strong("Personal Savings Rate (S*):"), " Percentage of disposable income saved (BEA)"),
+            tags$li(tags$strong("Average Hourly Earnings Growth (W*):"), " Year-over-year wage growth percentage (BLS)"),
+            tags$li(tags$strong("Consumer Price Index (I*):"), " Year-over-year inflation rate ", tags$em("(inverted - lower is better)")),
+            tags$li(tags$strong("Federal Funds Rate (R*):"), " Effective federal funds rate ", tags$em("(inverted - lower is better)"))
           )
         ),
         
         tags$hr(),
         
-        tags$h4(style = "color:#059669;", "National CFHI Calculation"),
-        tags$p(tags$strong("Used in the main CFHI visualization to track U.S. economic trends over time.")),
+        tags$h4(style = "color:#059669;", "CFHI Calculation Methodology"),
+        tags$p(tags$strong("Historical data from January 2000 to August 2025 (233 monthly observations)")),
         
-        tags$p(tags$strong("Step 1: Normalize Components (0-100 scale)")),
+        tags$p(tags$strong("Step 1: Component Normalization (Min-Max Scaling to 0-100)")),
         tags$div(
           style = "background:#f5f5f5; padding:10px; margin:10px 0; font-family:monospace;",
-          "S* = 100 × (National Savings Rate - Historical Min) / (Historical Max - Historical Min)", tags$br(),
-          "W* = 100 × (National Wage Growth - Historical Min) / (Historical Max - Historical Min)", tags$br(),
-          "I* = 100 - [100 × (National Inflation - Historical Min) / (Historical Max - Historical Min)]", tags$br(),
-          "R* = 100 - [100 × (Federal Funds Rate - Historical Min) / (Historical Max - Historical Min)]"
+          "S* = 100 × (Savings Rate - Min) / (Max - Min)", tags$br(),
+          "W* = 100 × (Wage Growth - Min) / (Max - Min)", tags$br(),
+          "I* = 100 - [100 × (Inflation - Min) / (Max - Min)]  // Inverted", tags$br(),
+          "R* = 100 - [100 × (Fed Rate - Min) / (Max - Min)]   // Inverted"
         ),
         
-        tags$p(tags$strong("Step 2: Calculate Raw CFHI")),
+        tags$p(tags$strong("Step 2: Simple Average (Equal Weighting)")),
         tags$div(
           style = "background:#f5f5f5; padding:10px; margin:10px 0; font-family:monospace; text-align:center; font-size:16px;",
-          "CFHI (raw) = (S* + W* + I* + R*) / 4"
-        ),
-        
-        tags$p(tags$strong("Step 3: Rebase to October 2006 = 100")),
-        tags$div(
-          style = "background:#fef3c7; padding:10px; margin:10px 0; font-family:monospace; text-align:center; font-size:16px; border:2px solid #f59e0b;",
-          "CFHI (final) = (CFHI raw / Oct 2006 CFHI raw) × 100"
+          "CFHI = (S* + W* + I* + R*) / 4"
         ),
         tags$p(
-          style = "font-size:14px; color:#666;",
-          "Rebasing allows the index to exceed 100 if conditions improve beyond 2006 levels, 
-          or fall below 100 if conditions worsen. October 2006 represents pre-financial crisis baseline."
+          style = "font-size:14px; color:#666; margin-top:10px;",
+          tags$strong("Result:"), " CFHI naturally ranges from 0 (all components at historical worst) to 100 (all components at historical best). ",
+          "Observed range: 17.90 (May 2007 pre-crisis trough) to 93.34 (April 2020 pandemic savings peak)."
         ),
         
         tags$hr(),
         
-        tags$h4(style = "color:#7c3aed;", "Personal CFHI Calculation"),
-        tags$p(tags$strong("Used in the CFHI tab's Personal Calculator to assess individual financial health.")),
+        tags$hr(),
         
-        tags$p(tags$strong("Step 1: Calculate Your Personal Metrics")),
+        tags$h4(style = "color:#1e40af;", "Data Sources & Coverage"),
         tags$ul(
-          tags$li(tags$strong("S:"), " (Monthly Savings ÷ Monthly Income) × 100"),
-          tags$li(tags$strong("W:"), " Your reported year-over-year income growth %"),
-          tags$li(tags$strong("I:"), " Current U.S. inflation rate (same for everyone)"),
-          tags$li(tags$strong("R:"), " Your average debt interest rate (or 0% if no debt)")
+          tags$li(tags$strong("Personal Savings Rate:"), " Bureau of Economic Analysis (BEA)"),
+          tags$li(tags$strong("Average Hourly Earnings (Wage Growth):"), " Bureau of Labor Statistics (BLS)"),
+          tags$li(tags$strong("Consumer Price Index (Inflation):"), " Bureau of Labor Statistics (BLS)"),
+          tags$li(tags$strong("Federal Funds Rate:"), " Federal Reserve Economic Data (FRED)")
         ),
         
-        tags$p(tags$strong("Step 2: Normalize Using Historical Ranges")),
         tags$div(
-          style = "background:#faf5ff; padding:10px; margin:10px 0; border-left:4px solid #7c3aed;",
+          style = "background:#f0f9ff; padding:12px; border-left:4px solid #3b82f6; margin:15px 0;",
           tags$p(
-            "Each personal metric is normalized using the ", tags$strong("same historical min/max ranges"), 
-            " from the national data (Oct 2006-present). This ensures your score is comparable to national trends."
-          ),
-          tags$div(
-            style = "font-family:monospace; font-size:14px;",
-            "S* = 100 × (Your Savings % - 2.1) / (33.8 - 2.1)", tags$br(),
-            "W* = 100 × (Your Wage Growth - (-4.8)) / (7.9 - (-4.8))", tags$br(),
-            "I* = 100 - [100 × (Current Inflation - (-2.1)) / (9.1 - (-2.1))]", tags$br(),
-            "R* = 100 - [100 × (Your Debt Rate - 0) / (25 - 0)]"
+            style = "margin:0; font-size:14px;",
+            tags$strong("Time Period:"), " January 2000 to August 2025 (233 monthly observations)", tags$br(),
+            tags$strong("Update Frequency:"), " Monthly", tags$br(),
+            tags$strong("Normalization:"), " All components scaled using full historical min/max across entire dataset"
           )
         ),
         
-        tags$p(tags$strong("Step 3: Average and Cap at 100")),
-        tags$div(
-          style = "background:#faf5ff; padding:10px; margin:10px 0; font-family:monospace; text-align:center; font-size:16px; border:2px solid #7c3aed;",
-          "Personal CFHI = min(100, (S* + W* + I* + R*) / 4)"
-        ),
-        tags$p(
-          style = "font-size:14px; color:#666;",
-          tags$strong("Note:"), " Personal CFHI is ", tags$em("NOT"), " rebased. It's capped at 100 to provide 
-          a clear 0-100 scale where 100 = optimal financial health based on historical benchmarks."
-        ),
-        
-        tags$hr(),
-        
-        tags$h4(style = "color:#1e40af;", "Key Differences"),
-        tags$div(
-          style = "background:#fff7ed; padding:15px; border-left:4px solid #f97316; margin:10px 0;",
-          tags$table(
-            style = "width:100%; border-collapse:collapse;",
-            tags$thead(
-              tags$tr(
-                tags$th(style = "text-align:left; padding:8px; border-bottom:2px solid #ddd;", "Aspect"),
-                tags$th(style = "text-align:left; padding:8px; border-bottom:2px solid #ddd;", "National CFHI"),
-                tags$th(style = "text-align:left; padding:8px; border-bottom:2px solid #ddd;", "Personal CFHI")
-              )
-            ),
-            tags$tbody(
-              tags$tr(
-                tags$td(style = "padding:8px; border-bottom:1px solid #ddd;", tags$strong("Data Source")),
-                tags$td(style = "padding:8px; border-bottom:1px solid #ddd;", "BEA, BLS, FRED"),
-                tags$td(style = "padding:8px; border-bottom:1px solid #ddd;", "User inputs + current inflation")
-              ),
-              tags$tr(
-                tags$td(style = "padding:8px; border-bottom:1px solid #ddd;", tags$strong("Rebasing")),
-                tags$td(style = "padding:8px; border-bottom:1px solid #ddd;", "Yes (Oct 2006 = 100)"),
-                tags$td(style = "padding:8px; border-bottom:1px solid #ddd;", "No (capped at 100)")
-              ),
-              tags$tr(
-                tags$td(style = "padding:8px; border-bottom:1px solid #ddd;", tags$strong("Score Range")),
-                tags$td(style = "padding:8px; border-bottom:1px solid #ddd;", "0 to unlimited (can exceed 100)"),
-                tags$td(style = "padding:8px; border-bottom:1px solid #ddd;", "0 to 100")
-              ),
-              tags$tr(
-                tags$td(style = "padding:8px;", tags$strong("Purpose")),
-                tags$td(style = "padding:8px;", "Track economic trends over time"),
-                tags$td(style = "padding:8px;", "Assess individual financial health")
-              )
-            )
-          )
-        ),
-        
-        tags$hr(),
-        
-        tags$h4(style = "color:#1e40af;", "Data Sources"),
+        tags$h4(style = "color:#1e40af; margin-top:20px;", "Interpretation"),
         tags$ul(
-          tags$li(tags$strong("Savings Rate:"), " U.S. Bureau of Economic Analysis (BEA) Table 2.1"),
-          tags$li(tags$strong("Wage Growth:"), " U.S. Bureau of Labor Statistics (BLS) Average Hourly Earnings"),
-          tags$li(tags$strong("Inflation:"), " U.S. Bureau of Labor Statistics (BLS) CPI-U"),
-          tags$li(tags$strong("Borrowing Rate:"), " Federal Reserve Economic Data (FRED) Federal Funds Rate")
+          tags$li(tags$strong("CFHI = 0-25:"), " Severe financial stress (similar to 2007 pre-crisis conditions)"),
+          tags$li(tags$strong("CFHI = 25-50:"), " Below-average financial health (moderate stress)"),
+          tags$li(tags$strong("CFHI = 50-75:"), " Above-average financial health (improving conditions)"),
+          tags$li(tags$strong("CFHI = 75-100:"), " Excellent financial health (near-optimal conditions)")
         ),
         
         tags$p(
           style = "font-size:12px; color:#666; font-style:italic; margin-top:15px;",
-          "Data updated monthly. Historical values may be recalculated as government agencies revise estimates."
+          "Note: Historical values may be revised as government agencies update estimates. ",
+          "Equal weighting (25% per component) reflects assumption of comparable importance across financial health dimensions."
         )
       )
     )

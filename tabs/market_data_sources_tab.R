@@ -54,17 +54,26 @@ tabItem(
           "It is widely regarded as the best single gauge of large-cap U.S. equities and serves as a proxy for the overall health of the U.S. stock market and economy."
         ),
         
-        tags$h4(style = "color: #1e293b; margin-top: 25px; margin-bottom: 15px;", "Relevance to CFHI"),
+        tags$h4(style = "color: #1e293b; margin-top: 25px; margin-bottom: 15px;", "Correlation with CFHI"),
         tags$p(
           style = "color: #475569; font-size: 15px;",
-          "The S&P 500 is relevant to household financial health for several reasons:"
+          "Multiple regression analysis controlling for Federal Reserve policy reveals:"
         ),
-        tags$ul(
+        tags$div(
+          style = "background:#fef9e7; padding:15px; border-left:4px solid #f39c12; margin:15px 0;",
+          tags$ul(
+            style = "color: #475569; font-size: 15px; margin:0;",
+            tags$li(tags$strong("Statistical Significance:"), " Relationship is statistically significant (p < 0.01)"),
+            tags$li(tags$strong("Practical Effect Size:"), " 1,000-point S&P 500 increase corresponds to ~0.7 CFHI increase"),
+            tags$li(tags$strong("Percentage Impact:"), " Less than 1% of total CFHI range (17.9-93.34)"),
+            tags$li(tags$strong("Interpretation:"), " Stock market explains minimal variance in household financial health")
+          )
+        ),
+        tags$p(
           style = "color: #475569; font-size: 15px;",
-          tags$li(tags$strong("Retirement Accounts:"), " Many 401(k)s, IRAs, and pension funds are invested in S&P 500 index funds"),
-          tags$li(tags$strong("Wealth Effect:"), " Rising stock prices increase household net worth and consumer confidence"),
-          tags$li(tags$strong("Economic Indicator:"), " Stock market performance often reflects and predicts broader economic conditions"),
-          tags$li(tags$strong("Employment:"), " Corporate performance impacts job security, wages, and benefits")
+          "The weak correlation reflects wealth concentration: the wealthiest 10% own approximately 90% of stocks, ",
+          "meaning market gains primarily benefit high-net-worth households. Federal Reserve interest rate policy ",
+          "demonstrates approximately 5× stronger impact on CFHI than equity market movements."
         )
       )
     )

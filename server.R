@@ -24,6 +24,8 @@ shinyServer(function(input, output, session) {
   source("server/state_analysis_server.R", local = TRUE)
   # ---- MARKET CORRELATION SERVER LOGIC ----
   source("server/market_correlation_server.R", local = TRUE)
+  # ---- FINDINGS SERVER LOGIC ----
+  source("server/findings_server.R", local = TRUE)
   # ---- CALCULATOR LOGIC ----
   # Source the calculation and loan approval logic
   # These define outputs that need to be in the server scope,

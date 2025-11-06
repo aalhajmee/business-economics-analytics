@@ -24,18 +24,19 @@ tabItem(
         tags$p(
           style = "color: #475569; font-size: 15px;",
           "The ", tags$strong("Financial Health Analytics Dashboard"), " provides comprehensive analysis of household financial well-being through the Composite Financial Health Index (CFHI). ",
-          "This platform integrates multiple economic indicators, state-level comparisons, market correlations, and personal finance tools to offer ",
-          "insights into financial health trends and forecasts. Built as a data science visualization project for BIOL 185."
+          "This platform integrates economic time series analysis, statistical forecasting, market correlation studies, state-level comparisons, and personal finance tools. ",
+          "Built as a data science visualization project for BIOL 185."
         ),
         
         tags$h4(style = "color: #1e293b; margin-top: 25px; margin-bottom: 15px;", "Key Capabilities"),
         tags$ul(
           style = "color: #475569; font-size: 15px;",
-          tags$li(tags$strong("CFHI Analysis:"), " Track composite financial health from 2000-2025 with component breakdowns"),
-          tags$li(tags$strong("Time Series Forecasting:"), " Ensemble ARIMA/ETS models with multiple economic scenarios"),
-          tags$li(tags$strong("Market Correlation:"), " Analyze relationships between S&P 500 and household finances"),
+          tags$li(tags$strong("CFHI Analysis:"), " Track household financial health index from 2000-2025 using four normalized economic indicators"),
+          tags$li(tags$strong("Key Findings:"), " Academic analysis of historical patterns including 2007 pre-crisis trough, 2020 pandemic peak, and current affordability pressures"),
+          tags$li(tags$strong("Time Series Forecasting:"), " Ensemble ARIMA/ETS models with scenario-based projections"),
+          tags$li(tags$strong("Market Correlation:"), " Regression analysis quantifying minimal S&P 500 impact on household finances"),
           tags$li(tags$strong("State Comparisons:"), " Geographic analysis of economic indicators across U.S. states"),
-          tags$li(tags$strong("Personal Finance Tools:"), " Loan calculators, savings guides, and financial planning resources")
+          tags$li(tags$strong("Personal Finance Tools:"), " Loan calculators, retirement planning, and savings guides")
         )
       )
     )
@@ -102,9 +103,10 @@ tabItem(
         tags$h4(style = "color: #1e293b; margin-bottom: 15px;", "CFHI Components"),
         tags$ul(
           style = "color: #475569; font-size: 15px;",
-          tags$li(tags$strong("Federal Reserve Economic Data (FRED):"), " Personal savings rates, borrowing rates, inflation metrics"),
-          tags$li(tags$strong("Bureau of Labor Statistics (BLS):"), " Wage data, Consumer Price Index (CPI)"),
-          tags$li(tags$strong("Coverage:"), " January 2000 to December 2025, monthly frequency")
+          tags$li(tags$strong("Bureau of Economic Analysis (BEA):"), " Personal savings rate"),
+          tags$li(tags$strong("Bureau of Labor Statistics (BLS):"), " Average hourly earnings growth, Consumer Price Index (CPI-U)"),
+          tags$li(tags$strong("Federal Reserve Economic Data (FRED):"), " Federal funds effective rate"),
+          tags$li(tags$strong("Coverage:"), " January 2000 to August 2025 (233 monthly observations)")
         ),
         
         tags$h4(style = "color: #1e293b; margin-top: 25px; margin-bottom: 15px;", "Market Data"),
@@ -144,10 +146,11 @@ tabItem(
         style = "padding: 15px;",
         tags$ul(
           style = "color: #475569; font-size: 15px; line-height: 1.8;",
-          tags$li(tags$strong("CFHI Calculation:"), " Composite index synthesizing normalized economic indicators with equal weighting"),
-          tags$li(tags$strong("Forecasting Method:"), " Ensemble approach averaging ARIMA and ETS models for improved accuracy"),
-          tags$li(tags$strong("Correlation Analysis:"), " Both Pearson and Spearman methods to capture linear and monotonic relationships"),
-          tags$li(tags$strong("Date Normalization:"), " All monthly data standardized to first day of month for consistent merging")
+          tags$li(tags$strong("CFHI Calculation:"), " Simple average of four min-max normalized components (0-100 scale), equal weighting"),
+          tags$li(tags$strong("Normalization:"), " All components scaled using full historical range (Jan 2000 - Aug 2025)"),
+          tags$li(tags$strong("Forecasting Method:"), " Ensemble approach averaging ARIMA and ETS models with scenario adjustments"),
+          tags$li(tags$strong("Correlation Analysis:"), " Multiple regression controlling for Fed policy to isolate S&P 500 effect"),
+          tags$li(tags$strong("Date Standardization:"), " Monthly observations, first day of month convention")
         )
       )
     )

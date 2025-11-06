@@ -62,6 +62,7 @@ state_data_tab <- safe_source_tab("tabs/state_data_tab.R", "state_data")
 forecast_tab   <- safe_source_tab("tabs/forecast_tab.R", "forecast")
 market_correlation_tab <- safe_source_tab("tabs/market_correlation_tab.R", "market_correlation")
 market_data_tab <- safe_source_tab("tabs/market_data_sources_tab.R", "market_data")
+findings_tab   <- safe_source_tab("tabs/findings_tab.R", "findings")
 guide_tab      <- safe_source_tab("tabs/savingsguide.R", "guide")
 overview_tab   <- safe_source_tab("tabs/overview.R", "overview")
 loan_tab       <- safe_source_tab("tabs/loans.R", "loans")
@@ -77,19 +78,18 @@ dashboardPage(
       id = "tabs",
       menuItem("Home",            tabName = "home",     icon = icon("home")),
       menuItem("CFHI Analysis",   icon = icon("chart-line"),
-               menuSubItem("Analysis", tabName = "cfhi"),
+               menuSubItem("Overview", tabName = "cfhi"),
+               menuSubItem("Key Findings", tabName = "findings"),
                menuSubItem("Forecasting", tabName = "forecast"),
-               menuSubItem("Data Sources", tabName = "cfhi_data")
+               menuSubItem("S&P 500 Correlation", tabName = "market_correlation"),
+               menuSubItem("Data Sources", tabName = "cfhi_data"),
+               menuSubItem("Market Data Sources", tabName = "market_data")
       ),
       menuItem("State Analysis", icon = icon("map-marked-alt"),
                menuSubItem("Explore States", tabName = "explore"),
                menuSubItem("Data Sources", tabName = "state_data")
       ),
-      menuItem("Market Analysis", icon = icon("chart-bar"),
-               menuSubItem("S&P 500 Correlation", tabName = "market_correlation"),
-               menuSubItem("Market Data Sources", tabName = "market_data")
-      ),
-      menuItem("Personal Finance", icon = icon("lightbulb"),
+      menuItem("Personal Finance", icon = icon("wallet"),
                menuSubItem("Overview",   tabName = "overview",    icon = icon("compass")),
                menuSubItem("Savings Guide",   tabName = "guide",    icon = icon("money-check-alt")),
                menuSubItem("Loan Calculator", tabName = "loans",     icon = icon("university")),
@@ -179,6 +179,9 @@ dashboardPage(
       
       # MARKET DATA SOURCES
       market_data_tab,
+      
+      # KEY FINDINGS
+      findings_tab,
       
       # OVERVIEW TAB (from overview.R)
       overview_tab,
