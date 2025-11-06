@@ -2,30 +2,79 @@
 # MARKET CORRELATION SERVER LOGIC
 # ===============================================================================
 
-# Load and merge data
+# Min-max scaling function with fixed range
+scale01 <- function(x, min_val = NULL, max_val = NULL) {
+  if (is.null(min_val) || is.null(max_val)) {
+    rng <- range(x, na.rm = TRUE)
+    min_val <- rng[1]
+    max_val <- rng[2]
+  }
+  if (!is.finite(min_val) || !is.finite(max_val)) return(rep(NA_real_, length(x)))
+  if (max_val - min_val == 0) return(rep(0.5, length(x)))
+  (x - min_val) / (max_val - min_val)
+}
+
+# Load and merge data with consistent CFHI calculation
 market_data <- reactive({
   req(input$market_date_range)
   
   tryCatch({
-    # Load CFHI data - normalize to first day of month
-    cfhi <- read_csv("data/cfhi/cfhi_master_2000_onward.csv", show_col_types = FALSE) %>%
-      select(date, CFHI) %>%
-      filter(!is.na(CFHI)) %>%
-      mutate(date = floor_date(as.Date(date), "month"))
+    # Load raw CFHI component data
+    cfhi_raw <- read_csv("data/cfhi/cfhi_master_2000_onward.csv", show_col_types = FALSE) %>%
+      mutate(date = floor_date(as.Date(date), "month")) %>%
+      select(date, savings_rate, wage_yoy, inflation_yoy, borrow_rate) %>%
+      distinct(date, .keep_all = TRUE) %>%
+      arrange(date) %>%
+      filter(!is.na(savings_rate), !is.na(wage_yoy), !is.na(inflation_yoy), !is.na(borrow_rate))
     
-    # Load S&P 500 data - normalize to first day of month
+    # Calculate min/max for each component using FULL dataset (Apr 2006 to Aug 2025)
+    # This ensures normalization is consistent regardless of date range selection
+    savings_min <- min(cfhi_raw$savings_rate, na.rm = TRUE)
+    savings_max <- max(cfhi_raw$savings_rate, na.rm = TRUE)
+    wage_min <- min(cfhi_raw$wage_yoy, na.rm = TRUE)
+    wage_max <- max(cfhi_raw$wage_yoy, na.rm = TRUE)
+    inflation_min <- min(cfhi_raw$inflation_yoy, na.rm = TRUE)
+    inflation_max <- max(cfhi_raw$inflation_yoy, na.rm = TRUE)
+    borrow_min <- min(cfhi_raw$borrow_rate, na.rm = TRUE)
+    borrow_max <- max(cfhi_raw$borrow_rate, na.rm = TRUE)
+    
+    # Calculate CFHI components with fixed normalization
+    cfhi <- cfhi_raw %>%
+      mutate(
+        S_star = 100 * scale01(savings_rate, savings_min, savings_max),
+        W_star = 100 * scale01(wage_yoy, wage_min, wage_max),
+        I_star = 100 - 100 * scale01(inflation_yoy, inflation_min, inflation_max),
+        R_star = 100 - 100 * scale01(borrow_rate, borrow_min, borrow_max),
+        CFHI_raw = (S_star + W_star + I_star + R_star) / 4
+      ) %>%
+      mutate(CFHI = CFHI_raw) %>%
+      select(date, CFHI)
+    
+    # Rebase to October 2006 = 100
+    base_date <- as.Date("2006-10-01")
+    base_value <- cfhi %>%
+      filter(date == base_date) %>%
+      pull(CFHI) %>%
+      first()
+    
+    if (!is.na(base_value) && base_value != 0) {
+      cfhi <- cfhi %>%
+        mutate(CFHI = (CFHI / base_value) * 100)
+    }
+    
+    # Load S&P 500 data
     sp500 <- read_excel("data/market/SP500_PriceHistory_Monthly_042006_082025_FactSet.xlsx", sheet = 1) %>%
       select(Date, Price, `% Change`) %>%
       rename(date = Date, sp500_price = Price, sp500_change = `% Change`) %>%
       mutate(date = floor_date(as.Date(date), "month"))
     
-    # Merge datasets on normalized month
+    # Merge datasets
     merged <- inner_join(cfhi, sp500, by = "date") %>%
       arrange(date) %>%
       filter(!is.na(CFHI), !is.na(sp500_price)) %>%
-      distinct(date, .keep_all = TRUE)  # Remove any duplicate months
+      distinct(date, .keep_all = TRUE)
     
-    # Apply date range filter
+    # Apply date range filter AFTER calculating CFHI with full dataset normalization
     date_range <- input$market_date_range
     
     if (date_range == "custom") {
@@ -40,7 +89,6 @@ market_data <- reactive({
     
     merged
   }, error = function(e) {
-    # Return empty data frame on error
     data.frame(date = as.Date(character()), CFHI = numeric(), sp500_price = numeric(), sp500_change = numeric())
   })
 })
@@ -199,36 +247,99 @@ output$dual_axis_plot <- renderPlotly({
     return(plotly_empty())
   }
   
-  # Normalize both series to 0-100 scale for better visual comparison
-  cfhi_norm <- (data$CFHI - min(data$CFHI)) / (max(data$CFHI) - min(data$CFHI)) * 100
-  sp500_norm <- (data$sp500_price - min(data$sp500_price)) / (max(data$sp500_price) - min(data$sp500_price)) * 100
+  # Use CFHI as-is (already indexed to Oct 2006 = 100)
+  # For S&P 500, normalize to its Oct 2006 value for comparable indexing
+  base_date <- as.Date("2006-10-01")
+  
+  # Get all data to find Oct 2006 baseline (need full dataset for consistent indexing)
+  all_data <- tryCatch({
+    cfhi_raw <- read_csv("data/cfhi/cfhi_master_2000_onward.csv", show_col_types = FALSE) %>%
+      mutate(date = floor_date(as.Date(date), "month")) %>%
+      select(date, savings_rate, wage_yoy, inflation_yoy, borrow_rate) %>%
+      distinct(date, .keep_all = TRUE) %>%
+      arrange(date) %>%
+      filter(!is.na(savings_rate), !is.na(wage_yoy), !is.na(inflation_yoy), !is.na(borrow_rate))
+    
+    savings_min <- min(cfhi_raw$savings_rate, na.rm = TRUE)
+    savings_max <- max(cfhi_raw$savings_rate, na.rm = TRUE)
+    wage_min <- min(cfhi_raw$wage_yoy, na.rm = TRUE)
+    wage_max <- max(cfhi_raw$wage_yoy, na.rm = TRUE)
+    inflation_min <- min(cfhi_raw$inflation_yoy, na.rm = TRUE)
+    inflation_max <- max(cfhi_raw$inflation_yoy, na.rm = TRUE)
+    borrow_min <- min(cfhi_raw$borrow_rate, na.rm = TRUE)
+    borrow_max <- max(cfhi_raw$borrow_rate, na.rm = TRUE)
+    
+    cfhi_full <- cfhi_raw %>%
+      mutate(
+        S_star = 100 * scale01(savings_rate, savings_min, savings_max),
+        W_star = 100 * scale01(wage_yoy, wage_min, wage_max),
+        I_star = 100 - 100 * scale01(inflation_yoy, inflation_min, inflation_max),
+        R_star = 100 - 100 * scale01(borrow_rate, borrow_min, borrow_max),
+        CFHI_raw = (S_star + W_star + I_star + R_star) / 4,
+        CFHI = CFHI_raw
+      ) %>%
+      select(date, CFHI)
+    
+    base_value <- cfhi_full %>%
+      filter(date == base_date) %>%
+      pull(CFHI) %>%
+      first()
+    
+    if (!is.na(base_value) && base_value != 0) {
+      cfhi_full <- cfhi_full %>%
+        mutate(CFHI = (CFHI / base_value) * 100)
+    }
+    
+    sp500_full <- read_excel("data/market/SP500_PriceHistory_Monthly_042006_082025_FactSet.xlsx", sheet = 1) %>%
+      select(Date, Price) %>%
+      rename(date = Date, sp500_price = Price) %>%
+      mutate(date = floor_date(as.Date(date), "month"))
+    
+    inner_join(cfhi_full, sp500_full, by = "date") %>%
+      arrange(date) %>%
+      filter(!is.na(CFHI), !is.na(sp500_price)) %>%
+      distinct(date, .keep_all = TRUE)
+  }, error = function(e) {
+    data.frame(date = as.Date(character()), CFHI = numeric(), sp500_price = numeric())
+  })
+  
+  # Get Oct 2006 baseline for S&P 500
+  sp500_baseline <- all_data %>%
+    filter(date == base_date) %>%
+    pull(sp500_price) %>%
+    first()
+  
+  # Index S&P 500 to Oct 2006 = 100 (same as CFHI)
+  if (!is.na(sp500_baseline) && sp500_baseline != 0) {
+    data$sp500_indexed <- (data$sp500_price / sp500_baseline) * 100
+  } else {
+    data$sp500_indexed <- data$sp500_price
+  }
   
   plot_ly(data) %>%
     add_trace(
       x = ~date,
-      y = cfhi_norm,
+      y = ~CFHI,
       type = "scatter",
       mode = "lines",
-      name = "CFHI (Normalized)",
+      name = "CFHI (Oct 2006 = 100)",
       line = list(color = "#1e40af", width = 2.5),
       yaxis = "y1",
-      hovertemplate = "Date: %{x}<br>CFHI: %{text:.2f}<extra></extra>",
-      text = data$CFHI
+      hovertemplate = "Date: %{x}<br>CFHI: %{y:.2f}<extra></extra>"
     ) %>%
     add_trace(
       x = ~date,
-      y = sp500_norm,
+      y = ~sp500_indexed,
       type = "scatter",
       mode = "lines",
-      name = "S&P 500 (Normalized)",
+      name = "S&P 500 (Oct 2006 = 100)",
       line = list(color = "#16a34a", width = 2.5),
       yaxis = "y1",
-      hovertemplate = "Date: %{x}<br>S&P 500: %{text:.2f}<extra></extra>",
-      text = data$sp500_price
+      hovertemplate = "Date: %{x}<br>S&P 500 Index: %{y:.2f}<extra></extra>"
     ) %>%
     layout(
       title = list(
-        text = "<b>CFHI vs S&P 500 Over Time</b> (Both Normalized to 0-100)",
+        text = "<b>CFHI vs S&P 500 Over Time</b> (Both Indexed to October 2006 = 100)",
         font = list(size = 16)
       ),
       xaxis = list(
@@ -237,10 +348,9 @@ output$dual_axis_plot <- renderPlotly({
         gridcolor = "#e5e5e5"
       ),
       yaxis = list(
-        title = "Normalized Value (0-100)",
+        title = "Index Value (Oct 2006 = 100)",
         showgrid = TRUE,
-        gridcolor = "#e5e5e5",
-        range = c(0, 100)
+        gridcolor = "#e5e5e5"
       ),
       hovermode = "x unified",
       plot_bgcolor = "#ffffff",
@@ -433,8 +543,14 @@ output$correlation_insights <- renderUI({
   # Recent trend (last 12 months)
   recent_data <- tail(data, 12)
   recent_cor <- cor(recent_data$CFHI, recent_data$sp500_price, method = stats$method)
-  recent_change <- if (abs(recent_cor - cor_val) > 0.1) {
-    if (recent_cor > cor_val) "strengthened" else "weakened"
+  
+  # Check for direction reversal
+  direction_changed <- (cor_val > 0 && recent_cor < 0) || (cor_val < 0 && recent_cor > 0)
+  
+  recent_change <- if (direction_changed) {
+    "reversed direction"
+  } else if (abs(recent_cor - cor_val) > 0.1) {
+    if (abs(recent_cor) > abs(cor_val)) "strengthened" else "weakened"
   } else {
     "remained stable"
   }
@@ -495,17 +611,38 @@ output$correlation_insights <- renderUI({
     # Key Findings
     "<h4 style='margin-top: 15px; color: #1e293b;'>Key Findings</h4>",
     "<ul style='color: #475569; font-size: 14px;'>",
-    "<li>The analysis reveals a <b>", cor_strength, " ", cor_direction, " correlation</b> ",
-    "between CFHI and S&P 500 over this period.</li>",
-    "<li>The S&P 500 explains approximately <b>", variance_pct, "%</b> of the variance in CFHI values.</li>",
-    "<li>Over the past 12 months, the correlation has <b>", recent_change, "</b> ",
-    "(recent r = ", round(recent_cor, 3), ").</li>",
+    "<li><b>Overall Period:</b> ", cor_strength, " ", cor_direction, " correlation (r = ", round(cor_val, 3), ") ",
+    "between CFHI and S&P 500, explaining ", variance_pct, "% of CFHI variance.</li>",
+    "<li><b>Recent Trend (12 months):</b> The correlation has <b>", recent_change, "</b> (r = ", round(recent_cor, 3), ")",
+    if (direction_changed) {
+      paste0(", indicating a <b style='color:#dc2626;'>fundamental shift in the relationship</b>. ",
+             "The ", if (cor_val < 0) "inverse" else "positive", " relationship observed historically has ",
+             if (recent_cor > 0) "become positive" else "become inverse", " in recent data.")
+    } else if (recent_change != "remained stable") {
+      paste0(", though the direction (", if (cor_val > 0) "positive" else "negative", ") remains consistent.")
+    } else {
+      "."
+    },
+    "</li>",
+    "<li><b>Practical Significance:</b> S&P 500 movements explain only ", variance_pct, "% of household financial health variation, ",
+    "suggesting other factors (wages, inflation, savings rates) play dominant roles.</li>",
     "</ul>",
     
     # Interpretation
     "<h4 style='color: #1e293b; margin-bottom: 10px;'>Analysis Interpretation</h4>",
     "<p style='color: #475569; font-size: 14px; margin-bottom: 10px;'>",
-    if (abs(cor_val) >= 0.5) {
+    if (direction_changed) {
+      paste0("<b style='color:#dc2626;'>Direction Reversal Detected:</b> The relationship between S&P 500 and CFHI has fundamentally changed. ",
+             "The overall ", if (cor_val < 0) "negative" else "positive", " correlation (r = ", round(cor_val, 3), ") is driven by historical data, ",
+             "while recent months show a ", if (recent_cor > 0) "positive" else "negative", " correlation (r = ", round(recent_cor, 3), "). ",
+             if (cor_val < 0 && recent_cor > 0) {
+               "This shift from inverse to positive relationship may reflect increased 401(k) participation, broader equity ownership, or recent economic conditions where market gains and household finances both benefited from the same macroeconomic tailwinds (e.g., employment growth, wage increases)."
+             } else if (cor_val > 0 && recent_cor < 0) {
+               "This shift from positive to inverse relationship may indicate changing economic dynamics where recent market gains have not translated to household benefit, potentially due to inflation concerns, rising costs, or concentrated wealth effects."
+             } else {
+               "This temporal instability suggests the relationship is highly dependent on prevailing economic conditions and policy environments."
+             })
+    } else if (abs(cor_val) >= 0.5) {
       if (cor_val > 0) {
         paste0("The strong positive correlation suggests that S&P 500 performance and household financial health move in the same direction. ",
                "This may be attributed to wealth effects (retirement accounts and investments), consumer confidence, and broader economic conditions that affect both markets and households.")

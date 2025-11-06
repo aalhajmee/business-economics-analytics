@@ -154,7 +154,7 @@ tabItem(
       verbatimTextOutput("regression_summary")
     ),
     box(
-      title = "Plain English Summary",
+      title = "Statistical Interpretation",
       status = "success",
       solidHeader = TRUE,
       width = 6,
@@ -162,7 +162,7 @@ tabItem(
       tags$div(
         style = "background:#f0fdf4; padding:10px; border-radius:5px; border-left:4px solid #16a34a; margin-bottom:10px;",
         tags$p(style="margin:0; font-size:12px;",
-          tags$b(icon("lightbulb"), " Interpretation Guide:"),
+          tags$b(icon("lightbulb"), " Analysis Summary:"),
           " This section synthesizes statistical findings into contextual interpretations, assessing the practical significance of the correlation, ",
           "hypothesis test results, and potential economic mechanisms underlying observed relationships."
         )
