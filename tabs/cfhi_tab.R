@@ -36,7 +36,7 @@ tabItem(
           box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
           background-color: #f9f9f9;
         ",
-        strong("CHFI = 0"), br(),
+        strong("CFHI = 0"), br(),
         "indicates low financial health"
       )
     ),
@@ -54,7 +54,7 @@ tabItem(
           box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
           background-color: #f9f9f9;
         ",
-        strong("CHFI = 100"), br(),
+        strong("CFHI = 100"), br(),
         "indicates high financial health"
       )
     )

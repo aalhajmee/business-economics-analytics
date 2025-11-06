@@ -26,7 +26,7 @@ tabItem(
           style = "color: #475569; font-size: 15px;",
           "The S&P 500 price history data is sourced from ",
           tags$strong("FactSet Research Systems"), 
-          ", a leading provider of financial data and analytics. FactSet aggregates and validates data from official exchanges and market sources."
+          ". For reproducible research, equivalent data is publicly available from Yahoo Finance and other free providers."
         ),
         
         tags$h4(style = "color: #1e293b; margin-top: 25px; margin-bottom: 15px;", "Coverage Period"),
@@ -92,50 +92,6 @@ tabItem(
           style = "color: #64748b; font-size: 14px; margin-top: 20px;",
           "The correlation analysis uses the overlapping period where both CFHI and S&P 500 data are available, ",
           "ensuring valid comparisons and statistical reliability."
-        )
-      )
-    ),
-    
-    box(
-      title = "Data Quality & Limitations",
-      status = "warning",
-      solidHeader = TRUE,
-      width = 6,
-      
-      tags$div(
-        style = "padding: 15px;",
-        tags$h4(style = "color: #1e293b; margin-bottom: 15px;", "Considerations"),
-        tags$ul(
-          style = "color: #475569; font-size: 15px; line-height: 1.8;",
-          tags$li(tags$strong("Causation:"), " Correlation does not imply causation; both may be influenced by common factors"),
-          tags$li(tags$strong("Time Lags:"), " Market movements may lead or lag household financial changes"),
-          tags$li(tags$strong("Income Distribution:"), " Stock market gains may not benefit all households equally"),
-          tags$li(tags$strong("Economic Cycles:"), " The relationship may vary during recessions vs. expansions")
-        ),
-        tags$p(
-          style = "color: #64748b; font-size: 14px; margin-top: 20px;",
-          "These analyses should be interpreted as exploratory insights rather than predictive models. ",
-          "Multiple economic factors influence household financial health beyond stock market performance."
-        )
-      )
-    )
-  ),
-  
-  # Citation
-  fluidRow(
-    box(
-      title = "Data Citation",
-      status = "success",
-      solidHeader = TRUE,
-      width = 12,
-      
-      tags$div(
-        style = "padding: 15px; background-color: #f8fafc; border-radius: 8px;",
-        tags$p(
-          style = "color: #334155; font-size: 14px; font-family: 'Courier New', monospace; margin: 0;",
-          "FactSet Research Systems Inc. (2025). ",
-          tags$em("S&P 500 Price History - Monthly Data: April 2006 to August 2025."), 
-          " Retrieved from FactSet database."
         )
       )
     )

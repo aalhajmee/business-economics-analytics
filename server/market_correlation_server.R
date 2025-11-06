@@ -19,48 +19,15 @@ market_data <- reactive({
   req(input$market_date_range)
   
   tryCatch({
-    # Load raw CFHI component data
-    cfhi_raw <- read_csv("data/cfhi/cfhi_master_2000_onward.csv", show_col_types = FALSE) %>%
+    # Load CFHI data directly from pre-processed CSV
+    # CSV already contains correct CFHI calculation: (S* + W* + I* + R*) / 4
+    # where each component is normalized 0-100 using full dataset
+    cfhi <- read_csv("data/cfhi/cfhi_master_2000_onward.csv", show_col_types = FALSE) %>%
       mutate(date = floor_date(as.Date(date), "month")) %>%
-      select(date, savings_rate, wage_yoy, inflation_yoy, borrow_rate) %>%
+      select(date, CFHI) %>%
       distinct(date, .keep_all = TRUE) %>%
       arrange(date) %>%
-      filter(!is.na(savings_rate), !is.na(wage_yoy), !is.na(inflation_yoy), !is.na(borrow_rate))
-    
-    # Calculate min/max for each component using FULL dataset (Apr 2006 to Aug 2025)
-    # This ensures normalization is consistent regardless of date range selection
-    savings_min <- min(cfhi_raw$savings_rate, na.rm = TRUE)
-    savings_max <- max(cfhi_raw$savings_rate, na.rm = TRUE)
-    wage_min <- min(cfhi_raw$wage_yoy, na.rm = TRUE)
-    wage_max <- max(cfhi_raw$wage_yoy, na.rm = TRUE)
-    inflation_min <- min(cfhi_raw$inflation_yoy, na.rm = TRUE)
-    inflation_max <- max(cfhi_raw$inflation_yoy, na.rm = TRUE)
-    borrow_min <- min(cfhi_raw$borrow_rate, na.rm = TRUE)
-    borrow_max <- max(cfhi_raw$borrow_rate, na.rm = TRUE)
-    
-    # Calculate CFHI components with fixed normalization
-    cfhi <- cfhi_raw %>%
-      mutate(
-        S_star = 100 * scale01(savings_rate, savings_min, savings_max),
-        W_star = 100 * scale01(wage_yoy, wage_min, wage_max),
-        I_star = 100 - 100 * scale01(inflation_yoy, inflation_min, inflation_max),
-        R_star = 100 - 100 * scale01(borrow_rate, borrow_min, borrow_max),
-        CFHI_raw = (S_star + W_star + I_star + R_star) / 4
-      ) %>%
-      mutate(CFHI = CFHI_raw) %>%
-      select(date, CFHI)
-    
-    # Rebase to October 2006 = 100
-    base_date <- as.Date("2006-10-01")
-    base_value <- cfhi %>%
-      filter(date == base_date) %>%
-      pull(CFHI) %>%
-      first()
-    
-    if (!is.na(base_value) && base_value != 0) {
-      cfhi <- cfhi %>%
-        mutate(CFHI = (CFHI / base_value) * 100)
-    }
+      filter(!is.na(CFHI))
     
     # Load S&P 500 data
     sp500 <- read_excel("data/market/SP500_PriceHistory_Monthly_042006_082025_FactSet.xlsx", sheet = 1) %>%
@@ -73,20 +40,6 @@ market_data <- reactive({
       arrange(date) %>%
       filter(!is.na(CFHI), !is.na(sp500_price)) %>%
       distinct(date, .keep_all = TRUE)
-    
-    # Index S&P 500 to October 2006 = 100 (same baseline as CFHI)
-    sp500_baseline <- merged %>%
-      filter(date == base_date) %>%
-      pull(sp500_price) %>%
-      first()
-    
-    if (!is.na(sp500_baseline) && sp500_baseline != 0) {
-      merged <- merged %>%
-        mutate(sp500_indexed = (sp500_price / sp500_baseline) * 100)
-    } else {
-      merged <- merged %>%
-        mutate(sp500_indexed = sp500_price)
-    }
     
     # Apply date range filter AFTER calculating CFHI with full dataset normalization
     date_range <- input$market_date_range
@@ -107,9 +60,41 @@ market_data <- reactive({
   })
 })
 
-# Calculate correlation statistics with hypothesis testing
+# Load FULL dataset for correlation (not filtered by date range)
+full_market_data <- reactive({
+  tryCatch({
+    # Load CFHI data directly from pre-processed CSV
+    # CSV already contains correct CFHI calculation and all components
+    cfhi <- read_csv("data/cfhi/cfhi_master_2000_onward.csv", show_col_types = FALSE) %>%
+      mutate(date = floor_date(as.Date(date), "month")) %>%
+      select(date, CFHI, savings_rate, wage_yoy, inflation_yoy, borrow_rate) %>%
+      distinct(date, .keep_all = TRUE) %>%
+      arrange(date) %>%
+      filter(!is.na(CFHI))
+    
+    # Load S&P 500 data
+    sp500 <- read_excel("data/market/SP500_PriceHistory_Monthly_042006_082025_FactSet.xlsx", sheet = 1) %>%
+      select(Date, Price, `% Change`) %>%
+      rename(date = Date, sp500_price = Price, sp500_change = `% Change`) %>%
+      mutate(date = floor_date(as.Date(date), "month"))
+    
+    # Merge datasets - NO DATE FILTERING for full correlation
+    # Keep CFHI components and Fed Funds Rate for advanced analysis
+    merged <- inner_join(cfhi, sp500, by = "date") %>%
+      arrange(date) %>%
+      filter(!is.na(CFHI), !is.na(sp500_price)) %>%
+      distinct(date, .keep_all = TRUE)
+    
+    merged
+  }, error = function(e) {
+    data.frame(date = as.Date(character()), CFHI = numeric(), sp500_price = numeric(), 
+               sp500_change = numeric(), borrow_rate = numeric())
+  })
+})
+
+# Calculate correlation statistics with hypothesis testing - ALWAYS uses FULL dataset
 correlation_stats <- reactive({
-  data <- market_data()
+  data <- full_market_data()
   
   if (nrow(data) < 3) {
     return(list(
@@ -120,11 +105,14 @@ correlation_stats <- reactive({
       model = NULL,
       conf_int = c(NA, NA),
       effect_size = NA,
-      hypothesis_result = "Insufficient data"
+      hypothesis_result = "Insufficient data",
+      partial_cor = NA,
+      partial_p = NA,
+      component_cors = list()
     ))
   }
   
-  # Use Pearson correlation method
+  # 1. NAIVE CORRELATION (what we've been doing - wrong!)
   method <- "pearson"
   cor_test <- cor.test(data$CFHI, data$sp500_price, method = method)
   
@@ -157,7 +145,73 @@ correlation_stats <- reactive({
            "): No significant correlation detected.")
   }
   
+  # 2. PARTIAL CORRELATION - Control for Fed Funds Rate (BETTER!)
+  partial_cor <- NA
+  partial_p <- NA
+  partial_test <- tryCatch({
+    # Manual partial correlation calculation
+    # Residualize both variables by Fed Funds Rate
+    cfhi_resid <- residuals(lm(CFHI ~ borrow_rate, data = data))
+    sp500_resid <- residuals(lm(sp500_price ~ borrow_rate, data = data))
+    cor.test(cfhi_resid, sp500_resid, method = "pearson")
+  }, error = function(e) NULL)
+  
+  if (!is.null(partial_test)) {
+    partial_cor <- partial_test$estimate
+    partial_p <- partial_test$p.value
+  }
+  
+  # 3. COMPONENT-WISE CORRELATIONS - Which components drive the negative correlation?
+  component_cors <- list()
+  
+  # Test each CFHI component against S&P 500
+  tryCatch({
+    # Savings rate component (S*) - expect positive
+    savings_test <- cor.test(data$S_star, data$sp500_price, method = "pearson")
+    component_cors$savings <- list(
+      name = "Savings Rate (S*)",
+      r = savings_test$estimate,
+      p = savings_test$p.value,
+      direction = "Non-inverted"
+    )
+    
+    # Wage growth component (W*) - expect positive
+    wage_test <- cor.test(data$W_star, data$sp500_price, method = "pearson")
+    component_cors$wages <- list(
+      name = "Wage Growth (W*)",
+      r = wage_test$estimate,
+      p = wage_test$p.value,
+      direction = "Non-inverted"
+    )
+    
+    # Inflation component (I*) - INVERTED, expect negative (artifact)
+    inflation_test <- cor.test(data$I_star, data$sp500_price, method = "pearson")
+    component_cors$inflation <- list(
+      name = "Inflation (I*)",
+      r = inflation_test$estimate,
+      p = inflation_test$p.value,
+      direction = "Inverted"
+    )
+    
+    # Interest rate component (R*) - INVERTED, expect negative (artifact)
+    rate_test <- cor.test(data$R_star, data$sp500_price, method = "pearson")
+    component_cors$rates <- list(
+      name = "Interest Rates (R*)",
+      r = rate_test$estimate,
+      p = rate_test$p.value,
+      direction = "Inverted"
+    )
+  }, error = function(e) {
+    component_cors <- list()
+  })
+  
+  # 4. BETTER HYPOTHESIS TEST - Multiple regression controlling for Fed policy
+  better_model <- tryCatch({
+    lm(CFHI ~ sp500_price + borrow_rate, data = data)
+  }, error = function(e) NULL)
+  
   list(
+    # Naive correlation (misleading)
     correlation = cor_test$estimate,
     p_value = cor_test$p.value,
     r_squared = r_squared,
@@ -168,7 +222,13 @@ correlation_stats <- reactive({
     effect_size = effect_size,
     hypothesis_result = hypothesis_result,
     test_statistic = cor_test$statistic,
-    cor_test = cor_test
+    cor_test = cor_test,
+    
+    # Advanced analysis (revealing truth)
+    partial_cor = partial_cor,
+    partial_p = partial_p,
+    component_cors = component_cors,
+    better_model = better_model
   )
 })
 
@@ -254,60 +314,7 @@ output$data_points <- renderValueBox({
   )
 })
 
-# Data verification display - proves values are stable
-output$data_verification_display <- renderUI({
-  data <- market_data()
-  
-  if (nrow(data) == 0) {
-    return(tags$p(style="color:#dc2626; margin-top:8px;", "No data available for verification."))
-  }
-  
-  # Test specific dates that should always have the same values
-  test_dates <- c(
-    as.Date("2006-10-01"),  # Baseline (should always be 100)
-    as.Date("2020-01-01"),  # Pre-pandemic
-    as.Date("2024-01-01")   # Recent data
-  )
-  
-  verification_rows <- lapply(test_dates, function(test_date) {
-    row_data <- data %>% filter(date == test_date)
-    
-    if (nrow(row_data) > 0) {
-      cfhi_val <- round(row_data$CFHI, 2)
-      sp500_val <- round(row_data$sp500_indexed, 2)
-      date_str <- format(test_date, "%B %Y")
-      
-      tags$tr(
-        tags$td(style="padding:4px 12px; border-bottom:1px solid #e5e7eb;", date_str),
-        tags$td(style="padding:4px 12px; border-bottom:1px solid #e5e7eb; text-align:right; font-family:monospace;", 
-                tags$b(cfhi_val)),
-        tags$td(style="padding:4px 12px; border-bottom:1px solid #e5e7eb; text-align:right; font-family:monospace;", 
-                tags$b(sp500_val))
-      )
-    } else {
-      NULL
-    }
-  })
-  
-  tags$div(
-    style = "margin-top:8px;",
-    tags$p(style="font-size:12px; color:#475569; margin-bottom:6px;",
-      "Verification: These index values remain constant across all date range selections:"),
-    tags$table(
-      style = "width:100%; font-size:12px; background:white; border-radius:4px;",
-      tags$thead(
-        tags$tr(style="background:#f8fafc;",
-          tags$th(style="padding:6px 12px; text-align:left; border-bottom:2px solid #cbd5e1;", "Date"),
-          tags$th(style="padding:6px 12px; text-align:right; border-bottom:2px solid #cbd5e1;", "CFHI Index"),
-          tags$th(style="padding:6px 12px; text-align:right; border-bottom:2px solid #cbd5e1;", "S&P 500 Index")
-        )
-      ),
-      tags$tbody(verification_rows)
-    )
-  )
-})
-
-# Dual-axis time series plot
+# Dual-axis time series plot with REAL VALUES
 output$dual_axis_plot <- renderPlotly({
   data <- market_data()
   
@@ -315,31 +322,34 @@ output$dual_axis_plot <- renderPlotly({
     return(plotly_empty())
   }
   
-  # Data already has CFHI and sp500_indexed both indexed to Oct 2006 = 100
-  plot_ly(data) %>%
+  # Use REAL values (not indexed) to show true magnitude differences
+  # This makes the negative correlation visually obvious
+  plot_ly() %>%
+    # S&P 500 on primary y-axis (left) - Blue
     add_trace(
-      x = ~date,
-      y = ~CFHI,
+      x = data$date,
+      y = data$sp500_price,
+      name = "S&P 500 (Real Values)",
       type = "scatter",
       mode = "lines",
-      name = "CFHI (Oct 2006 = 100)",
       line = list(color = "#1e40af", width = 2.5),
-      yaxis = "y1",
-      hovertemplate = "Date: %{x}<br>CFHI: %{y:.2f}<extra></extra>"
+      yaxis = "y",
+      hovertemplate = "<b>S&P 500</b><br>Date: %{x}<br>Price: %{y:.2f}<extra></extra>"
     ) %>%
+    # CFHI on secondary y-axis (right) - Red
     add_trace(
-      x = ~date,
-      y = ~sp500_indexed,
+      x = data$date,
+      y = data$CFHI,
+      name = "CFHI (Real Values)",
       type = "scatter",
       mode = "lines",
-      name = "S&P 500 (Oct 2006 = 100)",
-      line = list(color = "#16a34a", width = 2.5),
-      yaxis = "y1",
-      hovertemplate = "Date: %{x}<br>S&P 500 Index: %{y:.2f}<extra></extra>"
+      line = list(color = "#dc2626", width = 2.5),
+      yaxis = "y2",
+      hovertemplate = "<b>CFHI</b><br>Date: %{x}<br>Value: %{y:.2f}<extra></extra>"
     ) %>%
     layout(
       title = list(
-        text = "<b>CFHI vs S&P 500 Over Time</b> (Both Indexed to October 2006 = 100)",
+        text = "<b>S&P 500 vs CFHI: Real Values (Dual Axis)</b><br><sub>Reveals why correlation is negative: divergent movements</sub>",
         font = list(size = 16)
       ),
       xaxis = list(
@@ -347,10 +357,29 @@ output$dual_axis_plot <- renderPlotly({
         showgrid = TRUE,
         gridcolor = "#e5e5e5"
       ),
+      # Primary y-axis (left) for S&P 500
       yaxis = list(
-        title = "Index Value (Oct 2006 = 100)",
+        title = list(
+          text = "<b>S&P 500 Index</b>",
+          font = list(color = "#1e40af", size = 14)
+        ),
+        tickfont = list(color = "#1e40af"),
+        showgrid = FALSE,
+        side = "left",
+        rangemode = "tozero"
+      ),
+      # Secondary y-axis (right) for CFHI
+      yaxis2 = list(
+        title = list(
+          text = "<b>CFHI Value</b>",
+          font = list(color = "#dc2626", size = 14)
+        ),
+        tickfont = list(color = "#dc2626"),
+        overlaying = "y",
+        side = "right",
         showgrid = TRUE,
-        gridcolor = "#e5e5e5"
+        gridcolor = "#fee2e2",
+        rangemode = "tozero"
       ),
       hovermode = "x unified",
       plot_bgcolor = "#ffffff",
@@ -359,7 +388,25 @@ output$dual_axis_plot <- renderPlotly({
         orientation = "h",
         x = 0.5,
         xanchor = "center",
-        y = -0.15
+        y = -0.15,
+        bgcolor = "rgba(255, 255, 255, 0.8)"
+      ),
+      annotations = list(
+        list(
+          text = "<b>Visual Insight:</b> When blue (S&P 500) climbs during bull markets,<br>red (CFHI) often declines due to Fed rate hikes → negative correlation",
+          xref = "paper",
+          yref = "paper",
+          x = 0.5,
+          y = -0.25,
+          xanchor = "center",
+          yanchor = "top",
+          showarrow = FALSE,
+          font = list(size = 11, color = "#64748b"),
+          bgcolor = "#fef3c7",
+          bordercolor = "#f59e0b",
+          borderwidth = 1,
+          borderpad = 8
+        )
       )
     )
 })
@@ -578,172 +625,112 @@ output$correlation_insights <- renderUI({
            "S&P 500 and CFHI appear to move independently during this period.")
   }
   
-  insights_html <- paste0(
-    "<div style='padding: 15px; line-height: 1.8;'>",
+  # Create simple, clean interpretation
+  if (!is.null(stats$better_model)) {
+    model_summary <- summary(stats$better_model)
+    sp500_coef <- coef(model_summary)["sp500_price", ]
     
-    # Summary Statement
-    "<div style='background: #f0fdf4; border-left: 4px solid #16a34a; padding: 15px; margin-bottom: 15px; border-radius: 4px;'>",
-    "<h4 style='margin-top: 0; color: #166534;'><i class='fa fa-check-circle'></i> Summary Finding</h4>",
-    "<p style='margin: 0; color: #166534; font-size: 15px; font-weight: 500;'>", simple_summary, "</p>",
-    "</div>",
-    
-    # Hypothesis Testing Section
-    "<div style='background: #f0f9ff; border-left: 4px solid #0284c7; padding: 12px; margin-bottom: 15px; border-radius: 4px;'>",
-    "<h4 style='margin-top: 0; color: #0c4a6e;'><i class='fa fa-flask'></i> Formal Hypothesis Test</h4>",
-    "<p style='margin: 5px 0; color: #0c4a6e; font-size: 13px;'><b>H₀ (Null Hypothesis):</b> There is no correlation between CFHI and S&P 500 (ρ = 0)</p>",
-    "<p style='margin: 5px 0; color: #0c4a6e; font-size: 13px;'><b>Hₐ (Alternative Hypothesis):</b> There is a correlation between CFHI and S&P 500 (ρ ≠ 0)</p>",
-    "<p style='margin: 5px 0; color: #0c4a6e; font-size: 13px;'><b>Significance Level:</b> α = 0.05</p>",
-    "<p style='margin: 10px 0 5px 0; color: #0c4a6e; font-size: 14px; font-weight: 600;'><b>Result:</b> ", stats$hypothesis_result, "</p>",
-    "</div>",
-    
-    # Correlation Test Output (R-style)
-    "<h4 style='margin-top: 20px; color: #1e293b;'>Pearson Correlation Test</h4>",
-    "<pre style='background: #f8fafc; padding: 15px; border-radius: 5px; border-left: 4px solid #3b82f6; font-family: monospace; font-size: 13px; color: #1e293b; overflow-x: auto;'>",
-    "Pearson's product-moment correlation\n\n",
-    "data:  CFHI and S&P 500\n",
-    "t = ", round(stats$test_statistic, 4), ", df = ", stats$n - 2, ", p-value ", 
-    if (p_val < 0.001) "< 2.2e-16" else if (p_val < 0.01) "< 0.001" else paste0("= ", format(p_val, scientific = TRUE, digits = 3)), "\n",
-    "alternative hypothesis: true correlation is not equal to 0\n",
-    "95 percent confidence interval:\n",
-    " ", ci_text, "\n",
-    "sample estimates:\n",
-    "      cor \n",
-    sprintf("%9.7f", cor_val), "\n",
-    "</pre>",
-    
-    # Interpretation of Correlation Test
-    "<h4 style='margin-top: 15px; color: #1e293b;'>Interpretation</h4>",
-    "<div style='background: #f0f9ff; padding: 12px; border-radius: 5px; border-left: 4px solid #0ea5e9;'>",
-    "<p style='color: #475569; font-size: 14px; margin: 0 0 8px 0;'>",
-    "<b>Correlation Strength:</b> r = ", round(cor_val, 3), " indicates a <b>", cor_strength, " ", cor_direction, "</b> relationship. ",
-    "This means that ", round(abs(cor_val) * 100, 1), "% of the linear relationship is captured, with ",
-    if (cor_val > 0) "both variables moving in the same direction" else "variables moving in opposite directions", ".",
-    "</p>",
-    "<p style='color: #475569; font-size: 14px; margin: 0 0 8px 0;'>",
-    "<b>Statistical Significance:</b> p-value ", if (p_val < 0.001) "< 0.001" else round(p_val, 4), 
-    " (", sig_text, ") indicates this correlation is ", 
-    if (p_val < 0.05) "unlikely to have occurred by chance" else "not statistically distinguishable from zero", 
-    " at α = 0.05 significance level.",
-    "</p>",
-    "<p style='color: #475569; font-size: 14px; margin: 0 0 8px 0;'>",
-    "<b>Variance Explained:</b> R² = ", variance_pct, "% means S&P 500 explains ", variance_pct, 
-    "% of the variation in CFHI. The remaining ", round(100 - variance_pct, 1), 
-    "% is attributable to other factors (wages, inflation, savings behavior, borrowing costs).",
-    "</p>",
-    "<p style='color: #475569; font-size: 14px; margin: 0;'>",
-    "<b>Effect Size:</b> ", stats$effect_size, " (Cohen's classification) suggests a ", 
-    tolower(stats$effect_size), " practical effect, indicating the relationship has ", 
-    if (stats$effect_size == "Small" || stats$effect_size == "Negligible") "limited real-world impact" 
-    else if (stats$effect_size == "Medium") "moderate real-world relevance" 
-    else "substantial real-world importance", ".",
-    "</p>",
-    "</div>",
-    
-    # Key Findings
-    "<h4 style='margin-top: 15px; color: #1e293b;'>Key Findings</h4>",
-    "<ul style='color: #475569; font-size: 14px;'>",
-    "<li><b>Overall Period:</b> ", cor_strength, " ", cor_direction, " correlation (r = ", round(cor_val, 3), ") ",
-    "between CFHI and S&P 500, explaining ", variance_pct, "% of CFHI variance.</li>",
-    "<li><b>Recent Trend (12 months):</b> The correlation has <b>", recent_change, "</b> (r = ", round(recent_cor, 3), ")",
-    if (direction_changed) {
-      paste0(", indicating a <b style='color:#dc2626;'>fundamental shift in the relationship</b>. ",
-             "The ", if (cor_val < 0) "inverse" else "positive", " relationship observed historically has ",
-             if (recent_cor > 0) "become positive" else "become inverse", " in recent data.")
-    } else if (recent_change != "remained stable") {
-      paste0(", though the direction (", if (cor_val > 0) "positive" else "negative", ") remains consistent.")
-    } else {
-      "."
-    },
-    "</li>",
-    "<li><b>Practical Significance:</b> S&P 500 movements explain only ", variance_pct, "% of household financial health variation, ",
-    "suggesting other factors (wages, inflation, savings rates) play dominant roles.</li>",
-    "</ul>",
-    
-    # Interpretation
-    "<h4 style='color: #1e293b; margin-bottom: 10px;'>Analysis Interpretation</h4>",
-    "<p style='color: #475569; font-size: 14px; margin-bottom: 10px;'>",
-    if (direction_changed) {
-      paste0("<b style='color:#dc2626;'>Direction Reversal Detected:</b> The relationship between S&P 500 and CFHI has fundamentally changed. ",
-             "The overall ", if (cor_val < 0) "negative" else "positive", " correlation (r = ", round(cor_val, 3), ") is driven by historical data, ",
-             "while recent months show a ", if (recent_cor > 0) "positive" else "negative", " correlation (r = ", round(recent_cor, 3), "). ",
-             if (cor_val < 0 && recent_cor > 0) {
-               "This shift from inverse to positive relationship may reflect increased 401(k) participation, broader equity ownership, or recent economic conditions where market gains and household finances both benefited from the same macroeconomic tailwinds (e.g., employment growth, wage increases)."
-             } else if (cor_val > 0 && recent_cor < 0) {
-               "This shift from positive to inverse relationship may indicate changing economic dynamics where recent market gains have not translated to household benefit, potentially due to inflation concerns, rising costs, or concentrated wealth effects."
-             } else {
-               "This temporal instability suggests the relationship is highly dependent on prevailing economic conditions and policy environments."
-             })
-    } else if (abs(cor_val) >= 0.5) {
-      if (cor_val > 0) {
-        paste0("The strong positive correlation suggests that S&P 500 performance and household financial health move in the same direction. ",
-               "This may be attributed to wealth effects (retirement accounts and investments), consumer confidence, and broader economic conditions that affect both markets and households.")
+    insights_html <- paste0(
+      "<div style='padding: 15px; line-height: 1.8;'>",
+      
+      # Summary Finding
+      "<div style='background: #f0fdf4; border-left: 4px solid #16a34a; padding: 15px; margin-bottom: 15px; border-radius: 4px;'>",
+      "<h4 style='margin-top: 0; color: #166534;'><i class='fa fa-chart-line'></i> Correlation Analysis</h4>",
+      "<p style='margin: 0 0 10px 0; color: #166534; font-size: 15px; font-weight: 600;'>",
+      "Research Question: Does S&P 500 performance affect household financial health after controlling for Federal Reserve policy?",
+      "</p>",
+      "<p style='margin: 0; color: #166534; font-size: 14px;'>",
+      "Using partial correlation to account for confounding variables (Fed Funds Rate), we isolate the true relationship between stock market performance and household finances.",
+      "</p>",
+      "</div>",
+      
+      # Hypothesis Test
+      "<div style='background: #f0f9ff; border-left: 4px solid #0284c7; padding: 15px; margin-bottom: 15px; border-radius: 4px;'>",
+      "<h4 style='margin-top: 0; color: #0c4a6e;'><i class='fa fa-flask'></i> Hypothesis Test</h4>",
+      "<p style='margin: 5px 0; color: #0c4a6e; font-size: 13px;'><b>H₀:</b> S&P 500 has no effect on CFHI (β = 0)</p>",
+      "<p style='margin: 5px 0; color: #0c4a6e; font-size: 13px;'><b>Hₐ:</b> S&P 500 affects CFHI (β ≠ 0)</p>",
+      "<p style='margin: 5px 0; color: #0c4a6e; font-size: 13px;'><b>Significance Level:</b> α = 0.05</p>",
+      "</div>",
+      
+      # Statistical Results
+      "<h4 style='color: #1e293b; margin-bottom: 10px;'>Statistical Results</h4>",
+      "<pre style='background: #f8fafc; padding: 15px; border-radius: 5px; border-left: 4px solid #3b82f6; font-family: monospace; font-size: 13px; color: #1e293b; overflow-x: auto;'>",
+      "Multiple Regression: CFHI ~ S&P500 + FedFundsRate\n\n",
+      "S&P 500 Coefficient:\n",
+      "  Estimate: β = ", sprintf("%.6f", sp500_coef["Estimate"]), "\n",
+      "  Std Error: ", sprintf("%.6f", sp500_coef["Std. Error"]), "\n",
+      "  t-value: ", sprintf("%.3f", sp500_coef["t value"]), "\n",
+      "  p-value: ", if (sp500_coef["Pr(>|t|)"] < 0.001) "< 0.001" else sprintf("%.4f", sp500_coef["Pr(>|t|)"]), "\n\n",
+      "Model Fit:\n",
+      "  R² (adjusted): ", sprintf("%.4f", model_summary$adj.r.squared), "\n",
+      "  F-statistic: ", sprintf("%.2f", model_summary$fstatistic[1]), "\n",
+      "</pre>",
+      
+      # Interpretation
+      "<h4 style='color: #1e293b; margin-bottom: 10px;'>Interpretation</h4>",
+      "<div style='background: #f0fdf4; border-left: 4px solid #16a34a; padding: 15px; border-radius: 4px;'>",
+      "<p style='margin: 0 0 10px 0; color: #166534; font-size: 14px;'>",
+      "<b>Decision:</b> ",
+      if (sp500_coef["Pr(>|t|)"] < 0.05) {
+        paste0("<b style='color: #16a34a;'>REJECT H₀</b> (p = ", sprintf("%.4f", sp500_coef["Pr(>|t|)"]), " < 0.05)")
       } else {
-        paste0("The strong negative correlation indicates an inverse relationship where S&P 500 gains coincide with declining household financial health. ",
-               "This counterintuitive pattern may reflect periods where market growth was concentrated among high-wealth individuals while median households faced wage stagnation or rising costs.")
-      }
-    } else if (abs(cor_val) >= 0.3) {
-      if (cor_val > 0) {
-        paste0("The moderate positive correlation indicates that market performance and household finances are somewhat linked, but other factors play substantial roles. ",
-               "Variables such as wage growth, employment rates, and inflation independently influence household financial health beyond market effects.")
+        paste0("<b style='color: #dc2626;'>FAIL TO REJECT H₀</b> (p = ", sprintf("%.4f", sp500_coef["Pr(>|t|)"]), " ≥ 0.05)")
+      },
+      "</p>",
+      "<p style='margin: 0; color: #166534; font-size: 14px;'>",
+      "<b>Conclusion:</b> ",
+      if (sp500_coef["Pr(>|t|)"] < 0.05) {
+        # Calculate effect size in meaningful units (per 100-point S&P change)
+        effect_per_100 <- sp500_coef["Estimate"] * 100
+        
+        # Calculate practical significance: how much of CFHI range is explained?
+        cfhi_range <- 75.44  # 93.34 - 17.9
+        typical_sp500_swing <- 1000  # Typical major market movement
+        expected_cfhi_change <- typical_sp500_swing * sp500_coef["Estimate"]
+        pct_of_range <- (expected_cfhi_change / cfhi_range) * 100
+        
+        if (sp500_coef["Estimate"] > 0) {
+          paste0("The relationship is <b>statistically significant</b> (p < 0.05) but <b>",
+                 if (abs(effect_per_100) < 1.0) "practically weak" else "meaningful",
+                 "</b>. ",
+                 "For every 100-point S&P 500 increase, CFHI rises by ", sprintf("%.2f", effect_per_100), " points ",
+                 "(β = ", sprintf("%.6f", sp500_coef["Estimate"]), "). ",
+                 if (abs(effect_per_100) < 1.0) {
+                   paste0("<b>Practical Interpretation:</b> Even a 1,000-point S&P 500 swing (e.g., 3,500 → 4,500) ",
+                          "would only move CFHI by ~", sprintf("%.1f", expected_cfhi_change), " points, ",
+                          "representing just ", sprintf("%.1f%%", pct_of_range), " of the total CFHI range. ",
+                          "<b>Conclusion: The stock market has minimal direct impact on typical household financial health.</b> ",
+                          "Wages, inflation, and interest rates dominate household finances.")
+                 } else {
+                   "This represents a meaningful economic relationship showing that stock market gains meaningfully benefit household finances."
+                 })
+        } else {
+          paste0("S&P 500 has a statistically significant <b>negative</b> effect. ",
+                 "For every 100-point increase, CFHI decreases by ", sprintf("%.2f", abs(effect_per_100)), " points (β = ", 
+                 sprintf("%.6f", sp500_coef["Estimate"]), "). ",
+                 if (abs(effect_per_100) < 1.0) {
+                   "However, the practical effect size is small."
+                 } else {
+                   "This suggests stock market gains may correlate with factors that harm household finances."
+                 })
+        }
       } else {
-        paste0("The moderate negative correlation suggests that market gains may not benefit median households proportionally. ",
-               "This could reflect income inequality dynamics where equity ownership is concentrated, or periods where market optimism diverged from household economic realities.")
-      }
-    } else {
-      if (cor_val != 0) {
-        paste0("The weak correlation (r = ", round(cor_val, 3), ") indicates that S&P 500 movements have minimal direct association with household financial health. ",
-               "This finding emphasizes that household well-being depends primarily on factors like wage growth, savings rates, inflation control, and borrowing costs rather than equity market performance.")
-      } else {
-        "No meaningful correlation was detected, suggesting that S&P 500 performance and household financial health operate independently during this period."
-      }
-    },
-    "</p>",
-    
-    # CRITICAL: Methodological Explanation for Negative Correlation
-    if (cor_val < 0) {
-      paste0(
-        "<div style='background: #fef2f2; border-left: 4px solid #dc2626; padding: 15px; margin-top: 15px; border-radius: 4px;'>",
-        "<h4 style='margin: 0 0 10px 0; color: #991b1b;'><i class='fa fa-exclamation-circle'></i> Why Negative Correlation Occurs</h4>",
-        "<p style='margin: 0 0 10px 0; color: #7f1d1d; font-size: 13px;'>",
-        "The observed negative correlation (stocks up → CFHI down) contradicts intuition that stock gains benefit households. ",
-        "This counterintuitive result stems from <b>CFHI's construction methodology</b>, which includes two <b>inverted components</b>:",
-        "</p>",
-        "<ul style='color: #7f1d1d; font-size: 13px; margin: 0 0 10px 0;'>",
-        "<li><b>Interest Rates (R*)</b>: During bull markets, the Federal Reserve typically raises rates to prevent overheating. ",
-        "Higher rates reduce R*, lowering CFHI even as stocks rise.</li>",
-        "<li><b>Inflation (I*)</b>: Strong economic growth (which lifts stocks) often triggers inflation. ",
-        "Higher inflation reduces I*, lowering CFHI despite positive market performance.</li>",
-        "</ul>",
-        "<p style='margin: 0 0 10px 0; color: #7f1d1d; font-size: 13px;'>",
-        "<b>Real-World Example (2006-2007):</b> As S&P 500 peaked pre-crisis, the Fed raised rates from 1% to 5.25%, ",
-        "crushing R* from 100 to 0. This created a negative correlation despite households actually benefiting from employment and wage growth.",
-        "</p>",
-        "<p style='margin: 0; color: #7f1d1d; font-size: 13px;'>",
-        "<b>Implication:</b> The negative correlation is a <b>methodological artifact</b> of CFHI's design, not evidence that stock gains harm households. ",
-        "CFHI captures monetary policy effects (rate hikes) more than direct household wealth effects. ",
-        "A better metric would separate cyclical policy responses from structural household financial health.",
-        "</p>",
-        "</div>"
-      )
-    } else {
-      ""
-    },
-    
-    # Important Note (General)
-    "<div style='background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; margin-top: 15px; border-radius: 4px;'>",
-    "<p style='margin: 0; color: #78350f; font-size: 13px;'><b><i class='fa fa-exclamation-triangle'></i> Correlation ≠ Causation:</b> ",
-    "This analysis measures statistical association, not causal relationships. The observed correlation could result from: ",
-    "(1) S&P 500 → CFHI, (2) CFHI → S&P 500, (3) Federal Reserve policy → both, or (4) coincidental patterns. ",
-    if (cor_val < 0) {
-      "The negative correlation likely reflects <b>shared dependence on Fed monetary policy</b> (tightening during expansions, easing during contractions) rather than stocks directly harming households."
-    } else {
-      "The positive correlation may reflect shared macroeconomic drivers (employment, GDP growth) rather than direct wealth effects."
-    },
-    "</p>",
-    "</div>",
-    
-    "</div>"
-  )
+        paste0("<b>No significant relationship exists</b> between S&P 500 and household financial health after controlling for Fed policy (p = ",
+               sprintf("%.4f", sp500_coef["Pr(>|t|)"]), "). ",
+               "Stock market movements do not independently predict household finances when interest rates are held constant.")
+      },
+      "</p>",
+      "</div>",
+      
+      "</div>"
+    )
+  } else {
+    insights_html <- paste0(
+      "<div style='padding: 15px;'>",
+      "<p style='color: #dc2626;'>Unable to compute correlation statistics. Please check data availability.</p>",
+      "</div>"
+    )
+  }
   
   HTML(insights_html)
 })

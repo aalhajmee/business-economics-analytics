@@ -28,29 +28,26 @@ cfhi_feature_server <- function(id,
       validate(need(length(missing) == 0,
                     paste("Master CSV missing columns:", paste(missing, collapse=", "))))
       df <- df[order(df$date), ]
-      # if CFHI not present, build it minimally:
-      if (!"cfhi" %in% names(df) && !"CFHI" %in% names(df)) {
-        df$S_star <- 100 * scale01(df$savings_rate)
-        df$W_star <- 100 * scale01(df$wage_yoy)
-        df$I_star <- 100 - 100 * scale01(df$inflation_yoy)
-        df$R_star <- 100 - 100 * scale01(df$borrow_rate)
-        df$CFHI_raw <- rowMeans(df[, c("S_star","W_star","I_star","R_star")], na.rm = TRUE)
+      # if cfhi not present, build it minimally:
+      if (!"cfhi" %in% names(df)) {
+        df$s_star <- 100 * scale01(df$savings_rate)
+        df$w_star <- 100 * scale01(df$wage_yoy)
+        df$i_star <- 100 - 100 * scale01(df$inflation_yoy)
+        df$r_star <- 100 - 100 * scale01(df$borrow_rate)
+        df$cfhi_raw <- rowMeans(df[, c("s_star","w_star","i_star","r_star")], na.rm = TRUE)
         # No smoothing (k=1)
-        df$CFHI <- df$CFHI_raw
+        df$cfhi <- df$cfhi_raw
         
         # Rebase to October 2006 = 100
         base_date <- as.Date("2006-10-01")
         base_idx <- which(df$date == base_date)
         if (length(base_idx) > 0) {
-          base_value <- df$CFHI[base_idx[1]]
+          base_value <- df$cfhi[base_idx[1]]
           if (!is.na(base_value) && base_value != 0) {
-            df$CFHI <- (df$CFHI / base_value) * 100
-            df$CFHI_raw <- (df$CFHI_raw / base_value) * 100
+            df$cfhi <- (df$cfhi / base_value) * 100
+            df$cfhi_raw <- (df$cfhi_raw / base_value) * 100
           }
         }
-      } else if ("cfhi" %in% names(df) && !"CFHI" %in% names(df)) {
-        # Rename lowercase to uppercase for consistency
-        df$CFHI <- df$cfhi
       }
       # Provide year/month
       df$year <- lubridate::year(df$date)
@@ -77,30 +74,23 @@ cfhi_feature_server <- function(id,
       df_full <- df_master()
       req(input$date_range)
       
-      # Calculate components using FULL dataset for consistent normalization
-      # This ensures scores are comparable across time periods
-      if (!all(c("S_star","W_star","I_star","R_star") %in% names(df_full))) {
-        df_full$S_star <- 100 * scale01(df_full$savings_rate)
-        df_full$W_star <- 100 * scale01(df_full$wage_yoy)
-        df_full$I_star <- 100 - 100 * scale01(df_full$inflation_yoy)
-        df_full$R_star <- 100 - 100 * scale01(df_full$borrow_rate)
-        df_full$CFHI_raw <- rowMeans(df_full[, c("S_star","W_star","I_star","R_star")], na.rm = TRUE)
-        df_full$CFHI <- df_full$CFHI_raw
-      }
+      # CSV should already have normalized components (s_star, w_star, i_star, r_star)
+      # and CFHI normalized to 0-100 (0=worst, 100=best historical financial health)
+      # No need to recalculate since we're using the pre-processed CSV
       
-      # Now filter to selected date range
+      # Filter to selected date range for visualization
       rng <- as.Date(input$date_range)
       df <- df_full[df_full$date >= rng[1] & df_full$date <= rng[2], , drop = FALSE]
       df
     })
     
-    # Current CHFI card
+    # Current CFHI card
     observe({
       df <- df_master()
       req(nrow(df) > 0)
-      last_row <- df[tail(which(!is.na(df$CFHI)), 1), ]
+      last_row <- df[tail(which(!is.na(df$cfhi)), 1), ]
       if (nrow(last_row)) {
-        lbl <- sprintf("%.1f", last_row$CFHI)
+        lbl <- sprintf("%.1f", last_row$cfhi)
         sub <- paste0("Latest month: ", format(last_row$date, "%b %Y"))
         shinyjs::runjs(sprintf("document.getElementById('%s').innerText = '%s';", ns("current_label"), lbl))
         shinyjs::runjs(sprintf("document.getElementById('%s').innerText = '%s';", ns("current_sub"), sub))
@@ -115,7 +105,7 @@ cfhi_feature_server <- function(id,
       selected_comps <- input$show_components
       
       # Build the plot - main CFHI line
-      fig <- plot_ly(df, x = ~date, y = ~CFHI, type = 'scatter', mode = 'lines+markers',
+      fig <- plot_ly(df, x = ~date, y = ~cfhi, type = 'scatter', mode = 'lines+markers',
                      name = 'CFHI (Composite)',
                      line = list(color = '#1e40af', width = 3),
                      marker = list(size = 4, color = '#1e40af'),
@@ -127,19 +117,13 @@ cfhi_feature_server <- function(id,
       
       # Add component lines based on user selection
       if (!is.null(selected_comps) && length(selected_comps) > 0) {
-        # Ensure component columns exist
-        if (!all(c("S_star","W_star","I_star","R_star") %in% names(df))) {
-          s <- 100 * scale01(df$savings_rate)
-          w <- 100 * scale01(df$wage_yoy)
-          i <- 100 - 100 * scale01(df$inflation_yoy)
-          r <- 100 - 100 * scale01(df$borrow_rate)
-          df$S_star <- s; df$W_star <- w; df$I_star <- i; df$R_star <- r
-        }
+        # Components should already exist from df_filtered() which uses full dataset normalization
+        # No need to recalculate here
         
         # Add Savings Rate if selected
         if ("savings" %in% selected_comps) {
           fig <- fig %>%
-            add_trace(x = ~date, y = ~S_star, data = df, type = 'scatter', mode = 'lines',
+            add_trace(x = ~date, y = ~s_star, data = df, type = 'scatter', mode = 'lines',
                      name = 'Savings Rate ↑',
                      line = list(color = '#16a34a', dash = 'dash', width = 2),
                      hovertemplate = paste0(
@@ -153,7 +137,7 @@ cfhi_feature_server <- function(id,
         # Add Wage Growth if selected
         if ("wages" %in% selected_comps) {
           fig <- fig %>%
-            add_trace(x = ~date, y = ~W_star, data = df, type = 'scatter', mode = 'lines',
+            add_trace(x = ~date, y = ~w_star, data = df, type = 'scatter', mode = 'lines',
                      name = 'Wage Growth ↑',
                      line = list(color = '#0891b2', dash = 'dash', width = 2),
                      hovertemplate = paste0(
@@ -167,7 +151,7 @@ cfhi_feature_server <- function(id,
         # Add Inflation if selected
         if ("inflation" %in% selected_comps) {
           fig <- fig %>%
-            add_trace(x = ~date, y = ~I_star, data = df, type = 'scatter', mode = 'lines',
+            add_trace(x = ~date, y = ~i_star, data = df, type = 'scatter', mode = 'lines',
                      name = 'Inflation ↓ (inverted)',
                      line = list(color = '#ea580c', dash = 'dash', width = 2),
                      hovertemplate = paste0(
@@ -181,7 +165,7 @@ cfhi_feature_server <- function(id,
         # Add Borrow Rate if selected
         if ("borrow" %in% selected_comps) {
           fig <- fig %>%
-            add_trace(x = ~date, y = ~R_star, data = df, type = 'scatter', mode = 'lines',
+            add_trace(x = ~date, y = ~r_star, data = df, type = 'scatter', mode = 'lines',
                      name = 'Borrow Rate ↓ (inverted)',
                      line = list(color = '#c026d3', dash = 'dash', width = 2),
                      hovertemplate = paste0(
@@ -199,7 +183,7 @@ cfhi_feature_server <- function(id,
                                    format(min(df$date), "%b %Y"), " - ", 
                                    format(max(df$date), "%b %Y"), "</sub>")),
         xaxis = list(title = "", showgrid = TRUE, gridcolor = '#e5e7eb'),
-        yaxis = list(title = "Index (Oct 2006 = 100)", showgrid = TRUE, gridcolor = '#e5e7eb'),
+        yaxis = list(title = "Index (0=Worst, 100=Best)", showgrid = TRUE, gridcolor = '#e5e7eb'),
         hovermode = 'x unified',
         legend = list(
           orientation = "h", 
@@ -231,15 +215,15 @@ cfhi_feature_server <- function(id,
       current_year <- 2025
       df_current_year <- df[lubridate::year(df$date) == current_year, ]
       
-      if (nrow(df_current_year) > 0 && "CFHI" %in% names(df_current_year)) {
-        us_cfhi_avg <- mean(df_current_year$CFHI, na.rm = TRUE)
+      if (nrow(df_current_year) > 0 && "cfhi" %in% names(df_current_year)) {
+        us_cfhi_avg <- mean(df_current_year$cfhi, na.rm = TRUE)
       } else {
         # Fallback to most recent available data
-        if ("CFHI" %in% names(df)) {
-          valid_idx <- which(!is.na(df$CFHI))
+        if ("cfhi" %in% names(df)) {
+          valid_idx <- which(!is.na(df$cfhi))
           if (length(valid_idx) > 0) {
             last_row <- df[tail(valid_idx, 1), ]
-            us_cfhi_avg <- last_row$CFHI
+            us_cfhi_avg <- last_row$cfhi
           } else {
             us_cfhi_avg <- 100
           }
@@ -386,43 +370,43 @@ cfhi_feature_server <- function(id,
         selected_comps <- input$show_components
         
         # Use ggplot2 for reliable PNG export
-        p <- ggplot(df, aes(x = date, y = CFHI)) +
+        p <- ggplot(df, aes(x = date, y = cfhi)) +
           geom_line(aes(color = "CFHI (Composite)"), linewidth = 1.2) +
           geom_point(aes(color = "CFHI (Composite)"), size = 1.5) +
           scale_color_manual(name = "", values = c("CFHI (Composite)" = "#1e40af"))
         
         if (!is.null(selected_comps) && length(selected_comps) > 0) {
-          if (!all(c("S_star","W_star","I_star","R_star") %in% names(df))) {
+          if (!all(c("s_star","w_star","i_star","r_star") %in% names(df))) {
             s <- 100 * scale01(df$savings_rate)
             w <- 100 * scale01(df$wage_yoy)
             i <- 100 - 100 * scale01(df$inflation_yoy)
             r <- 100 - 100 * scale01(df$borrow_rate)
-            df$S_star <- s; df$W_star <- w; df$I_star <- i; df$R_star <- r
+            df$s_star <- s; df$w_star <- w; df$i_star <- i; df$r_star <- r
           }
           
           colors <- c("CFHI (Composite)" = "#1e40af")
           linetypes <- c("CFHI (Composite)" = "solid")
           
           if ("savings" %in% selected_comps) {
-            p <- p + geom_line(data = df, aes(x = date, y = S_star, color = "Savings Rate ↑"), 
+            p <- p + geom_line(data = df, aes(x = date, y = s_star, color = "Savings Rate ↑"), 
                               linetype = "dashed", linewidth = 0.8)
             colors["Savings Rate ↑"] <- "#16a34a"
             linetypes["Savings Rate ↑"] <- "dashed"
           }
           if ("wages" %in% selected_comps) {
-            p <- p + geom_line(data = df, aes(x = date, y = W_star, color = "Wage Growth ↑"), 
+            p <- p + geom_line(data = df, aes(x = date, y = w_star, color = "Wage Growth ↑"), 
                               linetype = "dashed", linewidth = 0.8)
             colors["Wage Growth ↑"] <- "#0891b2"
             linetypes["Wage Growth ↑"] <- "dashed"
           }
           if ("inflation" %in% selected_comps) {
-            p <- p + geom_line(data = df, aes(x = date, y = I_star, color = "Inflation ↓"), 
+            p <- p + geom_line(data = df, aes(x = date, y = i_star, color = "Inflation ↓"), 
                               linetype = "dashed", linewidth = 0.8)
             colors["Inflation ↓"] <- "#ea580c"
             linetypes["Inflation ↓"] <- "dashed"
           }
           if ("borrow" %in% selected_comps) {
-            p <- p + geom_line(data = df, aes(x = date, y = R_star, color = "Borrow Rate ↓"), 
+            p <- p + geom_line(data = df, aes(x = date, y = r_star, color = "Borrow Rate ↓"), 
                               linetype = "dashed", linewidth = 0.8)
             colors["Borrow Rate ↓"] <- "#c026d3"
             linetypes["Borrow Rate ↓"] <- "dashed"
@@ -434,7 +418,7 @@ cfhi_feature_server <- function(id,
         
         p <- p + 
           labs(title = paste0("CFHI: ", format(min(df$date), "%b %Y"), " - ", format(max(df$date), "%b %Y")),
-               x = "", y = "Index (Oct 2006 = 100)") +
+               x = "", y = "Index (0=Worst, 100=Best)") +
           theme_minimal() +
           theme(legend.position = "bottom",
                 plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
