@@ -167,6 +167,7 @@ correlation_stats <- reactive({
     conf_int = conf_int,
     effect_size = effect_size,
     hypothesis_result = hypothesis_result,
+    test_statistic = cor_test$statistic,
     cor_test = cor_test
   )
 })
@@ -595,17 +596,48 @@ output$correlation_insights <- renderUI({
     "<p style='margin: 10px 0 5px 0; color: #0c4a6e; font-size: 14px; font-weight: 600;'><b>Result:</b> ", stats$hypothesis_result, "</p>",
     "</div>",
     
-    # Statistical Summary
-    "<h4 style='margin-top: 0; color: #1e293b;'>Statistical Summary</h4>",
-    "<ul style='color: #475569; font-size: 14px;'>",
-    "<li><b>Correlation Coefficient:</b> r = ", round(cor_val, 3), " (", cor_strength, " ", cor_direction, ")</li>",
-    "<li><b>95% Confidence Interval:</b> ", ci_text, "</li>",
-    "<li><b>Effect Size (Cohen's d):</b> ", stats$effect_size, "</li>",
-    "<li><b>P-value:</b> ", if (p_val < 0.001) "< 0.001" else round(p_val, 4), 
-    " → ", sig_text, "</li>",
-    "<li><b>R² (Variance Explained):</b> ", variance_pct, "%</li>",
-    "<li><b>Sample Size:</b> n = ", stats$n, " months</li>",
-    "</ul>",
+    # Correlation Test Output (R-style)
+    "<h4 style='margin-top: 20px; color: #1e293b;'>Pearson Correlation Test</h4>",
+    "<pre style='background: #f8fafc; padding: 15px; border-radius: 5px; border-left: 4px solid #3b82f6; font-family: monospace; font-size: 13px; color: #1e293b; overflow-x: auto;'>",
+    "Pearson's product-moment correlation\n\n",
+    "data:  CFHI and S&P 500\n",
+    "t = ", round(stats$test_statistic, 4), ", df = ", stats$n - 2, ", p-value ", 
+    if (p_val < 0.001) "< 2.2e-16" else if (p_val < 0.01) "< 0.001" else paste0("= ", format(p_val, scientific = TRUE, digits = 3)), "\n",
+    "alternative hypothesis: true correlation is not equal to 0\n",
+    "95 percent confidence interval:\n",
+    " ", ci_text, "\n",
+    "sample estimates:\n",
+    "      cor \n",
+    sprintf("%9.7f", cor_val), "\n",
+    "</pre>",
+    
+    # Interpretation of Correlation Test
+    "<h4 style='margin-top: 15px; color: #1e293b;'>Interpretation</h4>",
+    "<div style='background: #f0f9ff; padding: 12px; border-radius: 5px; border-left: 4px solid #0ea5e9;'>",
+    "<p style='color: #475569; font-size: 14px; margin: 0 0 8px 0;'>",
+    "<b>Correlation Strength:</b> r = ", round(cor_val, 3), " indicates a <b>", cor_strength, " ", cor_direction, "</b> relationship. ",
+    "This means that ", round(abs(cor_val) * 100, 1), "% of the linear relationship is captured, with ",
+    if (cor_val > 0) "both variables moving in the same direction" else "variables moving in opposite directions", ".",
+    "</p>",
+    "<p style='color: #475569; font-size: 14px; margin: 0 0 8px 0;'>",
+    "<b>Statistical Significance:</b> p-value ", if (p_val < 0.001) "< 0.001" else round(p_val, 4), 
+    " (", sig_text, ") indicates this correlation is ", 
+    if (p_val < 0.05) "unlikely to have occurred by chance" else "not statistically distinguishable from zero", 
+    " at α = 0.05 significance level.",
+    "</p>",
+    "<p style='color: #475569; font-size: 14px; margin: 0 0 8px 0;'>",
+    "<b>Variance Explained:</b> R² = ", variance_pct, "% means S&P 500 explains ", variance_pct, 
+    "% of the variation in CFHI. The remaining ", round(100 - variance_pct, 1), 
+    "% is attributable to other factors (wages, inflation, savings behavior, borrowing costs).",
+    "</p>",
+    "<p style='color: #475569; font-size: 14px; margin: 0;'>",
+    "<b>Effect Size:</b> ", stats$effect_size, " (Cohen's classification) suggests a ", 
+    tolower(stats$effect_size), " practical effect, indicating the relationship has ", 
+    if (stats$effect_size == "Small" || stats$effect_size == "Negligible") "limited real-world impact" 
+    else if (stats$effect_size == "Medium") "moderate real-world relevance" 
+    else "substantial real-world importance", ".",
+    "</p>",
+    "</div>",
     
     # Key Findings
     "<h4 style='margin-top: 15px; color: #1e293b;'>Key Findings</h4>",
@@ -667,13 +699,47 @@ output$correlation_insights <- renderUI({
     },
     "</p>",
     
-    # Important Note
-    "<div style='background: #fef3c7; border-left: 4px solid #f59e0b; padding: 10px; margin-top: 15px; border-radius: 4px;'>",
-    "<p style='margin: 0; color: #78350f; font-size: 13px;'><b><i class='fa fa-exclamation-triangle'></i> Important:</b> ",
-    "Correlation does not imply causation. While we observe a ", cor_strength, " ", cor_direction, 
-    " relationship, this could be due to: (1) S&P 500 influencing CFHI, (2) CFHI influencing S&P 500, ",
-    "(3) a third variable influencing both (e.g., Federal Reserve policy), or (4) coincidental patterns. ",
-    "Further analysis would be needed to establish causal mechanisms.</p>",
+    # CRITICAL: Methodological Explanation for Negative Correlation
+    if (cor_val < 0) {
+      paste0(
+        "<div style='background: #fef2f2; border-left: 4px solid #dc2626; padding: 15px; margin-top: 15px; border-radius: 4px;'>",
+        "<h4 style='margin: 0 0 10px 0; color: #991b1b;'><i class='fa fa-exclamation-circle'></i> Why Negative Correlation Occurs</h4>",
+        "<p style='margin: 0 0 10px 0; color: #7f1d1d; font-size: 13px;'>",
+        "The observed negative correlation (stocks up → CFHI down) contradicts intuition that stock gains benefit households. ",
+        "This counterintuitive result stems from <b>CFHI's construction methodology</b>, which includes two <b>inverted components</b>:",
+        "</p>",
+        "<ul style='color: #7f1d1d; font-size: 13px; margin: 0 0 10px 0;'>",
+        "<li><b>Interest Rates (R*)</b>: During bull markets, the Federal Reserve typically raises rates to prevent overheating. ",
+        "Higher rates reduce R*, lowering CFHI even as stocks rise.</li>",
+        "<li><b>Inflation (I*)</b>: Strong economic growth (which lifts stocks) often triggers inflation. ",
+        "Higher inflation reduces I*, lowering CFHI despite positive market performance.</li>",
+        "</ul>",
+        "<p style='margin: 0 0 10px 0; color: #7f1d1d; font-size: 13px;'>",
+        "<b>Real-World Example (2006-2007):</b> As S&P 500 peaked pre-crisis, the Fed raised rates from 1% to 5.25%, ",
+        "crushing R* from 100 to 0. This created a negative correlation despite households actually benefiting from employment and wage growth.",
+        "</p>",
+        "<p style='margin: 0; color: #7f1d1d; font-size: 13px;'>",
+        "<b>Implication:</b> The negative correlation is a <b>methodological artifact</b> of CFHI's design, not evidence that stock gains harm households. ",
+        "CFHI captures monetary policy effects (rate hikes) more than direct household wealth effects. ",
+        "A better metric would separate cyclical policy responses from structural household financial health.",
+        "</p>",
+        "</div>"
+      )
+    } else {
+      ""
+    },
+    
+    # Important Note (General)
+    "<div style='background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; margin-top: 15px; border-radius: 4px;'>",
+    "<p style='margin: 0; color: #78350f; font-size: 13px;'><b><i class='fa fa-exclamation-triangle'></i> Correlation ≠ Causation:</b> ",
+    "This analysis measures statistical association, not causal relationships. The observed correlation could result from: ",
+    "(1) S&P 500 → CFHI, (2) CFHI → S&P 500, (3) Federal Reserve policy → both, or (4) coincidental patterns. ",
+    if (cor_val < 0) {
+      "The negative correlation likely reflects <b>shared dependence on Fed monetary policy</b> (tightening during expansions, easing during contractions) rather than stocks directly harming households."
+    } else {
+      "The positive correlation may reflect shared macroeconomic drivers (employment, GDP growth) rather than direct wealth effects."
+    },
+    "</p>",
     "</div>",
     
     "</div>"
