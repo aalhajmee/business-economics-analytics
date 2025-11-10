@@ -92,7 +92,7 @@ dashboardPage(
       ),
       menuItem("Personal Finance", icon = icon("wallet"),
                menuSubItem("Overview",   tabName = "overview",    icon = icon("compass")),
-               menuSubItem("Credit Card Approval",   tabName = "credit",    icon = icon("money-check-alt")),
+               menuSubItem("Credit Card Approval",   tabName = "credit",    icon = icon("dollar-sign")),
                menuSubItem("Savings Guide",   tabName = "guide",    icon = icon("money-check-alt")),
                menuSubItem("Loan Calculator", tabName = "loans",     icon = icon("university")),
                menuSubItem("Retirement", tabName = "retirement",     icon = icon("umbrella-beach"))
