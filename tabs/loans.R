@@ -1,5 +1,3 @@
-# Loans.R
-# This script defines the UI and server logic for the loan approval calculator tab
 library(shiny)
 library(glmnet)
 library(tidyverse)
@@ -15,35 +13,82 @@ loan_ui <- tabItem(
               font-weight:600;
               font-size:32px;"),
   br(),
-  h3(""),
-  p("Enter your information and calculate your likelihood of getting approved for a loan."),
   
+  # Legend cards
   fluidRow(
-    column(5, wellPanel(
-      numericInput("loan_income", "Income (after tax):",
-                   min = 0, max = 1000000000, value = 50000, step = 1000),
-      numericInput("loan_credit_score", "Credit Score:",
-                   min = 300, max = 850, value = 650, step = 10),
-      numericInput("loan_amount_input", "Loan Amount:",
-                   min = 1000, max = 1000000000, value = 20000, step = 1000),
-      numericInput("loan_years_employed", "Years Employed:",
-                   min = 0, max = 100, value = 5, step = 1),
-      actionButton("calculateBtn", "Calculate Approval Odds", 
-                   class = "btn-primary", width = "100%"),
-      p("*Enter your information to learn more about how to improve your chances of approval!")
-    )),
+    column(
+      6,
+      div(
+        style = "
+          border: 2px solid #1e2a38;
+          border-radius: 8px;
+          padding: 10px;
+          width: 220px;
+          margin-left: auto;
+          margin-right: auto;
+          text-align: center;
+          box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+          background-color: #f9f9f9;
+        ",
+        strong("Low Approval"), br(),
+        "indicates need for improvement"
+      )
+    ),
+    column(
+      6,
+      div(
+        style = "
+          border: 2px solid #1e2a38;
+          border-radius: 8px;
+          padding: 10px;
+          width: 220px;
+          margin-left: auto;
+          margin-right: auto;
+          text-align: center;
+          box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+          background-color: #f9f9f9;
+        ",
+        strong("High Approval"), br(),
+        "indicates strong financial profile"
+      )
+    )
+  ),
+  
+  br(),
+  
+  # === Loan Approval Calculator Panel ===
+  shinydashboard::box(
+    title = "Loan Approval Calculator — Calculate Your Approval Odds",
+    width = 12, status = "primary", solidHeader = TRUE,
     
-    column(7, wellPanel(
-      h4("Loan Approval Prediction"),
-      uiOutput("approvalResult"),
-      hr(),
-      h4("Debt-to-Income Ratio"),
-      uiOutput("dtiRatio"),
-      hr(),
-      h4("Recommendations"),
-      uiOutput("recommendations")
-    ))
-  )
+    fluidRow(
+      column(5, wellPanel(
+        numericInput("loan_income", "Income (after tax):",
+                     min = 0, max = 1000000000, value = 50000, step = 1000),
+        numericInput("loan_credit_score", "Credit Score:",
+                     min = 300, max = 850, value = 650, step = 10),
+        numericInput("loan_amount_input", "Loan Amount:",
+                     min = 1000, max = 1000000000, value = 20000, step = 1000),
+        numericInput("loan_years_employed", "Years Employed:",
+                     min = 0, max = 100, value = 5, step = 1),
+        actionButton("calculateBtn", "Calculate Approval Odds", 
+                     class = "btn-primary", width = "100%"),
+        p("*Enter your information to learn more about how to improve your chances of approval!")
+      )),
+      
+      column(7, wellPanel(
+        h4("Loan Approval Prediction"),
+        uiOutput("approvalResult"),
+        hr(),
+        h4("Debt-to-Income Ratio"),
+        uiOutput("dtiRatio"),
+        hr(),
+        h4("Recommendations"),
+        uiOutput("recommendations")
+      ))
+    )
+  ),
+  p(".")
 )
 
 # Server Logic
