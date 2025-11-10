@@ -4,7 +4,7 @@
 # This checks and installs any missing packages before loading them
 required_packages <- c("shiny", "shinydashboard", "shinythemes", "shinyjs",
                        "tidyverse", "readxl", "plotly", "DT", "zoo",
-                       "lubridate", "forecast", "glmnet")
+                       "lubridate", "forecast", "glmnet", "randomForest")
 
 
 missing_packages <- required_packages[!required_packages %in% installed.packages()[,"Package"]]
@@ -67,6 +67,7 @@ guide_tab      <- safe_source_tab("tabs/savingsguide.R", "guide")
 overview_tab   <- safe_source_tab("tabs/overview.R", "overview")
 loan_tab       <- safe_source_tab("tabs/loans.R", "loans")
 retirement_tab <- safe_source_tab("tabs/retirement_tab.R", "retirement_tab")
+credit_tab     <- safe_source_tab("tabs/credit_tab.R", "credit_tab")
 about_tab      <- safe_source_tab("tabs/about_tab.R", "about")
 
 
@@ -91,6 +92,7 @@ dashboardPage(
       ),
       menuItem("Personal Finance", icon = icon("wallet"),
                menuSubItem("Overview",   tabName = "overview",    icon = icon("compass")),
+               menuSubItem("Credit Card Approval",   tabName = "credit",    icon = icon("money-check-alt")),
                menuSubItem("Savings Guide",   tabName = "guide",    icon = icon("money-check-alt")),
                menuSubItem("Loan Calculator", tabName = "loans",     icon = icon("university")),
                menuSubItem("Retirement", tabName = "retirement",     icon = icon("umbrella-beach"))
@@ -185,6 +187,9 @@ dashboardPage(
       
       # OVERVIEW TAB (from overview.R)
       overview_tab,
+      
+      # CREDIT CARD GUIDE (from credit_tab.R)
+      credit_tab,
       
       # SAVINGS GUIDE (from savingsguide.R)
       guide_tab,

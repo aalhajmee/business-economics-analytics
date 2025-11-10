@@ -30,6 +30,9 @@ shinyServer(function(input, output, session) {
   # Source the calculation and loan approval logic
   # These define outputs that need to be in the server scope,
   # so they have access to input/output/session.
+  if (file.exists("server/credit_server.R")) {
+    source("server/credit_server.R", local = TRUE)
+  }
   if (file.exists("server/calculations.R")) {
     source("server/calculations.R", local = TRUE)
   }
