@@ -65,6 +65,7 @@ market_data_tab <- safe_source_tab("tabs/market_data_sources_tab.R", "market_dat
 findings_tab   <- safe_source_tab("tabs/findings_tab.R", "findings")
 guide_tab      <- safe_source_tab("tabs/savingsguide.R", "guide")
 overview_tab   <- safe_source_tab("tabs/overview.R", "overview")
+insights_tab   <- safe_source_tab("tabs/data_insights.R", "insights")
 loan_tab       <- safe_source_tab("tabs/loans.R", "loans")
 retirement_tab <- safe_source_tab("tabs/retirement_tab.R", "retirement_tab")
 credit_tab     <- safe_source_tab("tabs/credit_tab.R", "credit_tab")
@@ -92,6 +93,7 @@ dashboardPage(
       ),
       menuItem("Personal Finance", icon = icon("wallet"),
                menuSubItem("Overview",   tabName = "overview",    icon = icon("compass")),
+               menuSubItem("Insights",   tabName = "data_insights",    icon = icon("search")),
                menuSubItem("Credit Card Approval",   tabName = "credit",    icon = icon("dollar-sign")),
                menuSubItem("Savings Guide",   tabName = "guide",    icon = icon("money-check-alt")),
                menuSubItem("Loan Calculator", tabName = "loans",     icon = icon("university")),
