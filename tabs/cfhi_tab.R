@@ -7,19 +7,6 @@ tabItem(
               font-size:32px;"),
   br(),
   
-  # Gradient color bar
-  div(
-    style = "
-      height: 30px;
-      background: linear-gradient(to right, red, orange, yellow, limegreen, green);
-      border-radius: 4px;
-      margin-left: auto;
-      margin-right: auto;
-      width: 80%;
-    "
-  ),
-  br(),
-  
   # Legend cards
   fluidRow(
     column(
