@@ -79,33 +79,11 @@ tabItem(tabName = "overview",
                            icon = icon("arrow-right"), class = "btn-flat"))
         ),
         
-# ===== DEBT SECTION =====
-        box(
-          title = tagList(icon("balance-scale"), "Managing Debt"),
-          status = "warning", solidHeader = TRUE, width = 12,
-          p("Debt can be a useful financial tool if managed wisely, but excessive debt can limit your 
-             financial flexibility and increase stress."),
-          tags$ul(
-            tags$li(tags$b("Good Debt:"), 
-                    " Student loans or mortgages that build long-term value."),
-            tags$li(tags$b("Bad Debt:"), 
-                    " High-interest consumer or credit card debt with little lasting benefit."),
-            tags$li(tags$b("Debt-to-Income Ratio (DTI):"), 
-                    " Aim to keep total monthly debt payments below 36% of your income."),
-            tags$li(tags$b("Tips:"),
-                    " Pay more than the minimum, avoid unnecessary borrowing, and refinance high-interest debt if possible.")
-          ),
-          br(),
-          p("Responsible debt management strengthens credit and ensures financial stability over time."),
-          div(style = "text-align:right;",
-              actionButton("go_to_debt_tools", "View Debt & Budget Tools", 
-                           icon = icon("arrow-right"), class = "btn-flat"))
-        ),
         
 # ===== LOANS SECTION =====
         box(
           title = tagList(icon("university"), "Understanding Loans"),
-          status = "primary", solidHeader = TRUE, width = 12,
+          status = "warning", solidHeader = TRUE, width = 12,
           p("Loans allow you to make large purchases or investments that would otherwise be out of reach. 
              Understanding loan types and terms helps you make smarter borrowing decisions."),
           tags$ul(
