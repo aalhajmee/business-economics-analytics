@@ -1,6 +1,5 @@
-# === Load Dataset ===
+# === LOAD DATASET ===
 finance_data <- read.csv("data/personal/synthetic_personal_finance_dataset.csv")
-
 
 # === Reactive Filter ===
 filtered_data <- reactive({
@@ -34,4 +33,15 @@ output$scatter_plot <- renderPlot({
   )
   grid()
   abline(lm(data[[yvar]] ~ data[[xvar]]), col = "#006699", lwd = 2)
+  
+  # === Download Handler ===
+  output$download_data <- downloadHandler(
+    filename = function() {
+      paste0("personal_finance_data_", Sys.Date(), ".csv")
+    },
+    content = function(file) {
+      write.csv(finance_data, file, row.names = FALSE)
+    }
+  )
+  
 })
