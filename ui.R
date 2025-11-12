@@ -190,6 +190,9 @@ dashboardPage(
       # OVERVIEW TAB (from overview.R)
       overview_tab,
       
+      # DATA INSIGHTS TAB
+      insights_tab,
+      
       # CREDIT CARD GUIDE (from credit_tab.R)
       credit_tab,
       

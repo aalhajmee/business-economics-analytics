@@ -12,11 +12,11 @@ tabItem(
   fluidRow(
     column(3,
            selectInput("region_filter", "Filter by Region:",
-                       choices = c("All", unique(df$region)), selected = "All")
+                       choices = c("All", unique(finance_data$region)), selected = "All")
     ),
     column(3,
            selectInput("loan_filter", "Filter by Loan Type:",
-                       choices = c("All", unique(df$loan_type)), selected = "All")
+                       choices = c("All", unique(finance_data$loan_type)), selected = "All")
     ),
     column(3,
            selectInput("x_var", "Select X-Axis Variable:",
