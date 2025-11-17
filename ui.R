@@ -59,6 +59,7 @@ cfhi_tab       <- safe_source_tab("tabs/cfhi_tab.R",     "cfhi")
 cfhi_data_tab  <- safe_source_tab("tabs/cfhi_data_tab.R", "cfhi_data")
 explore_tab    <- safe_source_tab("tabs/state_analysis_tab.R", "explore")
 state_data_tab <- safe_source_tab("tabs/state_data_tab.R", "state_data")
+employment_tab <- safe_source_tab("tabs/employment_tab.R", "employment")
 forecast_tab   <- safe_source_tab("tabs/forecast_tab.R", "forecast")
 market_correlation_tab <- safe_source_tab("tabs/market_correlation_tab.R", "market_correlation")
 market_data_tab <- safe_source_tab("tabs/market_data_sources_tab.R", "market_data")
@@ -89,6 +90,7 @@ dashboardPage(
       ),
       menuItem("State Analysis", icon = icon("map-marked-alt"),
                menuSubItem("Explore States", tabName = "explore"),
+               menuSubItem("Employment Data", tabName = "employment"),
                menuSubItem("Data Sources", tabName = "state_data")
       ),
       menuItem("Personal Finance", icon = icon("wallet"),
@@ -174,6 +176,9 @@ dashboardPage(
       
       # STATE DATA SOURCES
       state_data_tab,
+      
+      # EMPLOYMENT
+      employment_tab,
       
       # FORECASTING (from forecast_tab.R)
       forecast_tab,

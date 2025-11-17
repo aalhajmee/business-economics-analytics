@@ -56,6 +56,10 @@ shinyServer(function(input, output, session) {
   # ---- STATE DATA SOURCES TAB ----
   source("server/state_data_server.R", local = TRUE)
   
+  if (file.exists("server/Employment.R")) {
+    source("server/Employment.R", local = TRUE)
+  }
+  
   # ---- CFHI MODULE ----
   cfhi_feature_server(
     id = "cfhi",
