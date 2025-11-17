@@ -49,10 +49,12 @@ tabItem(
       title = "Financial Correlation Explorer",
       width = 12, solidHeader = TRUE, status = "info",
       plotOutput("scatter_plot", height = "450px"),
-    downloadButton("download_data", "Download Dataset", class = "btn btn-primary",
-                       style = "color:white; background-color:#0073e6; border:none; font-weight:400;")
-    ))
+      br(),
+      downloadButton("download_data", "Download Dataset",
+                     class = "btn btn-primary",
+                     style = "color:white; background-color:#0073e6; border:none; font-weight:400;")
+    )
   )
-
+)
 
 
