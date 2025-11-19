@@ -63,6 +63,7 @@ ui <- page_navbar(
   
   # Custom CSS & JavaScript for Dynamic Container Expansion
   header = tags$head(
+    tags$title("Financial Insight"),
     tags$style(HTML("
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap');
       
