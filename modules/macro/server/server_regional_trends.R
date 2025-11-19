@@ -4,16 +4,96 @@
 
 regional_trends_server <- function(input, output, session, macro_data, shared_state) {
   
+  # Animation state
+  is_playing <- reactiveVal(FALSE)
+  
+  # Get year range from data
+  year_range <- reactive({
+    req(macro_data)
+    years <- sort(unique(macro_data$year))
+    list(min = min(years, na.rm = TRUE), max = max(years, na.rm = TRUE), all = years)
+  })
+  
+  # Play/Pause button handler
+  observeEvent(input$reg_play_pause, {
+    if (is_playing()) {
+      # Pause animation
+      is_playing(FALSE)
+      updateActionButton(session, "reg_play_pause", label = "Play", icon = shiny::icon("play"))
+    } else {
+      # Start animation
+      is_playing(TRUE)
+      updateActionButton(session, "reg_play_pause", label = "Pause", icon = shiny::icon("pause"))
+    }
+  })
+  
+  # Animation timer - updates every 500ms
+  auto_invalidate <- reactiveTimer(500, session)
+  
+  # Animation logic - triggered by timer when playing
+  observe({
+    # Trigger timer (this makes the observe block re-run every 500ms)
+    auto_invalidate()
+    
+    # Only proceed if playing
+    if (!is_playing()) return()
+    
+    years <- year_range()$all
+    current_year <- input$reg_year
+    current_idx <- which(years == current_year)
+    
+    if (length(current_idx) == 0) {
+      current_idx <- 1
+    }
+    
+    # Move to next year
+    if (current_idx < length(years)) {
+      next_year <- years[current_idx + 1]
+      updateSliderInput(session, "reg_year", value = next_year)
+    } else {
+      # Reached the end, stop animation
+      is_playing(FALSE)
+      updateActionButton(session, "reg_play_pause", label = "Play", icon = shiny::icon("play"))
+    }
+  })
+  
+  # Reset to first year when indicator changes
+  observeEvent(input$reg_indicator, {
+    if (is_playing()) {
+      is_playing(FALSE)
+      updateActionButton(session, "reg_play_pause", label = "Play", icon = shiny::icon("play"))
+    }
+    years <- year_range()$all
+    if (length(years) > 0) {
+      updateSliderInput(session, "reg_year", value = years[1])
+    }
+  })
+  
+  # Animation status text
+  output$reg_animation_status <- renderText({
+    if (is_playing()) {
+      years <- year_range()$all
+      current_idx <- which(years == input$reg_year)
+      total <- length(years)
+      paste("Playing:", current_idx, "of", total, "years")
+    } else {
+      ""
+    }
+  })
+  
   # Reactive regional data - Auto-updates on input change
+  # Shows data from start year up to selected year (for animation effect)
   regional_data_reactive <- reactive({
-    req(input$reg_indicator, input$reg_year_range)
+    req(input$reg_indicator, input$reg_year)
     
     indicator <- input$reg_indicator
-    years <- input$reg_year_range
+    end_year <- input$reg_year
+    start_year <- year_range()$min
     
     # Calculate regional averages (weighted by population)
+    # Filter to show data from start up to selected year
     macro_data %>%
-      filter(year >= years[1], year <= years[2], !is.na(.data[[indicator]]), !is.na(population)) %>%
+      filter(year >= start_year, year <= end_year, !is.na(.data[[indicator]]), !is.na(population)) %>%
       group_by(region, year) %>%
       summarise(
         value = weighted.mean(.data[[indicator]], w = population, na.rm = TRUE),
@@ -44,7 +124,7 @@ regional_trends_server <- function(input, output, session, macro_data, shared_st
       geom_point(size = 2) +
       scale_color_manual(values = final_palette) +
       labs(
-        title = paste("Regional Trends:", indicator_label),
+        title = paste("Regional Trends:", indicator_label, "-", input$reg_year),
         x = "Year",
         y = paste("Avg", indicator_label),
         color = "Region"
