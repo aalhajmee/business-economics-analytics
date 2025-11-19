@@ -3,7 +3,8 @@
 # ============================================================================
 
 unemployment_ui <- function() {
-  fluidRow(
+  tagList(
+    fluidRow(
     column(12,
       card(
         card_header("State Employment Data - Interactive Map"),
@@ -134,5 +135,6 @@ unemployment_ui <- function() {
         )
       )
     )
+  )
   )
 }

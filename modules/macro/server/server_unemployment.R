@@ -1,6 +1,10 @@
-# server/Employment.R
+# ============================================================================
+# Unemployment by States - Server Logic
+# ============================================================================
 
-employment_data <- reactive({
+unemployment_server <- function(input, output, session, shared_state) {
+  
+  employment_data <- reactive({
   # Read files
   jobs <- read_excel("data/state/Employment/JobOpens.xlsx")
   hires <- read_excel("data/state/Employment/Hires.xlsx")
@@ -259,3 +263,5 @@ output$bottom_states_employment <- renderTable({
   
   result
 }, striped = TRUE, hover = TRUE, bordered = TRUE)
+  
+}
