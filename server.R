@@ -91,13 +91,13 @@ function(input, output, session) {
   data_table_server(input, output, session, macro_data, shared_state)
   
   # Module 2: Personal Finance Tools Servers ----
-  savings_server(input, output, session)
-  loans_server(input, output, session)
-  planning_guide_server(input, output, session)
+  #savings_server(input, output, session)
+  #loans_server(input, output, session)
+  #planning_guide_server(input, output, session)
   
   # Module 3: Retirement Risk Simulator Servers ----
-  simulator_server(input, output, session)
-  scenarios_server(input, output, session)
+  #simulator_server(input, output, session)
+  #scenarios_server(input, output, session)
   
   # Home Page Navigation (Updated for bslib page_navbar id)
   observeEvent(input$btn_goto_macro, {
