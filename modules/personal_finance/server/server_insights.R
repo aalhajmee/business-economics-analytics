@@ -2,7 +2,7 @@
 # CREDIT ANALYTICS SERVER
 # ======================
 
-credit_data <- read.csv("/mnt/data/credit_score.csv")
+credit_data <- read.csv("/mnt/data/insights/credit_score.csv")
 
 library(ggplot2)
 library(randomForest)
