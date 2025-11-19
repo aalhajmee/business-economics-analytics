@@ -204,7 +204,7 @@ ui <- page_navbar(
 
   # 3. Personal Finance (Dropdown) ----
   nav_menu("Personal Finance", icon = bs_icon("wallet2"),
-    nav_panel("Insights", value = "pf_insights", icon = bs_icon("search"), savings_ui()),
+    nav_panel("Insights", value = "pf_insights", icon = bs_icon("search"), insights_ui()),
     nav_panel("Savings Projector", value = "pf_savings", icon = bs_icon("piggy-bank"), savings_ui()),
     nav_panel("Loan Calculator", value = "pf_loans", icon = bs_icon("calculator"), loans_ui()),
     nav_panel("Financial Guide", value = "pf_guide", icon = bs_icon("journal-text"), planning_guide_ui())

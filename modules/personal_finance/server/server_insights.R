@@ -1,31 +1,51 @@
-# ======================
-# CREDIT ANALYTICS SERVER
-# ======================
+# ============================================================================
+# Credit Analytics - Server Logic
+# ============================================================================
 
-credit_data <- read.csv("/mnt/data/credit_score.csv")
+insights_server <- function(input, output, session) {
+  
+  # Load credit data (update path as needed)
+  credit_data_path <- "/mnt/data/credit_score.csv"
+  if (!file.exists(credit_data_path)) {
+    # Try alternative path or create empty dataset
+    credit_data <- data.frame()
+    warning("Credit data file not found at: ", credit_data_path)
+  } else {
+    credit_data <- read.csv(credit_data_path)
+  }
 
 library(ggplot2)
 library(randomForest)
 
-# -------- PRETTY LABEL FUNCTION --------
-pretty_labels <- YOUR_PRETTY_LABELS_LIST_HERE   # paste your list exactly as is
+  # -------- PRETTY LABEL FUNCTION --------
+  pretty_labels <- list(
+    "INCOME" = "Income",
+    "SAVINGS" = "Savings",
+    "DEBT" = "Debt",
+    "R_SAVINGS_INCOME" = "Savings-to-Income Ratio",
+    "R_DEBT_INCOME" = "Debt-to-Income Ratio",
+    "R_DEBT_SAVINGS" = "Debt-to-Savings Ratio",
+    "CREDIT_SCORE" = "Credit Score"
+  )
 
-format_label <- function(x) {
-  if (x %in% names(pretty_labels)) return(pretty_labels[[x]])
-  x <- gsub("_", " ", x)
-  tools::toTitleCase(tolower(x))
-}
-
-# Convert categorical variables to factors
-credit_data$CAT_GAMBLING <- as.factor(credit_data$CAT_GAMBLING)
-credit_data$CAT_DEBT <- as.factor(credit_data$CAT_DEBT)
-credit_data$CAT_CREDIT_CARD <- as.factor(credit_data$CAT_CREDIT_CARD)
-credit_data$CAT_MORTGAGE <- as.factor(credit_data$CAT_MORTGAGE)
-credit_data$CAT_SAVINGS_ACCOUNT <- as.factor(credit_data$CAT_SAVINGS_ACCOUNT)
-credit_data$CAT_DEPENDENTS <- as.factor(credit_data$CAT_DEPENDENTS)
-
-# ===== FILTERED DATASET =====
-filtered_credit <- reactive({
+  format_label <- function(x) {
+    if (x %in% names(pretty_labels)) return(pretty_labels[[x]])
+    x <- gsub("_", " ", x)
+    tools::toTitleCase(tolower(x))
+  }
+  
+  # Convert categorical variables to factors (if columns exist)
+  if (nrow(credit_data) > 0) {
+    if ("CAT_GAMBLING" %in% names(credit_data)) credit_data$CAT_GAMBLING <- as.factor(credit_data$CAT_GAMBLING)
+    if ("CAT_DEBT" %in% names(credit_data)) credit_data$CAT_DEBT <- as.factor(credit_data$CAT_DEBT)
+    if ("CAT_CREDIT_CARD" %in% names(credit_data)) credit_data$CAT_CREDIT_CARD <- as.factor(credit_data$CAT_CREDIT_CARD)
+    if ("CAT_MORTGAGE" %in% names(credit_data)) credit_data$CAT_MORTGAGE <- as.factor(credit_data$CAT_MORTGAGE)
+    if ("CAT_SAVINGS_ACCOUNT" %in% names(credit_data)) credit_data$CAT_SAVINGS_ACCOUNT <- as.factor(credit_data$CAT_SAVINGS_ACCOUNT)
+    if ("CAT_DEPENDENTS" %in% names(credit_data)) credit_data$CAT_DEPENDENTS <- as.factor(credit_data$CAT_DEPENDENTS)
+  }
+  
+  # ===== FILTERED DATASET =====
+  filtered_credit <- reactive({
   data <- credit_data
   if (input$default_filter == "Defaulted") data <- subset(data, DEFAULT == 1)
   if (input$default_filter == "Not Defaulted") data <- subset(data, DEFAULT == 0)
@@ -102,5 +122,6 @@ output$download_credit_data <- downloadHandler(
   filename = function() paste0("credit_score_data_", Sys.Date(), ".csv"),
   content = function(file) {
     write.csv(credit_data, file, row.names = FALSE)
-  }
-)
+  })
+  
+}

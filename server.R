@@ -54,6 +54,7 @@ source("modules/macro/server/server_commodity.R")
 source("modules/macro/server/server_statistical_analysis.R")
 source("modules/macro/server/server_data_table.R")
 
+source("modules/personal_finance/server/server_insights.R")
 source("modules/personal_finance/server/server_savings.R")
 source("modules/personal_finance/server/server_loans.R")
 source("modules/personal_finance/server/server_planning_guide.R")
@@ -93,6 +94,7 @@ function(input, output, session) {
   data_table_server(input, output, session, macro_data, shared_state)
   
   # Module 2: Personal Finance Tools Servers ----
+  insights_server(input, output, session)
   #savings_server(input, output, session)
   #loans_server(input, output, session)
   #planning_guide_server(input, output, session)
