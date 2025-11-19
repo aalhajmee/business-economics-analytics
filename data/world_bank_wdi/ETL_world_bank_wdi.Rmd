@@ -1,0 +1,525 @@
+---
+title: "World Bank WDI Data - ETL Process"
+subtitle: "Extract, Transform, Load"
+author: "BIOL 185 Group Project"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: show
+    theme: cosmo
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# Data Source Information
+
+## Source Details
+
+- **Source Name:** World Bank World Development Indicators (WDI)
+- **URL:** https://datatopics.worldbank.org/world-development-indicators/
+- **Access Method:** WDI R Package API
+- **License:** Creative Commons Attribution 4.0 (CC-BY 4.0)
+- **Update Frequency:** Annual
+- **Coverage:** 1960 - 2023 (64 years), 200+ countries
+
+## Citation
+
+```
+World Bank. (2024). World Development Indicators. 
+The World Bank Group. 
+Available at: https://datatopics.worldbank.org/world-development-indicators/
+License: Creative Commons Attribution 4.0 (CC-BY 4.0)
+```
+
+## Indicators Collected
+
+| Indicator | WDI Code | Unit | Definition |
+|-----------|----------|------|------------|
+| GDP | `NY.GDP.MKTP.KD` | Constant 2015 US$ | Gross Domestic Product |
+| GDP per Capita | `NY.GDP.PCAP.KD` | Constant 2015 US$ | GDP divided by population |
+| Inflation | `FP.CPI.TOTL.ZG` | Annual % | Consumer Price Index change |
+| Unemployment | `SL.UEM.TOTL.ZS` | % of labor force | Total unemployment rate |
+| Government Debt | `GC.DOD.TOTL.GD.ZS` | % of GDP | Central government debt |
+| Exchange Rate | `PA.NUS.FCRF` | LCU per US$ | Official exchange rate |
+| Trade Balance | `NE.RSB.GNFS.ZS` | % of GDP | Net exports |
+| Population Growth | `SP.POP.GROW` | Annual % | Population growth rate |
+| Life Expectancy | `SP.DYN.LE00.IN` | Years | Life expectancy at birth |
+| Total Population | `SP.POP.TOTL` | Number | Population, total |
+
+---
+
+# Extract: Data Collection
+
+## Load Required Libraries
+
+```{r libraries}
+library(WDI)
+library(tidyverse)
+library(knitr)
+library(DT)
+```
+
+## Define Indicators
+
+```{r define_indicators}
+# Define indicators with descriptive names
+indicators <- c(
+  gdp = "NY.GDP.MKTP.KD",
+  gdp_per_capita = "NY.GDP.PCAP.KD",
+  inflation = "FP.CPI.TOTL.ZG",
+  unemployment = "SL.UEM.TOTL.ZS",
+  govt_debt = "GC.DOD.TOTL.GD.ZS",
+  exchange_rate = "PA.NUS.FCRF",
+  trade_balance = "NE.RSB.GNFS.ZS",
+  pop_growth = "SP.POP.GROW",
+  life_expectancy = "SP.DYN.LE00.IN",
+  population = "SP.POP.TOTL"
+)
+
+print("Indicators defined:")
+kable(data.frame(
+  Name = names(indicators),
+  Code = indicators
+))
+```
+
+## Fetch Data from WDI API
+
+```{r fetch_data, cache=TRUE}
+cat("Fetching data from World Bank WDI API...\n")
+cat("This may take 2-3 minutes...\n\n")
+
+start_time <- Sys.time()
+
+raw_data <- WDI(
+  country = "all",
+  indicator = indicators,
+  start = 1960,
+  end = 2023,
+  extra = TRUE  # Include region, income level, etc.
+)
+
+end_time <- Sys.time()
+fetch_duration <- as.numeric(difftime(end_time, start_time, units = "secs"))
+
+cat(sprintf("✓ Data fetched successfully in %.1f seconds\n", fetch_duration))
+cat(sprintf("  Rows: %s\n", format(nrow(raw_data), big.mark = ",")))
+cat(sprintf("  Columns: %d\n", ncol(raw_data)))
+```
+
+## Initial Data Inspection
+
+```{r inspect_raw}
+cat("Raw data structure:\n")
+str(raw_data, max.level = 1)
+
+cat("\n\nFirst few rows:\n")
+head(raw_data) %>% 
+  select(country, year, region, gdp_per_capita, inflation) %>%
+  kable()
+```
+
+---
+
+# Transform: Data Cleaning
+
+## Step 1: Remove Aggregate Regions
+
+The WDI API returns both individual countries and aggregate regions (e.g., "World", "High income"). We need only actual countries.
+
+```{r remove_aggregates}
+cat("Removing aggregate regions...\n\n")
+
+# Count before
+before_count <- nrow(raw_data)
+
+# Filter out aggregates
+clean_data <- raw_data %>%
+  filter(
+    !is.na(iso2c),           # Must have ISO code
+    region != "Aggregates",  # Not an aggregate region
+    !is.na(region)           # Must have a valid region
+  )
+
+# Count after
+after_count <- nrow(clean_data)
+removed_count <- before_count - after_count
+
+cat(sprintf("✓ Removed %s aggregate/invalid rows\n", format(removed_count, big.mark = ",")))
+cat(sprintf("  Remaining: %s rows\n", format(after_count, big.mark = ",")))
+```
+
+## Step 2: Select Relevant Columns
+
+```{r select_columns}
+clean_data <- clean_data %>%
+  select(
+    # Identifiers
+    country,
+    iso2c,
+    iso3c,
+    year,
+    
+    # Groupings
+    region,
+    income,
+    
+    # Economic indicators
+    gdp,
+    gdp_per_capita,
+    inflation,
+    unemployment,
+    govt_debt,
+    exchange_rate,
+    trade_balance,
+    pop_growth,
+    life_expectancy,
+    population
+  )
+
+cat("✓ Selected relevant columns\n")
+cat(sprintf("  Columns: %d\n", ncol(clean_data)))
+```
+
+## Step 3: Data Quality Assessment
+
+### Missing Values Analysis
+
+```{r missing_values}
+missing_summary <- clean_data %>%
+  summarise(across(
+    c(gdp, gdp_per_capita, inflation, unemployment, govt_debt, 
+      trade_balance, pop_growth, life_expectancy),
+    ~sum(is.na(.))
+  )) %>%
+  pivot_longer(everything(), names_to = "Indicator", values_to = "Missing_Count") %>%
+  mutate(
+    Total_Count = nrow(clean_data),
+    Missing_Percent = round((Missing_Count / Total_Count) * 100, 2)
+  )
+
+cat("Missing values by indicator:\n")
+kable(missing_summary)
+```
+
+### Range Validation
+
+```{r range_validation}
+range_summary <- clean_data %>%
+  summarise(
+    across(
+      c(gdp_per_capita, inflation, unemployment, life_expectancy),
+      list(
+        min = ~min(., na.rm = TRUE),
+        max = ~max(., na.rm = TRUE),
+        mean = ~mean(., na.rm = TRUE),
+        median = ~median(., na.rm = TRUE)
+      ),
+      .names = "{.col}_{.fn}"
+    )
+  ) %>%
+  pivot_longer(everything()) %>%
+  separate(name, into = c("indicator", "statistic"), sep = "_(?=[^_]+$)") %>%
+  pivot_wider(names_from = statistic, values_from = value)
+
+cat("Range validation for key indicators:\n")
+kable(range_summary, digits = 2)
+```
+
+## Step 4: Handle Data Types
+
+```{r data_types}
+# Ensure proper data types
+clean_data <- clean_data %>%
+  mutate(
+    year = as.integer(year),
+    country = as.character(country),
+    region = as.factor(region),
+    income = as.factor(income)
+  )
+
+cat("✓ Data types standardized\n")
+```
+
+## Step 5: Sort and Arrange
+
+```{r sort_data}
+clean_data <- clean_data %>%
+  arrange(country, year)
+
+cat("✓ Data sorted by country and year\n")
+```
+
+---
+
+# Load: Save Cleaned Data
+
+## Summary Statistics
+
+```{r final_summary}
+cat("Final cleaned dataset summary:\n\n")
+
+cat(sprintf("  Total Rows: %s\n", format(nrow(clean_data), big.mark = ",")))
+cat(sprintf("  Total Columns: %d\n", ncol(clean_data)))
+cat(sprintf("  Countries: %d\n", n_distinct(clean_data$country)))
+cat(sprintf("  Years: %d to %d (%d years)\n", 
+           min(clean_data$year), 
+           max(clean_data$year),
+           n_distinct(clean_data$year)))
+cat(sprintf("  Regions: %d\n", n_distinct(clean_data$region)))
+```
+
+### Countries Included
+
+```{r countries_list}
+countries <- clean_data %>%
+  distinct(country, region) %>%
+  arrange(region, country)
+
+cat(sprintf("\nTotal countries: %d\n\n", nrow(countries)))
+
+countries %>%
+  group_by(region) %>%
+  summarise(
+    Countries = n(),
+    .groups = "drop"
+  ) %>%
+  kable()
+```
+
+## Save to RDS File
+
+```{r save_data}
+output_file <- "wdi_clean.rds"
+output_path <- file.path(getwd(), output_file)
+
+saveRDS(clean_data, output_path)
+
+cat(sprintf("\n✓ Clean data saved to: %s\n", output_file))
+cat(sprintf("  File size: %.2f MB\n", file.size(output_path) / 1024^2))
+```
+
+## Save Metadata
+
+```{r save_metadata}
+metadata <- list(
+  source = "World Bank World Development Indicators",
+  extraction_date = Sys.Date(),
+  indicators = indicators,
+  year_range = c(min(clean_data$year), max(clean_data$year)),
+  n_countries = n_distinct(clean_data$country),
+  n_observations = nrow(clean_data),
+  citation = "World Bank. (2024). World Development Indicators. https://datatopics.worldbank.org/world-development-indicators/"
+)
+
+saveRDS(metadata, "wdi_metadata.rds")
+cat("\n✓ Metadata saved to: wdi_metadata.rds\n")
+```
+
+---
+
+# Data Quality Report
+
+## Completeness by Indicator
+
+```{r completeness_plot, fig.width=10, fig.height=6}
+library(ggplot2)
+
+completeness <- clean_data %>%
+  summarise(across(
+    c(gdp_per_capita, inflation, unemployment, govt_debt, 
+      life_expectancy, pop_growth, trade_balance),
+    ~(sum(!is.na(.)) / n()) * 100
+  )) %>%
+  pivot_longer(everything(), names_to = "Indicator", values_to = "Completeness")
+
+ggplot(completeness, aes(x = reorder(Indicator, Completeness), y = Completeness)) +
+  geom_col(fill = "#3498db", alpha = 0.8) +
+  geom_text(aes(label = sprintf("%.1f%%", Completeness)), 
+           hjust = -0.1, size = 4) +
+  coord_flip() +
+  ylim(0, 105) +
+  labs(
+    title = "Data Completeness by Indicator",
+    subtitle = "Percentage of non-missing values",
+    x = "Indicator",
+    y = "Completeness (%)"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank()
+  )
+```
+
+## Temporal Coverage
+
+```{r temporal_coverage, fig.width=10, fig.height=6}
+temporal_coverage <- clean_data %>%
+  group_by(year) %>%
+  summarise(
+    n_countries = n_distinct(country),
+    .groups = "drop"
+  )
+
+ggplot(temporal_coverage, aes(x = year, y = n_countries)) +
+  geom_line(color = "#3498db", size = 1.2) +
+  geom_point(color = "#2c3e50", size = 2) +
+  labs(
+    title = "Temporal Coverage: Countries per Year",
+    subtitle = "Number of countries with data by year",
+    x = "Year",
+    y = "Number of Countries"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank()
+  )
+```
+
+---
+
+# ETL Process Summary
+
+## Process Flowchart
+
+```
+┌─────────────────────┐
+│   EXTRACT PHASE     │
+├─────────────────────┤
+│ • Connect to WDI API│
+│ • Fetch 10 indicators│
+│ • Time: 1960-2023   │
+│ • All countries     │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│  TRANSFORM PHASE    │
+├─────────────────────┤
+│ • Remove aggregates │
+│ • Select columns    │
+│ • Validate ranges   │
+│ • Handle missing    │
+│ • Standardize types │
+│ • Sort data         │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│    LOAD PHASE       │
+├─────────────────────┤
+│ • Save to RDS       │
+│ • Generate metadata │
+│ • Quality report    │
+└─────────────────────┘
+```
+
+## Key Statistics
+
+```{r key_stats}
+key_stats <- data.frame(
+  Metric = c(
+    "Data Source",
+    "Extraction Date",
+    "Raw Rows",
+    "Clean Rows",
+    "Countries",
+    "Years",
+    "Indicators",
+    "Output File"
+  ),
+  Value = c(
+    "World Bank WDI API",
+    as.character(Sys.Date()),
+    format(before_count, big.mark = ","),
+    format(nrow(clean_data), big.mark = ","),
+    as.character(n_distinct(clean_data$country)),
+    sprintf("%d - %d", min(clean_data$year), max(clean_data$year)),
+    as.character(length(indicators)),
+    "wdi_clean.rds"
+  )
+)
+
+kable(key_stats)
+```
+
+---
+
+# Usage in Shiny App
+
+## Loading Data in Application
+
+```r
+# In Shiny app, load the cleaned data:
+macro_data <- readRDS("data/world_bank_wdi/wdi_clean.rds")
+metadata <- readRDS("data/world_bank_wdi/wdi_metadata.rds")
+
+# Access indicators
+countries <- unique(macro_data$country)
+years <- range(macro_data$year)
+```
+
+## Example Queries
+
+```{r example_queries}
+# Example 1: Get GDP per capita for USA in 2020
+usa_2020 <- clean_data %>%
+  filter(country == "United States", year == 2020) %>%
+  select(country, year, gdp_per_capita, inflation)
+
+cat("Example 1: USA in 2020\n")
+kable(usa_2020)
+
+# Example 2: Top 5 countries by GDP per capita (2022)
+top5_2022 <- clean_data %>%
+  filter(year == 2022, !is.na(gdp_per_capita)) %>%
+  arrange(desc(gdp_per_capita)) %>%
+  head(5) %>%
+  select(country, gdp_per_capita, life_expectancy)
+
+cat("\n\nExample 2: Top 5 countries by GDP per capita (2022)\n")
+kable(top5_2022, digits = 0)
+```
+
+---
+
+# Data Limitations
+
+## Known Issues
+
+1. **Missing Values**: Some indicators have < 70% completeness
+   - Government debt data is sparse for developing countries
+   - Exchange rate data missing for countries using USD
+
+2. **Reporting Lag**: Most recent data (2022-2023) may be revised
+
+3. **Historical Data**: Pre-1990 data less complete for former Soviet states
+
+4. **Small Economies**: Microstates may have limited indicator coverage
+
+## Recommendations
+
+- Use pairwise deletion for correlation analysis
+- Be cautious with pre-1990 cross-country comparisons
+- Check data availability before time-series analysis
+- Document missing data patterns in final analysis
+
+---
+
+# Session Information
+
+```{r session_info}
+sessionInfo()
+```
+
+---
+
+**ETL Process Completed:** `r Sys.Date()`  
+**Data Ready for Analysis:** ✓
+

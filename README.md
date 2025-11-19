@@ -1,232 +1,169 @@
-# Financial Health Analytics Dashboard
+# Financial Data Analysis and Planning Dashboard
 
-Dashboard analyzing U.S. household financial health with economic indicators, forecasting models, market correlations, and personal finance calculators.
+**BIOL 185 Group Project - Fall 2025**
 
-## ⚠️ Disclaimer
+A modular Shiny web application integrating global macroeconomic analysis, personal finance planning, and retirement risk simulation to explore how global economic conditions influence individual financial decisions and long-term retirement outcomes.
 
-**AI-Assisted Development**: The code in this project was primarily written with the assistance of Large Language Model (LLM) AI tools, including ChatGPT and Claude. These AI models were used to generate code, provide implementation guidance, and assist with debugging throughout the development process. While the project concept, design decisions, and data analysis approaches were directed by the team members, the actual code implementation heavily relied on AI assistance.
+---
 
-## Quick Start
+## Project Description
 
-### Running the Application
+This dashboard integrates three analytical layers:
 
-```bash
-# Automatic package installation and launch
-Rscript -e "shiny::runApp()"
-```
+- **Global Macroeconomic Explorer**: Analysis of economic indicators across 200+ countries from 1960-2023
+- **Personal Finance Tools**: Savings calculators, loan analysis, and budget planning guides
+- **Retirement Risk Simulator**: Monte Carlo simulations for long-term retirement planning scenarios
 
+The application uses classical statistical methods, interactive visualizations, and computational analysis to provide insights into economic trends and personal financial planning.
 
-The application automatically detects and installs missing R packages on first run. Access the dashboard at http://127.0.0.1:3838 after startup.
+---
 
-### Manual Installation
+## Team Members
 
-```bash
-# Install dependencies first
-Rscript install_packages.R
+**Course:** BIOL 185 - Data Science: Visualizing and Exploring Big Data
+**Semester:** Fall 2025
 
-# Launch dashboard
-Rscript -e "shiny::runApp()"
-```
+- **[Ammar Alhajmee]** - Global Macroeconomic Explorer Module
+- **[Bemnet Ali]** - Personal Finance Tools Module
+- **[Colin Bridges]** - Retirement Risk Simulator Module
 
-## Features
+---
 
-### CFHI Analysis
+## Modules and Features
 
-The Composite Financial Health Index (CFHI) synthesizes four economic indicators into a single measure of household financial well-being.
+### Module 1: Global Macroeconomic Explorer
 
-**Overview Tab**
-- Time series visualization from January 2000 to August 2025 (233 monthly observations)
-- Interactive component breakdown: Savings Rate, Wage Growth, Inflation, Borrowing Rate
-- Each component min-max normalized to 0-100 scale (inflation and interest rates inverted)
-- CFHI = simple average of four components, naturally ranging 0-100
-- Historical range: 17.90 (May 2007 pre-crisis) to 93.34 (April 2020 pandemic peak)
+**Features:**
+- Time-series analysis of economic indicators across 200+ countries
+- Dual-axis indicator relationships for country-specific analysis
+- Indicator vs. commodity prices (gold and oil) comparison - U.S. specific
+- Correlation matrix with country filtering
+- Interactive world maps with dynamic color scaling
+- Regional trend comparisons using population-weighted averages
+- U.S. state-level economic analysis
+- Statistical analysis (ANOVA, regression, Chi-Square test of independence)
+- Downloadable data tables
 
-**Key Findings Tab**
-- Academic analysis of three major historical patterns
-- Finding 1: 2007 pre-crisis financial deterioration (CFHI = 17.90 months before market crash)
-- Finding 2: 2020 pandemic savings peak (forced savings, stimulus, zero rates)
-- Finding 3: 2024-2025 affordability crisis (current 28.38 similar to pre-2008 levels)
-- Finding 4: Stock market disconnect (1,000-point S&P gain = 0.7 CFHI increase)
-- Professional academic writing with comprehensive methodology documentation
+**Indicators:** GDP, GDP per capita, inflation, unemployment, government debt, life expectancy, population growth, exchange rates, trade balance
 
-**Forecasting Tab**
-- Ensemble ARIMA/ETS time series models
-- Forecast horizons: 6 months, 1 year, 2 years
-- Scenario-based projections: baseline, economic growth, recession, high inflation
-- Custom parameter adjustments for each component
-- Confidence intervals (80% and 95%) with uncertainty quantification
+### Module 2: Personal Finance Tools
 
-**S&P 500 Correlation Tab**
-- Regression analysis of market impact on household finances
-- Dual-axis time series comparing CFHI and S&P 500 (April 2006 - August 2025)
-- Multiple regression controlling for Federal Reserve policy
-- Statistical finding: β = 0.0007 per S&P point (statistically significant, practically negligible)
-- Rolling 12-month correlation tracking
-- Dynamic date filtering and automated interpretation
+**Features:**
+- Savings calculator with compound interest projections and growth charts
+- Loan calculator with amortization schedules and approval probability using gradient descent logistic regression
+- 50/30/20 savings guide with current vs. recommended spending analysis
 
-**Data Sources Tabs**
-- CFHI methodology: BEA savings, BLS wages/inflation, FRED interest rates
-- Market data: FactSet S&P 500 historical prices
-- Comprehensive coverage periods and update frequencies
-- Limitations and interpretation guidelines
+### Module 3: Retirement Risk Simulator
 
+**Features:**
+- Dual-scenario Monte Carlo simulation with 200 simulations per scenario
+- Monthly granularity modeling with investment returns and inflation
+- Scenario comparison with deterministic projections
+- Success rate calculations and portfolio trajectory visualizations
 
+---
 
-### State Analysis
+## Research Questions
 
-State-level economic comparison tools for analyzing geographic variations in financial conditions.
+### Module 1: Global Macroeconomic Explorer
 
-**Explore States Tab**
-- Interactive U.S. state selection
-- Comparative economic metrics: median income, unemployment rates, cost of living indices
-- Time series visualizations of state economic indicators
-- Multi-state comparison capabilities
-- Data tables with sorting and filtering
+1. How do GDP growth and inflation trends vary across global regions over time?
+2. What is the relationship between unemployment and inflation across countries? (Phillips curve analysis)
+3. How does government debt (% of GDP) relate to economic growth across countries?
+4. How do GDP per capita and life expectancy correlate?
+5. How do exchange rates behave in countries with high inflation?
 
-**Data Sources Tab**
-- State economic data sources and collection methodology
-- Variable definitions and measurement standards
-- Geographic coverage details
+### Module 2: Personal Finance Tools
 
-### Personal Finance Tools
+- What savings rate is needed to reach specific financial goals?
+- How do credit profiles affect loan approval probability?
+- What is the total cost of borrowing over different loan terms?
 
-Practical calculators and guides for individual financial planning.
+### Module 3: Retirement Risk Simulator
 
-**Overview Tab**
-- Summary of available personal finance features
-- Quick links to specific tools
+- What is the probability of reaching a retirement goal given current savings and market volatility?
+- How do different return scenarios impact long-term portfolio values?
+- What is the range of possible retirement outcomes?
 
-**Savings Guide Tab**
-- Savings rate recommendations based on income levels
-- Goal-based savings calculations
-- Visual savings projections over time
-- Best practices and financial planning tips
+---
 
-**Loan Calculator Tab**
-- Loan approval probability estimator using logistic regression
-- Required inputs: credit score, income, debt-to-income ratio, loan amount
-- Amortization schedule generation
-- Monthly payment calculations
-- Total interest cost analysis
-- Interactive parameter adjustment
+## Methodology
 
-## Technical Architecture
+**Data Collection:** World Bank World Development Indicators (WDI) via R package API, U.S. Census Bureau ACS, Bureau of Labor Statistics, MERIC, and publicly available commodity price datasets.
 
-- **Framework**: R Shiny 1.9.1 with shinydashboard
-- **Data Processing**: tidyverse (dplyr, tidyr, readr, lubridate)
-- **Visualization**: plotly for interactive graphics, ggplot2 for static plots
-- **Time Series**: forecast package (auto.arima, ets)
-- **Statistical Analysis**: Linear regression, correlation analysis
-- **Data Tables**: DT package for interactive tables
+**Data Processing:** ETL processes documented in R Markdown files. Data cleaning includes removal of aggregate regions, missing value handling, standardization of country codes, and validation checks.
 
-### Project Structure
+**Statistical Methods:**
 
-```
-business-economics-analytics/
-├── ui.R                        # Main UI definition
-├── server.R                    # Server logic coordinator
-├── tabs/                       # UI components for each feature
-│   ├── cfhi_tab.R
-│   ├── cfhi_feature_ui.R      # CFHI module UI
-│   ├── forecast_tab.R
-│   ├── market_correlation_tab.R
-│   ├── state_analysis_tab.R
-│   └── loans.R
-├── server/                     # Backend logic for each feature
-│   ├── cfhi_feature_server.R  # CFHI module server
-│   ├── forecast_server.R
-│   ├── market_correlation_server.R
-│   ├── state_analysis_server.R
-│   └── retirement_calculator.R
-├── data/                       # All project data organized by feature
-│   ├── cfhi/                  # CFHI economic indicators
-│   │   ├── cfhi_master_2000_onward.csv
-│   │   ├── series_raw/
-│   │   ├── series_normalized/
-│   │   └── by_year/
-│   ├── market/                # S&P 500 market data
-│   │   └── SP500_PriceHistory_Monthly_042006_082025_FactSet.xlsx
-│   ├── state/                 # State economic demographics
-│   │   └── State_Data_Demographics.csv
-│   └── loan/                  # Loan approval dataset
-│       └── loan_approval.xlsx
-└── www/                        # Static assets (images, CSS)
-```
+**Descriptive Statistics (mean, median, standard deviation):**
+Chosen to provide foundational summaries of economic indicators across countries and time periods. Essential for understanding central tendencies and variability in the World Bank WDI data, which spans 200+ countries over 64 years. Interpretation: Reveals typical economic performance levels, identifies outliers, and quantifies dispersion in indicators like GDP per capita, inflation rates, and unemployment.
 
-## Data Sources
+**Pearson Correlation Coefficients:**
+Selected to measure linear relationships between economic indicators (e.g., GDP and life expectancy, inflation and unemployment). Highly relevant for the World Bank dataset where multiple indicators are tracked simultaneously. Interpretation: Identifies which economic factors move together (positive correlation) or inversely (negative correlation), revealing potential economic relationships such as the wealth-health connection or trade-offs between inflation and unemployment.
 
-**CFHI Components** (233 monthly observations)
-- Personal Savings Rate: Bureau of Economic Analysis (BEA)
-- Average Hourly Earnings Growth: Bureau of Labor Statistics (BLS)
-- Consumer Price Index (CPI-U): Bureau of Labor Statistics (BLS)
-- Federal Funds Effective Rate: Federal Reserve Economic Data (FRED)
-- Coverage: January 2000 to August 2025, monthly frequency
+**Simple Linear Regression (OLS):**
+Chosen to quantify how much variation in a dependent variable (e.g., life expectancy) can be explained by independent economic factors (GDP, unemployment, government debt). Directly applicable to the cross-country panel data structure of the WDI dataset. Interpretation: Provides coefficients indicating the magnitude and direction of relationships, allowing statements like "a $1,000 increase in GDP per capita is associated with X years of life expectancy increase."
 
-**S&P 500 Index** (233 observations overlapping with CFHI)
-- Source: FactSet Research Systems (equivalent data available via Yahoo Finance)
-- Coverage: April 2006 to August 2025, end-of-month prices
-- Fields: closing price, monthly returns, volume, total return index
+**ANOVA for Regional Comparisons:**
+Selected to test for statistically significant differences in economic indicators across global regions (e.g., Sub-Saharan Africa vs. North America). Appropriate for the categorical regional groupings inherent in the World Bank data classification. Interpretation: Determines whether observed regional disparities are statistically meaningful or due to random variation, providing evidence for geographic economic inequality.
 
-**State Economic Data**
-- U.S. Census Bureau: income statistics
-- Bureau of Labor Statistics: unemployment rates
-- Various sources: cost of living indices
+**Chi-Square Test of Independence:**
+Selected to test whether economic indicator categories (e.g., high/low GDP per capita, high/low inflation) are independent of geographic regions. Appropriate for categorical data analysis where countries are classified into economic categories and regional groups. Interpretation: Determines if there is a statistically significant association between economic performance levels and geographic regions. A significant result indicates that certain regions are more likely to have specific economic characteristics, revealing geographic patterns in economic development.
 
-**Loan Data**
-- Synthetic dataset for educational purposes
-- Variables: credit scores, income, debt ratios, approval outcomes
+**Monte Carlo Simulation (monthly granularity):**
+Selected to model retirement portfolio uncertainty by simulating thousands of possible future scenarios. Appropriate for financial planning where market returns and inflation are stochastic. Interpretation: Provides probability distributions of retirement outcomes, success rates (percentage of simulations where money remains), and confidence intervals. Monthly granularity captures realistic volatility patterns better than annual models.
 
-## Required Packages
+**Gradient Descent Logistic Regression (loan approval):**
+Chosen to predict binary outcomes (loan approval/rejection) based on borrower characteristics. Trained on historical loan approval data to learn patterns in creditworthiness. Interpretation: Provides probability scores for loan approval, helping users understand how factors like income, credit score, and employment history influence approval likelihood. The gradient descent approach allows the model to learn from data without requiring explicit statistical assumptions.
 
-The application requires the following R packages (auto-installed on first run):
+**Visualization:** Interactive time-series plots, scatterplots, correlation heatmaps, choropleth maps, and dual-axis comparisons using plotly and ggplot2.
 
-- Core: shiny, shinydashboard, shinythemes, shinyjs
-- Data manipulation: tidyverse (includes dplyr, tidyr, ggplot2, readr)
-- Data import: readxl, DT
-- Time series: zoo, lubridate, forecast
-- Visualization: plotly
+---
 
-See [REPRODUCIBILITY.md](REPRODUCIBILITY.md) for complete environment details, package versions, and instructions for reproducing all analyses.
-- Modeling: glmnet
+## Data Sources and Citations
 
-## Methodology Notes
+**World Bank World Development Indicators:**
+World Bank. (2024). World Development Indicators. The World Bank Group. Available at: https://datatopics.worldbank.org/world-development-indicators/. License: CC BY-4.0
 
-**CFHI Calculation**
-- Four components normalized independently using min-max scaling (0-100)
-- Inflation and interest rates inverted (lower = better)
-- Simple average: CFHI = (S* + W* + I* + R*) / 4
-- No rebasing or additional transformations
-- Naturally bounded 0-100 where extremes represent historical worst/best
+**U.S. Census Bureau American Community Survey:**
+U.S. Census Bureau. (2023). American Community Survey 5-Year Estimates. Retrieved from https://www.census.gov/programs-surveys/acs. License: Public Domain (U.S. Government Work)
 
-**Key Findings**
-- 2007 Trough (17.90): Pre-crisis financial stress with negative savings, peak rates
-- 2020 Peak (93.34): Pandemic-era forced savings, stimulus, zero rates
-- 2025 Current (28.38): Post-inflation affordability crisis near 2007 levels
-- Stock Market Impact: Minimal (1,000 S&P points = 0.7 CFHI change = <1% of range)
+**Bureau of Labor Statistics:**
+U.S. Bureau of Labor Statistics. Local Area Unemployment Statistics. Retrieved from https://www.bls.gov/lau/. License: Public Domain (U.S. Government Work)
 
-**Statistical Approach**
-- Time series: Ensemble ARIMA/ETS averaging for robustness
-- Correlation: Multiple regression isolating S&P 500 effect from Fed policy
-- Scenarios: Adjustments applied to base forecast via component-specific multipliers
-- Confidence intervals: Derived from model prediction variance
+**MERIC Cost of Living Data:**
+Missouri Economic Research and Information Center. Cost of Living Data Series. Retrieved from https://meric.mo.gov/data/cost-living-data-series. License: Public Domain (State Government Work)
 
-This project was developed for BIOL 185 - Data Science at Washington and Lee University.
+**Commodity Prices:**
+DataHub.io. Core Gold Prices Dataset. Retrieved from https://datahub.io/core/gold-prices. License: Public Domain / Open Data
 
-## Team Contributions
+Federal Reserve Bank of St. Louis. FRED Economic Data - WTI Crude Oil Prices (DCOILWTICO). Retrieved from https://fred.stlouisfed.org/series/DCOILWTICO. License: Public Domain (U.S. Government Work)
 
+---
 
-### Ammar Alhajmee
-**Primary Focus:** 
-- fill later
+## Installation and Usage
 
-### Bemnet Ali
-**Primary Focus:** 
-- fill later
+**Prerequisites:** R (version 4.0 or higher), RStudio (recommended), internet connection
 
-### Colin Bridges
-**Primary Focus:** 
-- fill later
+**Setup:**
+1. Run the ETL process: Open `data/world_bank_wdi/ETL_world_bank_wdi.Rmd` in RStudio and knit to generate cleaned data
+2. Launch the application: Open `ui.R` or `server.R` in RStudio and click "Run App"
 
+The application will automatically install required packages on first run. All data processing is documented in R Markdown files within the `data/` directory.
 
+---
 
-**Note:** While individual contributions are documented above, this was a truly collaborative project where team members frequently consulted each other, shared ideas, and helped debug issues across all components. The final product reflects the collective effort and expertise of all three team members.
+## Disclaimers
+
+**Educational Purpose:** This application is developed for educational purposes as part of BIOL 185 coursework. It is intended for academic learning and demonstration of data science concepts.
+
+**Not Financial Advice:** This application does not constitute financial, investment, or legal advice. All calculations, projections, and analyses are for informational purposes only. Users should consult qualified financial professionals before making any financial decisions. Historical data and simulations do not guarantee future performance.
+
+**AI-Assisted Development:** This codebase was developed with assistance from artificial intelligence tools. While the code has been reviewed and tested, users should verify calculations and methodologies for their specific use cases.
+
+**Data Accuracy:** While efforts have been made to ensure data accuracy, the application relies on external data sources that may contain errors or be subject to revision. Users should verify critical data points from original sources.
+
+---
+
+**Last Updated:** November 2025  
+**Version:** 2.0.0

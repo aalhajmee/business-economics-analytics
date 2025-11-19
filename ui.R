@@ -1,220 +1,210 @@
-# ===============================================================================
-# AUTO-INSTALL MISSING PACKAGES
-# ===============================================================================
-# This checks and installs any missing packages before loading them
-required_packages <- c("shiny", "shinydashboard", "shinythemes", "shinyjs",
-                       "tidyverse", "readxl", "plotly", "DT", "zoo",
-                       "lubridate", "forecast", "glmnet", "randomForest")
+# ============================================================================
+# Financial Data Analysis and Planning Dashboard - UI
+# BIOL 185 Group Project
+# ============================================================================
 
-
-missing_packages <- required_packages[!required_packages %in% installed.packages()[,"Package"]]
-
-
-if(length(missing_packages) > 0) {
-  cat("\n=================================================================\n")
-  cat("Installing missing packages:", paste(missing_packages, collapse=", "), "\n")
-  cat("=================================================================\n\n")
-  install.packages(missing_packages, repos = "https://cloud.r-project.org")
-  cat("\n✓ Package installation complete!\n\n")
+# Auto-Install and Load Required Packages (UI Check) ----
+required_packages <- c("shiny", "bslib", "bsicons", "shinyWidgets", "plotly", "DT")
+missing_packages <- required_packages[!(required_packages %in% installed.packages()[,"Package"])]
+if (length(missing_packages) > 0) {
+  install.packages(missing_packages, dependencies = TRUE)
 }
 
-
-# ===============================================================================
-# LOAD LIBRARIES
-# ===============================================================================
+# Load Libraries ----
 library(shiny)
-library(shinydashboard)
-library(shinythemes)
-library(shinyjs)
+library(bslib)          # Modern Bootstrap 5 theming
+library(bsicons)        # Bootstrap icons
+library(shinyWidgets)
 library(plotly)
 library(DT)
 
+# Source UI Components ----
+source("modules/macro/ui/ui_time_series.R")
+source("modules/macro/ui/ui_relationships.R")
+source("modules/macro/ui/ui_correlations.R")
+source("modules/macro/ui/ui_global_map.R")
+source("modules/macro/ui/ui_regional_trends.R")
+source("modules/macro/ui/ui_states.R")
+source("modules/macro/ui/ui_commodity.R")
+source("modules/macro/ui/ui_statistical_analysis.R")
+source("modules/macro/ui/ui_data_table.R")
 
-# CFHI UI module
-source("tabs/cfhi_feature_ui.R")
+source("modules/personal_finance/ui/ui_savings.R")
+source("modules/personal_finance/ui/ui_loans.R")
+source("modules/personal_finance/ui/ui_planning_guide.R")
 
+source("modules/retirement/ui/ui_simulator.R")
+source("modules/retirement/ui/ui_scenarios.R")
 
-# ---- Safe sourcing helper: returns a tabItem or a friendly error tab ----
-safe_source_tab <- function(path, tab_fallback_name) {
-  tryCatch(
-    source(path, local = TRUE)$value,
-    error = function(e) {
-      tabItem(
-        tabName = tab_fallback_name,
-        h2(sprintf("Error loading %s", path)),
-        div(
-          style="white-space:pre-wrap; font-family:monospace; background:#fff3cd; border:1px solid #ffeeba; padding:12px; border-radius:8px;",
-          paste("•", conditionMessage(e))
-        )
-      )
-    }
-  )
-}
+source("ui_components/ui_home.R")
+source("ui_components/ui_about.R")
 
-
-# Source your tabs (each file should return a single tabItem(...))
-id = "tabs"
-home_tab       <- safe_source_tab("tabs/frontpage.R",     "home")
-cfhi_tab       <- safe_source_tab("tabs/cfhi_tab.R",     "cfhi")
-cfhi_data_tab  <- safe_source_tab("tabs/cfhi_data_tab.R", "cfhi_data")
-explore_tab    <- safe_source_tab("tabs/state_analysis_tab.R", "explore")
-state_data_tab <- safe_source_tab("tabs/state_data_tab.R", "state_data")
-employment_tab <- safe_source_tab("tabs/employment_tab.R", "employment")
-forecast_tab   <- safe_source_tab("tabs/forecast_tab.R", "forecast")
-market_correlation_tab <- safe_source_tab("tabs/market_correlation_tab.R", "market_correlation")
-market_data_tab <- safe_source_tab("tabs/market_data_sources_tab.R", "market_data")
-findings_tab   <- safe_source_tab("tabs/findings_tab.R", "findings")
-guide_tab      <- safe_source_tab("tabs/savingsguide.R", "guide")
-overview_tab   <- safe_source_tab("tabs/overview.R", "overview")
-insights_tab   <- safe_source_tab("tabs/data_insights.R", "insights")
-loan_tab       <- safe_source_tab("tabs/loans.R", "loans")
-retirement_tab <- safe_source_tab("tabs/retirement_tab.R", "retirement_tab")
-credit_tab     <- safe_source_tab("tabs/credit_tab.R", "credit_tab")
-about_tab      <- safe_source_tab("tabs/about_tab.R", "about")
-
-
-dashboardPage(
-  dashboardHeader(title = "Financial Health"),
+# Define UI with bslib (Modern Web App Structure) ----
+ui <- page_navbar(
+  title = tags$span(bs_icon("graph-up-arrow"), " Financial Insight"),
+  id = "nav",
   
-  dashboardSidebar(
-    sidebarMenu(
-      id = "tabs",
-      menuItem("Home",            tabName = "home",     icon = icon("home")),
-      menuItem("CFHI Analysis",   icon = icon("chart-line"),
-               menuSubItem("Overview", tabName = "cfhi"),
-               menuSubItem("Key Findings", tabName = "findings"),
-               menuSubItem("Forecasting", tabName = "forecast"),
-               menuSubItem("S&P 500 Correlation", tabName = "market_correlation"),
-               menuSubItem("Data Sources", tabName = "cfhi_data"),
-               menuSubItem("Market Data Sources", tabName = "market_data")
-      ),
-      menuItem("State Analysis", icon = icon("map-marked-alt"),
-               menuSubItem("Explore States", tabName = "explore"),
-               menuSubItem("Employment Data", tabName = "employment"),
-               menuSubItem("Data Sources", tabName = "state_data")
-      ),
-      menuItem("Personal Finance", icon = icon("wallet"),
-               menuSubItem("Overview",   tabName = "overview",    icon = icon("compass")),
-               menuSubItem("Insights",   tabName = "data_insights",    icon = icon("search")),
-               menuSubItem("Credit Card Approval",   tabName = "credit",    icon = icon("dollar-sign")),
-               menuSubItem("Savings Guide",   tabName = "guide",    icon = icon("money-check-alt")),
-               menuSubItem("Loan Calculator", tabName = "loans",     icon = icon("university")),
-               menuSubItem("Retirement", tabName = "retirement",     icon = icon("umbrella-beach"))
-      ),
-      menuItem("About",           tabName = "about",    icon = icon("info-circle"))
-    )
+  # ENTERPRISE LIGHT THEME
+  theme = bs_theme(
+    version = 5,
+    bg = "#ffffff",             
+    fg = "#1e293b",             
+    primary = "#2563eb",        
+    secondary = "#64748b",
+    success = "#10b981",
+    info = "#0ea5e9",
+    warning = "#f59e0b",
+    danger = "#ef4444",
+    base_font = font_google("Inter"),
+    heading_font = font_google("Plus Jakarta Sans"),
+    "navbar-bg" = "#1e293b",    
+    "navbar-fg" = "#ffffff"     
   ),
-  dashboardBody(
-    tags$head(
-      tags$style(HTML("
-       .main-header .logo {
-         font-family: 'Trebuchet MS', sans-serif !important;
-         font-size: 22px !important;
-         font-weight: 600 !important;
-         letter-spacing: 0.5px !important;
-       }
+  
+  # Custom CSS & JavaScript for Dynamic Container Expansion
+  header = tags$head(
+    tags$style(HTML("
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap');
       
-       /* Fix button text visibility */
-       .btn-primary,
-       .btn-primary:hover,
-       .btn-primary:focus,
-       .btn-primary:active,
-       .btn-success,
-       .btn-success:hover,
-       .btn-success:focus,
-       .btn-success:active,
-       .btn-info,
-       .btn-info:hover,
-       .btn-info:focus,
-       .btn-info:active,
-       .btn-warning,
-       .btn-warning:hover,
-       .btn-warning:focus,
-       .btn-warning:active,
-       .btn-danger,
-       .btn-danger:hover,
-       .btn-danger:focus,
-       .btn-danger:active,
-       .shiny-download-link.btn-primary,
-       .shiny-download-link.btn-success,
-       .shiny-download-link.btn-info,
-       .action-button {
-         color: #ffffff !important;
-       }
+      body { background-color: #f1f5f9 !important; }
+      .navbar { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+      .navbar-brand { font-weight: 700; }
+      .card { 
+        background-color: #ffffff;
+        border: 1px solid #cbd5e1; 
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        border-radius: 8px; 
+        margin-bottom: 24px;
+        overflow: visible !important; /* Allow dropdowns to overflow */
+        position: relative;
+      }
+      .card-header { 
+        background-color: #f8fafc; 
+        border-bottom: 1px solid #e2e8f0; 
+        color: #0f172a;
+        font-weight: 600;
+        padding: 1rem 1.25rem;
+      }
+      .card-body {
+        overflow: visible !important; /* Allow dropdowns to overflow */
+      }
+      .form-control, .selectize-input {
+        background-color: #ffffff;
+        border-color: #cbd5e1;
+      }
+      .form-control:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      }
+      .btn-primary { box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
       
-       /* Ensure icons are also white */
-       .btn-primary i,
-       .btn-success i,
-       .btn-info i,
-       .btn-warning i,
-       .btn-danger i,
-       .shiny-download-link i {
-         color: #ffffff !important;
-       }
-     "))
-    ),
+      /* Selectize Dropdown Styling */
+      .selectize-dropdown {
+        z-index: 1050 !important; /* Above cards */
+        max-height: 400px;
+        overflow-y: auto;
+      }
+      
+      /* Ensure parent containers don't clip */
+      .col-md-4, .col-md-8, .col-md-3, .col-md-9, .col-4, .col-8, .col-3, .col-9 {
+        overflow: visible !important;
+      }
+    ")),
+    
+    # JavaScript to dynamically expand containers when dropdowns open
     tags$script(HTML("
- function goToTab(tabName) {
-   Shiny.setInputValue('go_to_tab', tabName, {priority: 'event'});
- }
-")),
-    
-    useShinyjs(),
-    
-    tabItems(
-      # HOME (from homepage.R)
-      home_tab,
-      
-      # CFHI ANALYSIS (from cfhi_tab.R)
-      cfhi_tab,
-      
-      # CFHI DATA SOURCES
-      cfhi_data_tab,
-      
-      # EXPLORE (from state_analysis_tab.R)
-      explore_tab,
-      
-      # STATE DATA SOURCES
-      state_data_tab,
-      
-      # EMPLOYMENT
-      employment_tab,
-      
-      # FORECASTING (from forecast_tab.R)
-      forecast_tab,
-      
-      # MARKET CORRELATION ANALYSIS
-      market_correlation_tab,
-      
-      # MARKET DATA SOURCES
-      market_data_tab,
-      
-      # KEY FINDINGS
-      findings_tab,
-      
-      # OVERVIEW TAB (from overview.R)
-      overview_tab,
-      
-      # DATA INSIGHTS TAB
-      insights_tab,
-      
-      # CREDIT CARD GUIDE (from credit_tab.R)
-      credit_tab,
-      
-      # SAVINGS GUIDE (from savingsguide.R)
-      guide_tab,
-      
-      # LOAN CALCULATOR (from loans.R)
-      loan_tab,
-      
-      # RETIREMENT (from retirement.R)
-      retirement_tab,
-      
-      # ABOUT (from about_tab.R)
-      about_tab
-    )
-  )
+      $(document).ready(function() {
+        // Function to expand container when dropdown opens
+        function expandContainerForDropdown() {
+          setTimeout(function() {
+            var $dropdown = $('.selectize-dropdown:visible');
+            if ($dropdown.length) {
+              // Find the selectize input that triggered this dropdown
+              var $selectizeInput = $('.selectize-input.focus');
+              if ($selectizeInput.length) {
+                var $card = $selectizeInput.closest('.card');
+                if ($card.length) {
+                  var cardBottom = $card.offset().top + $card.outerHeight();
+                  var dropdownBottom = $dropdown.offset().top + $dropdown.outerHeight();
+                  
+                  // If dropdown extends beyond card, expand card
+                  if (dropdownBottom > cardBottom) {
+                    var extraHeight = dropdownBottom - cardBottom + 30; // 30px padding
+                    var currentMinHeight = parseInt($card.css('min-height')) || $card.height();
+                    $card.css('min-height', currentMinHeight + extraHeight + 'px');
+                  }
+                }
+              }
+            }
+          }, 50); // Small delay to ensure dropdown is rendered
+        }
+        
+        // Monitor selectize dropdowns opening
+        $(document).on('selectize:open', function() {
+          expandContainerForDropdown();
+        });
+        
+        // Also check on click (fallback)
+        $(document).on('click', '.selectize-input', function() {
+          expandContainerForDropdown();
+        });
+        
+        // Reset card height when dropdown closes
+        $(document).on('selectize:close click', function(e) {
+          // Only reset if clicking outside
+          if (!$(e.target).closest('.selectize').length) {
+            $('.card').each(function() {
+              var $card = $(this);
+              if ($card.data('expanded-height')) {
+                $card.css('min-height', '');
+                $card.removeData('expanded-height');
+              }
+            });
+          }
+        });
+        
+        // Reset on document click outside
+        $(document).on('click', function(e) {
+          if (!$(e.target).closest('.selectize').length && !$('.selectize-dropdown:visible').length) {
+            $('.card').css('min-height', '');
+          }
+        });
+      });
+    "))
+  ),
+
+  # 1. Home ----
+  nav_panel("Overview", icon = bs_icon("house"), home_ui()),
+
+  # 2. Global Macro (Dropdown) ----
+  nav_menu("Global Economy", icon = bs_icon("globe"),
+    nav_panel("Time Series Analysis", value = "macro_time_series", icon = bs_icon("graph-up"), time_series_ui()),
+    nav_panel("Indicator Relationships", value = "macro_relationships", icon = bs_icon("diagram-2"), relationships_ui()),
+    nav_panel("Indicator vs Commodities", value = "macro_commodity", icon = bs_icon("graph-up-arrow"), commodity_ui()),
+    nav_panel("Correlation Matrix", value = "macro_correlations", icon = bs_icon("grid-3x3"), correlations_ui()),
+    nav_panel("Global Economic Map", value = "macro_map", icon = bs_icon("map"), global_map_ui()),
+    nav_panel("Regional Trends", value = "macro_regional", icon = bs_icon("bar-chart-line"), regional_trends_ui()),
+    nav_panel("U.S. States", value = "macro_states", icon = bs_icon("geo-alt"), states_ui()),
+    nav_panel("Statistical Analysis", value = "macro_statistical", icon = bs_icon("calculator"), statistical_analysis_ui()),
+    nav_item(tags$hr()),
+    nav_panel("Data Explorer", value = "macro_data", icon = bs_icon("table"), data_table_ui())
+  ),
+
+  # 3. Personal Finance (Dropdown) ----
+  nav_menu("Personal Finance", icon = bs_icon("wallet2"),
+    nav_panel("Savings Projector", value = "pf_savings", icon = bs_icon("piggy-bank"), savings_ui()),
+    nav_panel("Loan Calculator", value = "pf_loans", icon = bs_icon("calculator"), loans_ui()),
+    nav_panel("Financial Guide", value = "pf_guide", icon = bs_icon("journal-text"), planning_guide_ui())
+  ),
+
+  # 4. Retirement (Dropdown) ----
+  nav_menu("Retirement Planning", icon = bs_icon("hourglass-split"),
+    nav_panel("Risk Simulator", value = "ret_simulator", icon = bs_icon("activity"), simulator_ui()),
+    nav_panel("Scenario Comparison", value = "ret_scenarios", icon = bs_icon("columns-gap"), scenarios_ui())
+  ),
+
+  # 5. About ----
+  nav_panel("About", icon = bs_icon("info-circle"), about_ui())
+  
+  # Removed redundant "Data: World Bank" link here
 )
-
-
-

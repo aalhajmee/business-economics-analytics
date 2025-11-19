@@ -1,53 +1,52 @@
 State,State_Code,Median_Income,Unemployment_Rate,Poverty_Rate,Cost_of_Living_Index
-Alabama,AL,62027,2.9,15.6,88
-Alaska,AK,89336,4.7,10.2,127.1
-Arizona,AZ,76872,4.1,12.8,102.2
-Arkansas,AR,58773,3.8,16,86.9
-California,CA,96334,5.5,12,151.7
-Colorado,CO,92470,4.2,9.4,105.6
-Connecticut,CT,93760,3.8,10,116.1
-Delaware,DE,82855,4.3,10.7,102.7
-District of Columbia,NA,106287,NA,14.5,NA
-Florida,FL,71711,3.8,12.6,99.6
-Georgia,GA,74664,3.4,13.5,89.2
-Hawaii,HI,98317,2.7,10,184.1
-Idaho,ID,74636,3.7,10.6,98.6
-Illinois,IL,81702,4.4,11.7,93.4
-Indiana,IN,70051,3.6,12.2,90.3
-Iowa,IA,73147,3.8,11,89.9
-Kansas,KS,72639,3.8,11.5,87
-Kentucky,KY,62417,4.7,16.1,92.3
-Louisiana,LA,60023,4.4,18.9,91.9
-Maine,ME,71773,3.2,10.8,115
-Maryland,MD,101652,3.6,9.3,119.8
-Massachusetts,MA,101341,4.8,10,131.6
-Michigan,MI,71149,5.2,13.1,89.6
-Minnesota,MN,87556,3.6,9.2,94.1
-Mississippi,MS,54915,3.9,19.1,84.8
-Missouri,MO,68920,4.1,12.6,88.6
-Montana,MT,69922,2.9,12,100.7
-Nebraska,NE,74985,3,10.3,91.3
-Nevada,NV,75561,5.3,12.6,104.9
-New Hampshire,NH,95628,3,7.2,109.7
-New Jersey,NJ,101050,5,9.8,114.4
-New Mexico,NM,62125,4.1,18.1,92.1
-New York,NY,84578,4,13.7,125.1
-North Carolina,NC,69904,3.7,13.2,94.2
-North Dakota,ND,75949,2.5,10.6,98.9
-Ohio,OH,69680,5,13.2,91.7
-Oklahoma,OK,63603,3.1,15.3,87.9
-Oregon,OR,80426,5,11.9,113.1
-Pennsylvania,PA,76081,4,11.8,97
-Puerto Rico,NA,25096,NA,41.6,NA
-Rhode Island,RI,86372,4.6,10.9,110.6
-South Carolina,SC,66818,4.3,14.2,95.9
-South Dakota,SD,72421,1.9,12,96.9
-Tennessee,TN,67097,3.6,13.8,88.7
-Texas,TX,76292,4.1,13.8,92.1
-Utah,UT,91750,3.3,8.6,101.9
-Vermont,VT,78024,2.5,10.3,117.9
-Virginia,VA,90974,3.6,9.9,103
-Washington,WA,94952,4.5,9.9,118.7
-West Virginia,WV,57917,3.8,16.6,87.5
-Wisconsin,WI,75670,3.1,10.6,95.4
-Wyoming,WY,74815,3.2,10.7,93.3
+Alabama,AL,62212,2.9,15.6,87.9
+Alaska,AK,86631,4.7,10.4,127.7
+Arizona,AZ,77315,4.1,12.4,108.8
+Arkansas,AR,58700,3.8,15.7,89.3
+California,CA,95521,5.5,12,136.7
+Colorado,CO,92911,4.2,9.3,102.7
+Connecticut,CT,91665,3.8,10.3,114.1
+Delaware,DE,81361,4.3,10.5,102.8
+District of Columbia,DC,108210,6,14,135.2
+Florida,FL,73311,3.8,12.3,99.5
+Georgia,GA,74632,3.4,13.6,91.8
+Hawaii,HI,95322,2.7,10.1,179.7
+Idaho,ID,74942,3.7,10.1,99
+Illinois,IL,80306,4.4,11.6,95.9
+Indiana,IN,69477,3.6,12.3,90.6
+Iowa,IA,71433,3.8,11.3,90.3
+Kansas,KS,70333,3.8,11.2,88.9
+Kentucky,KY,61118,4.7,16.4,91.9
+Louisiana,LA,58229,4.4,18.9,92.7
+Maine,ME,73733,3.2,10.4,114.2
+Maryland,MD,98678,3.6,9.5,118.9
+Massachusetts,MA,99858,4.8,10.4,150.8
+Michigan,MI,69183,5.2,13.5,94.7
+Minnesota,MN,85086,3.6,9.3,94.2
+Mississippi,MS,54203,3.9,18,85.5
+Missouri,MO,68545,4.1,12,89
+Montana,MT,70804,2.9,11.7,109.8
+Nebraska,NE,74590,3,10.5,91.6
+Nevada,NV,76364,5.3,12,98.6
+New Hampshire,NH,96838,3,7.2,109.2
+New Jersey,NJ,99781,5,9.7,114.6
+New Mexico,NM,62268,4.1,17.8,92.5
+New York,NY,82095,4,14.2,126.6
+North Carolina,NC,70804,3.7,12.8,97.4
+North Dakota,ND,76525,2.5,9.8,91.3
+Ohio,OH,67769,5,13.3,92.8
+Oklahoma,OK,62138,3.1,15.9,84.4
+Oregon,OR,80160,5,12.2,111.8
+Pennsylvania,PA,73824,4,12,97.1
+Rhode Island,RI,84972,4.6,10.8,113.4
+South Carolina,SC,67804,4.3,13.9,92.5
+South Dakota,SD,71810,1.9,11.8,91.8
+Tennessee,TN,67631,3.6,14,90.3
+Texas,TX,75780,4.1,13.7,90.8
+Utah,UT,93421,3.3,9,99.1
+Vermont,VT,81211,2.5,9.7,113.7
+Virginia,VA,89931,3.6,10.2,100.1
+Washington,WA,94605,4.5,10.3,113.9
+West Virginia,WV,55948,3.8,16.7,88.1
+Wisconsin,WI,74631,3.1,10.7,97.7
+Wyoming,WY,72415,3.2,11.3,95.3

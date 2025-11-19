@@ -37,7 +37,5 @@ business-economics-analytics.Rproj
 *.Rproj*
 .env
 
-.github/Rule1.instructions.Rmd
-.github/instructions/Rule1.instructions.md
 .github/
 github/ 
