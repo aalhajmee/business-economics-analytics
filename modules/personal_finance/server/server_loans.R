@@ -154,7 +154,12 @@ loans_server <- function(input, output, session) {
   
   # Amortization Schedule Table - Removed
   output$loan_amort_table <- renderDT({
-    data.frame(
-      Message = "Amortization schedule requires interest rate and loan term inputs"
-    ) %>%
-      
+    datatable(
+      data.frame(
+        Message = "Amortization schedule requires interest rate and loan term inputs"
+      ),
+      options = list(dom = 't', pageLength = 1)
+    )
+  })
+  
+}
