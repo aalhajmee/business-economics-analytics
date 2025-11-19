@@ -6,9 +6,9 @@ unemployment_server <- function(input, output, session, shared_state) {
   
   employment_data <- reactive({
   # Read files
-  jobs <- read_excel("data/state/Employment/JobOpens.xlsx")
-  hires <- read_excel("data/state/Employment/Hires.xlsx")
-  quits <- read_excel("data/state/Employment/Quits.xlsx")
+  jobs <- read_excel("data/state/raw_source/unemployment/JobOpens.xlsx")
+  hires <- read_excel("data/state/raw_source/unemployment/Hires.xlsx")
+  quits <- read_excel("data/state/raw_source/unemployment/Quits.xlsx")
   
   # Merge datasets
   df <- jobs %>%
