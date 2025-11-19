@@ -25,12 +25,10 @@ source("modules/macro/ui/ui_correlations.R")
 source("modules/macro/ui/ui_global_map.R")
 source("modules/macro/ui/ui_regional_trends.R")
 source("modules/macro/ui/ui_states.R")
-source("modules/macro/ui/ui_unemployment.R")
 source("modules/macro/ui/ui_commodity.R")
 source("modules/macro/ui/ui_statistical_analysis.R")
 source("modules/macro/ui/ui_data_table.R")
 
-source("modules/personal_finance/ui/ui_insights.R")
 source("modules/personal_finance/ui/ui_savings.R")
 source("modules/personal_finance/ui/ui_loans.R")
 source("modules/personal_finance/ui/ui_planning_guide.R")
@@ -66,14 +64,6 @@ ui <- page_navbar(
   # Custom CSS & JavaScript for Dynamic Container Expansion
   header = tags$head(
     tags$title("Financial Insight"),
-    tags$script(HTML("
-      // Set document title immediately to override navbar title
-      document.title = 'Financial Insight';
-      // Also set it on document ready as a fallback
-      $(document).ready(function() {
-        document.title = 'Financial Insight';
-      });
-    ")),
     tags$style(HTML("
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap');
       
@@ -196,7 +186,6 @@ ui <- page_navbar(
     nav_panel("Global Economic Map", value = "macro_map", icon = bs_icon("map"), global_map_ui()),
     nav_panel("Regional Trends", value = "macro_regional", icon = bs_icon("bar-chart-line"), regional_trends_ui()),
     nav_panel("U.S. States", value = "macro_states", icon = bs_icon("geo-alt"), states_ui()),
-    nav_panel("Unemployment by States", value = "macro_unemployment", icon = bs_icon("geo-alt"), unemployment_ui()),
     nav_panel("Statistical Analysis", value = "macro_statistical", icon = bs_icon("calculator"), statistical_analysis_ui()),
     nav_item(tags$hr()),
     nav_panel("Data Explorer", value = "macro_data", icon = bs_icon("table"), data_table_ui())
@@ -204,7 +193,6 @@ ui <- page_navbar(
 
   # 3. Personal Finance (Dropdown) ----
   nav_menu("Personal Finance", icon = bs_icon("wallet2"),
-    nav_panel("Insights", value = "pf_insights", icon = bs_icon("search"), insights_ui()),
     nav_panel("Savings Projector", value = "pf_savings", icon = bs_icon("piggy-bank"), savings_ui()),
     nav_panel("Loan Calculator", value = "pf_loans", icon = bs_icon("calculator"), loans_ui()),
     nav_panel("Financial Guide", value = "pf_guide", icon = bs_icon("journal-text"), planning_guide_ui())
