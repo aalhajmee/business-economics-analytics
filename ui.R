@@ -25,6 +25,7 @@ source("modules/macro/ui/ui_correlations.R")
 source("modules/macro/ui/ui_global_map.R")
 source("modules/macro/ui/ui_regional_trends.R")
 source("modules/macro/ui/ui_states.R")
+source("modules/macro/ui/ui_unemployment.R")
 source("modules/macro/ui/ui_commodity.R")
 source("modules/macro/ui/ui_statistical_analysis.R")
 source("modules/macro/ui/ui_data_table.R")
@@ -195,6 +196,7 @@ ui <- page_navbar(
     nav_panel("Global Economic Map", value = "macro_map", icon = bs_icon("map"), global_map_ui()),
     nav_panel("Regional Trends", value = "macro_regional", icon = bs_icon("bar-chart-line"), regional_trends_ui()),
     nav_panel("U.S. States", value = "macro_states", icon = bs_icon("geo-alt"), states_ui()),
+    nav_panel("Unemployment by States", value = "macro_unemployment", icon = bs_icon("geo-alt"), unemployment_ui()),
     nav_panel("Statistical Analysis", value = "macro_statistical", icon = bs_icon("calculator"), statistical_analysis_ui()),
     nav_item(tags$hr()),
     nav_panel("Data Explorer", value = "macro_data", icon = bs_icon("table"), data_table_ui())
