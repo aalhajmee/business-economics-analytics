@@ -53,7 +53,8 @@ loans_server <- function(input, output, session) {
   predict_approval <- function(model, income, credit_score, loan_amount, years_employed) {
     # Normalize the input using training data statistics
     features <- c(income, credit_score, loan_amount, years_employed)
-    normalized <- (features - model$means) / model$stds
+    # Handle zero standard deviation (constant features in training)
+    normalized <- ifelse(model$stds == 0, 0, (features - model$means) / model$stds)
     
     # Calculate probability using trained weights
     z <- model$weights[1] + sum(normalized * model$weights[2:5])
