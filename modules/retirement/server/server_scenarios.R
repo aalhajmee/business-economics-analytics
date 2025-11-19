@@ -71,15 +71,20 @@ scenarios_server <- function(input, output, session) {
     df <- scenario_data()
     req(df)
     
+    # Calculate total contributions once to avoid repetition and division by zero
+    total_contrib <- input$scen_savings + input$scen_contrib * 12 * (input$scen_retire_age - input$scen_age)
+    
     final <- df %>% 
       group_by(Strategy) %>% 
       filter(Age == max(Age)) %>%
       arrange(match(Strategy, c("Conservative", "Moderate", "Aggressive"))) %>%
       mutate(
         `Final Amount` = scales::dollar(Balance),
-        `Total Contributions` = scales::dollar(input$scen_savings + input$scen_contrib * 12 * (input$scen_retire_age - input$scen_age)),
-        `Total Return` = scales::dollar(Balance - (input$scen_savings + input$scen_contrib * 12 * (input$scen_retire_age - input$scen_age))),
-        `Return %` = scales::percent((Balance - (input$scen_savings + input$scen_contrib * 12 * (input$scen_retire_age - input$scen_age))) / (input$scen_savings + input$scen_contrib * 12 * (input$scen_retire_age - input$scen_age)))
+        `Total Contributions` = scales::dollar(total_contrib),
+        `Total Return` = scales::dollar(Balance - total_contrib),
+        `Return %` = ifelse(total_contrib > 0, 
+                           scales::percent((Balance - total_contrib) / total_contrib),
+                           "N/A")
       ) %>%
       select(Strategy, `Final Amount`, `Total Contributions`, `Total Return`, `Return %`)
     

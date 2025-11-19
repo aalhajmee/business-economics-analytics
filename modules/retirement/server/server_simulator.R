@@ -102,8 +102,7 @@ simulator_server <- function(input, output, session) {
       need(params$withdrawals > 0, "Monthly withdrawals must be positive"),
       need(params$years > 0, "Years must be positive"),
       need(params$growthRate >= 0 && params$growthRate <= 30, "Growth rate must be between 0% and 30%"),
-      need(params$inflation >= 0 && params$inflation <= 20, "Inflation must be between 0% and 20%"),
-      need(params$withdrawals < params$startAmount, "Monthly withdrawals exceed starting amount")
+      need(params$inflation >= 0 && params$inflation <= 20, "Inflation must be between 0% and 20%")
     )
     
     params$seed <- 12345  # Fixed seed for reproducibility
@@ -120,8 +119,7 @@ simulator_server <- function(input, output, session) {
       need(params$withdrawals > 0, "Monthly withdrawals must be positive"),
       need(params$years > 0, "Years must be positive"),
       need(params$growthRate >= 0 && params$growthRate <= 30, "Growth rate must be between 0% and 30%"),
-      need(params$inflation >= 0 && params$inflation <= 20, "Inflation must be between 0% and 20%"),
-      need(params$withdrawals < params$startAmount, "Monthly withdrawals exceed starting amount")
+      need(params$inflation >= 0 && params$inflation <= 20, "Inflation must be between 0% and 20%")
     )
     
     params$seed <- 12346  # Different seed for scenario B

@@ -8,16 +8,19 @@ home_ui <- function() {
         card_header(tags$span(bs_icon("graph-up-arrow"), " Financial Insight")),
         div(
           class = "p-4",
-          h2("Explore. Plan. Simulate.", class = "display-6 fw-bold"),
+          h2("Financial Data Analysis and Planning Dashboard", class = "display-6 fw-bold"),
           p(
             class = "lead text-muted",
-            "Your integrated platform for global economic analysis and personal financial planning."
+            "A comprehensive platform integrating global macroeconomic analysis, personal finance tools, and retirement planning simulations."
           ),
           hr(),
           p(
-            style = "font-size: 1.1rem;",
-            "This dashboard connects the macro to the micro. Understand how global economic forces shape the world, ",
-            "then apply financial principles to build your own secure future."
+            style = "font-size: 1.1rem; line-height: 1.7;",
+            "This application provides three interconnected analytical modules: ",
+            strong("Global Macroeconomic Explorer"), " for analyzing economic indicators across 200+ countries using advanced statistical methods; ",
+            strong("Personal Finance Tools"), " for savings projections, loan analysis, and financial planning guidance; and ",
+            strong("Retirement Risk Simulator"), " for Monte Carlo-based long-term portfolio simulations. ",
+            "Designed for educational and research purposes, the dashboard enables users to explore relationships between global economic trends and individual financial decision-making."
           )
         )
       )
